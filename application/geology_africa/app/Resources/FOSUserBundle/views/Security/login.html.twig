@@ -1,0 +1,17 @@
+{# extends "@FOSUser/layout.html.twig" #}
+
+{# vendor/friendsofsymfony/user-bundle/Resources/views/edit.html.twig #}
+
+{% extends "@App/homelayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block homegeology_body %}
+	{% block fos_user_content %}
+		{{ include('@FOSUser/Security/login_content.html.twig') }}
+	{% endblock fos_user_content %}
+{% endblock %}
+
+

@@ -1,0 +1,722 @@
+{# src/AppBundle/Resources/views/results_searchall.html.twig #}
+		
+
+	
+{% block body_top %}
+	{{ include("@App/searchall.html.twig") }}
+	
+
+
+{% endblock %}
+
+{% block body %}
+	{% block results_search_body %}
+
+		<!--<table class="table_nbr_results">
+			<tr>
+				<td colspan="4" id="ol_map">
+					<style >
+						p.collapse{
+							display:none;
+						}
+					</style>
+					<div  style="width:500px;height:400px;" id="map_result" class="map_result"></div>
+					<div id="mouse-position"></div>
+					<div style="display: none;">
+						< !-- Clickable label for Vienna 
+						<a class="overlay" id="vienna" target="_blank" href="http://en.wikipedia.org/wiki/Vienna">Vienna</a>
+						<div id="marker" title="Marker"></div>-- >
+						< !-- Popup -- >
+						<div id="popup" ></div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="4">
+					 <select id="layer-select_results">
+						<option value="Road">Road</option>
+						<option value="Aerial">Aerial</option>
+					 </select>
+				</td>
+			</tr>
+		</table>-->
+		<table class="table_nbr_results">
+			<tr>
+				<th class="td1">
+					Results :
+				</th>
+				<td class="td1">
+					<label class="lab_number_results">
+				</td>
+				<td align="right">
+					Nbr of results by page:
+				</td>
+				<td width="50px">
+					<select class="inp_searchNbrResByPage">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+						<option value="20">20</option>
+						<option value="25">25</option>
+						<option value="50">50</option>
+						<option value="75">75</option>
+						<option value="100">100</option>
+					</select>
+				</td>
+			</tr>
+		</table>
+		<TABLE class="table_results">
+			<TR >
+				<TH width="3%">
+					Coll
+				</TH>
+				<TH width="30%" colspan="4">
+					Contributions
+				</TH>
+				<TH width="30%" colspan="6">
+					Samples
+				</TH>
+				<TH width="10%" colspan="3">
+					Documents
+				</th>
+				<TH width="30%" colspan="4">
+					Locations
+				</TH>
+			</TR>				
+			<TR>
+			<!--collection-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idcollection_up up-arrow" onclick="sortTable('token',1)">&#9650</div>
+						<div class="idcollection_down down-arrow" onclick="sortTable('token',2)">&#9660</div>
+					</span>
+				</TH>
+			<!--Contributions-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idcontribution_up up-arrow" onclick="sortTable('idcontribution',1)">&#9650</div>
+						<div class="idcontribution_down down-arrow" onclick="sortTable('idcontribution',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="8%">
+					Type
+					<span style="float:right;">
+						<div class="datetype_up up-arrow" onclick="sortTable('datetype',1)">&#9650</div>
+						<div class="datetype_down down-arrow" onclick="sortTable('datetype',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="6%">
+					Date
+					<span style="float:right;">
+						<div class="contribution_date_up up-arrow" onclick="sortTable('contribution_date',1)">&#9650</div>
+						<div class="contribution_date_down down-arrow" onclick="sortTable('contribution_date',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="8%">
+					Contributor
+					<span style="float:right;">
+						<div class="people_up up-arrow" onclick="sortTable('people',1)">&#9650</div>
+						<div class="people_down down-arrow" onclick="sortTable('people',2)">&#9660</div>
+					</span>
+				</th>
+			<!--samples-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idsample_up up-arrow" onclick="sortTable('idsample',1)">&#9650</div>
+						<div class="idsample_down down-arrow" onclick="sortTable('idsample',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Code
+					<span style="float:right;">
+						<div class="fieldnum_up up-arrow" onclick="sortTable('fieldnum',1)">&#9650</div>
+						<div class="fieldnum_down down-arrow" onclick="sortTable('fieldnum',2)">&#9660</div>
+					</span>
+				</th>
+				<TH width="6%">
+					Mineral
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('mineral',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('mineral',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Formula
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('mformula',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('mformula',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="6%">
+					Descr.
+					<span style="float:right;">
+						<div class="sampledescription_up up-arrow" onclick="sortTable('sampledescription',1)">&#9650</div>
+						<div class="sampledescription_down down-arrow" onclick="sortTable('sampledescription',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="6%">
+					Type
+					<span style="float:right;">
+						<div class="type_up up-arrow" onclick="sortTable('type',1)">&#9650</div>
+						<div class="type_down down-arrow" onclick="sortTable('type',2)">&#9660</div>
+					</span>
+				</TH>
+			<!--documents-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="iddoc_up up-arrow" onclick="sortTable('iddoc',1)">&#9650</div>
+						<div class="iddoc_down down-arrow" onclick="sortTable('iddoc',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="6%">
+					Medium
+					<span style="float:right;">
+						<div class="medium_up up-arrow" onclick="sortTable('medium',1)">&#9650</div>
+						<div class="medium_down down-arrow" onclick="sortTable('medium',2)">&#9660</div>
+					</span>
+				</th>
+				<TH width="6%">
+					Info
+					<span style="float:right;">
+						<div class="docinfo_up up-arrow" onclick="sortTable('docinfo',1)">&#9650</div>
+						<div class="docinfo_down down-arrow" onclick="sortTable('docinfo',2)">&#9660</div>
+					</span>
+				</TH>
+			<!--locations-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idpt_up up-arrow" onclick="sortTable('idpt',1)">&#9650</div>
+						<div class="idpt_down down-arrow" onclick="sortTable('idpt',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Lat.
+					<span style="float:right;">
+						<div class="lat_up up-arrow" onclick="sortTable('coord_lat',1)">&#9650</div>
+						<div class="lat_down down-arrow" onclick="sortTable('coord_lat',2)">&#9660</div>
+					</span>
+				</th>
+				<TH width="5%">
+					Long.
+					<span style="float:right;">
+						<div class="long_up up-arrow" onclick="sortTable('coord_long',1)">&#9650</div>
+						<div class="long_down down-arrow" onclick="sortTable('coord_long',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Place
+					<span style="float:right;">
+						<div class="place_up up-arrow" onclick="sortTable('place',1)">&#9650</div>
+						<div class="place_down down-arrow" onclick="sortTable('place',2)">&#9660</div>
+					</span>
+				</TH>
+				<!--<TH width="7%">
+					Description Geo.
+					<span style="float:right;">
+						<div class="geodescription_up up-arrow" onclick="sortTable('geodescription',1)">&#9650</div>
+						<div class="geodescription_down down-arrow" onclick="sortTable('geodescription',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Position
+					<span style="float:right;">
+						<div class="positiondescription_up up-arrow" onclick="sortTable('positiondescription',1)">&#9650</div>
+						<div class="positiondescription_down down-arrow" onclick="sortTable('positiondescription',2)">&#9660</div>
+					</span>
+				</TH>-->
+			</TR>
+			{% set i=0 %}
+			{% for item in results %}
+				<TR> 
+					<TD>
+						{{item.token}}
+					</TD>
+					<TD>
+						<label class="but_showcontribution_{{item.pk_contribution}}" onclick="viewcontribution({{item.pk_contribution}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">{{item.idcontribution}}</label> <img src="{{ asset('pics/edit.png') }}" class="but_editcontribution_{{item.pk_contribution}}" onclick="editcontribution({{item.pk_contribution}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+					</TD>
+					<TD>
+						{{item.datetype}}
+					</TD>
+					<TD>
+						{{item.contribution_date|date("d/m/Y") }}
+					</TD>
+					<TD>
+						{{item.people}}
+					</TD>
+					{% if item.token == "F" or item.token == "L" or item.token == "M" %}
+						<TD>
+							<label class="but_showsample_{{item.pk_sample}}" onclick="viewsample({{item.pk_sample}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">{{item.idsample}}</label> <img src="{{ asset('pics/edit.png') }}" class="but_editsample_{{item.pk_sample}}" onclick="editsample({{item.pk_sample}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+						</TD>
+						<TD>
+							{{item.fieldnum}}
+						</TD>
+						<TD>
+							{{item.mname|lower}}
+							{% if (item.fmname|length > 0) and (item.fmname|lower != item.mname|lower) %} - {{ item.fmname|lower}}(Fl.) {% endif %}
+						</TD>
+						<TD>
+							<label class="input_formula{{i}}" >	</label>
+						</TD>
+						<TD>
+							{% if item.sampledescription|length > 0 %} 
+								{{ item.sampledescription|length > 50 ? item.sampledescription|slice(0, 50) ~ '...' : item.sampledescription  }}
+							{% endif %}
+						</TD>
+						<TD>
+							{{item.type}}
+						</TD>
+					{% else %}
+						<TD colspan="6"></TD>
+					{% endif %}
+					{% if item.token == "C" or item.token == "G" or item.token == "A" or item.token == "I" or item.token == "B" %}
+						<TD>
+							<label class="but_showdoc_{{item.pk_doc}}" onclick="viewdoc({{item.pk_doc}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">{{item.iddoc}}</label> <img src="{{ asset('pics/edit.png') }}" class="but_editdoc_{{item.pk_doc}}" onclick="editdoc({{item.pk_doc}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+						</TD>
+						<TD>
+							{{item.medium}}
+						</TD>
+						<TD>
+							{{item.title}}
+						</TD>
+					{% else %}
+						<TD colspan="3"></TD>
+					{% endif %}
+					{% if item.token == "Z" or item.token == "O" or item.token == "D"  %}
+						<TD>
+							<label class="but_showpoint_{{item.pk_point}}" onclick="viewpoint({{item.pk_point}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">{{item.idpt}}</label> <img src="{{ asset('pics/edit.png') }}" class="but_editpoint_{{item.pk_point}}" onclick="editpoint({{item.pk_point}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+						</TD>
+						<TD>
+							{% if item.coord_lat != '' %}
+								{{item.coord_lat|number_format(2, '.', ',')}}
+							{% endif %}
+						</TD>
+						<TD>
+							{% if item.coord_long != '' %}
+								{{item.coord_long|number_format(2, '.', ',')}}
+							{% endif %}
+						</TD>
+						<TD>
+							{{item.place}}
+						</TD>
+					{% else %}
+						<TD colspan="4"></TD>
+					{% endif %}
+				</TR>
+				{% set i=i+1%}
+			{% endfor %}
+		</TABLE>
+
+		<div class="navigation text-center">
+			{{ knp_pagination_render(results) }}
+		</div>
+		
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+    <style>
+      #marker {
+        width: 20px;
+        height: 20px;
+        border: 1px solid #088;
+        border-radius: 10px;
+        background-color: #0FF;
+        opacity: 0.5;
+      }
+      #vienna {
+        text-decoration: none;
+        color: white;
+        font-size: 11pt;
+        font-weight: bold;
+        text-shadow: black 0.1em 0.1em 0.2em;
+      }
+      .popover-body {
+        min-width: 276px;
+      }
+    </style>-->
+		<script type="text/javascript">
+			{% set i=0%}
+			var formulas_array = [];
+			{% for item in results %}
+				formulas_array[{{i}}]=displayFormula("{{item.mformula}}");
+				$(".input_formula{{i}}").html(formulas_array[{{i}}]);
+				{% set i=i+1%}
+			{% endfor %}	
+			
+			function displayFormula(formula){	
+				var newformula = "";		
+				if(formula.indexOf("&lt;") != -1){
+					formula = formula.replace(/&gt;/g,">").replace(/&lt;/g,"<");		
+				}
+				newformula = formula.replace(/>/g,"§");
+				newformula = newformula.replace(/</g,"<sub>");
+				newformula = newformula.replace(/§/g,"</sub>");
+				newformulaarray = newformula.split("&#039;");
+				
+				if (newformulaarray.length >1){
+					newformula = "";
+					for (i=0;i<newformulaarray.length; i++){
+						if (i%2 == 0){
+							newformula = newformula + newformulaarray[i];
+						}else{
+							newformula = newformula + "<sup>" + newformulaarray[i] + "</sup>";
+						}
+					}
+				}
+				return newformula;
+			}
+			
+			function sortTable(n,dir) {
+				if (dir==1){
+					sortDirection = n+" "+"ASC";
+				}
+				if (dir==2){
+					sortDirection = n+" "+"DESC";
+				}
+				searchclic();
+			}
+
+			function editcontribution(pk) {
+				var url = '{{ path("app_edit_contribution", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewcontribution(pk) {
+				var url = '{{ path("app_view_contribution", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function editsample(pk) {
+				var url = '{{ path("app_edit_sample", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewsample(pk) {
+				var url = '{{ path("app_view_sample", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function editdoc(pk) {
+				var url = '{{ path("app_edit_doc", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewdoc(pk) {
+				var url = '{{ path("app_view_doc", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function editpoint(pk) {
+				var url = '{{ path("app_edit_point", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewpoint(pk) {
+				var url = '{{ path("app_view_point", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			$(document).ready(function() {
+			
+				function test_elem_empty($field,$elem){
+					if ($elem.length >0) {
+						$str = $field + " option[value='"+$elem+"'";
+						$($str).prop("selected","selected");
+					}
+				}
+				//{ % set filter = app.session.get('p') %}
+				//{ % set queryvals = filter['queryvals'] %}
+				
+				{% set arrayqueryvals = queryvals|split(',,') %}
+				{% set elem = {} %}
+				{% for e in arrayqueryvals %}
+				{% 		set elem1 = e|split(':') %}
+				{%  	set elem = elem|merge({(elem1[0]):(elem1[1])}) %}
+				{% endfor %}
+
+				$i = 0;
+				setTimeout(function(){
+					$("#inp_searchsamplecoll option[value='{{elem['samplecollection']}}']").prop("selected","selected");
+					$("#inp_searchloccoll option[value='{{elem['loccollection']}}']").prop("selected","selected");
+						
+					//collval = '{{elem['samplecollection']}}';
+					test_elem_empty(".inp_searchmingroup","{{elem['groupmineral']}}");
+					test_elem_empty(".inp_searchminclass","{{elem['classmineral']}}");
+					test_elem_empty(".inp_searchmineral","{{elem['mineral']}}");
+					
+					test_elem_empty(".inp_searchLithomineral","{{elem['lithomineral']}}");
+					test_elem_empty(".inp_searchLithomagnet","{{elem['lithomagnet']}}");
+					test_elem_empty(".inp_searchconttype","{{elem['type']}}");
+					$i++;
+					test_elem_empty(".inp_searchcontyear","{{elem['year']}}");
+					test_elem_empty(".inp_searchcontname","{{elem['people']}}");
+					test_elem_empty(".inp_searchcontrole","{{elem['role']}}");
+					test_elem_empty(".inp_searchcontfunction","{{elem['function']}}");
+					test_elem_empty(".inp_searchconttitle","{{elem['title']}}");
+					test_elem_empty(".inp_searchcontstatus","{{elem['status']}}");
+					test_elem_empty(".inp_searchcontinstitute","{{elem['institute']}}");
+				}, 500);
+				//onElementModified('body', '#inp_searchcoll', function(element){
+
+				
+				//	});
+
+				$(".inp_searchnum_sample").val("{{elem['searchnum_sample']}}");
+				$(".inp_searchfieldnum_sample").val("{{elem['fieldnum_sample']}}");
+				$(".inp_searchmuseumnr").val("{{elem['museumnr']}}");
+				$(".inp_searchmuseumloc").val("{{elem['museumloc']}}");			
+				$(".inp_searchboxnbr").val("{{elem['boxnbr']}}");			
+				$(".inp_searchdescr").val("{{elem['descr']}}");	
+				$(".inp_searchweight").val("{{elem['weight']}}");	
+				$(".inp_searchsize").val("{{elem['size']}}");	
+				$(".inp_searchdimension").val("{{elem['dimension']}}");	
+				$(".inp_searchquality").val("{{elem['quality']}}");	
+				$(".inp_searchloaninfo").val("{{elem['loaninfo']}}")
+				$(".inp_searchsecuritylevel").val("{{elem['securitylevel']}}")
+				$(".inp_searchvariousinfo").val("{{elem['variousinfo']}}");
+				$(".inp_search_WKT").val("{{elem['wkt']}}");
+			
+				/*if ({{elem['radioactivity']}} == 1){
+					$( ".inp_searchradioact").attr('checked',true);
+				}else{
+					$( ".inp_searchradioact").attr('checked',false);
+				}*/
+				if ({{elem['slimplate']}} == 1){
+					$( ".inp_searchslimplate").attr('checked',true);
+				}else{
+					$( ".inp_searchslimplate").attr('checked',false);
+				}
+				if ({{elem['chemanalysis']}} == 1){
+					$( ".inp_searchchemanalysis").attr('checked',true);
+				}else{
+					$( ".inp_searchchemanalysis").attr('checked',false);
+				}
+				if ({{elem['holotype']}} == 1){
+					$( ".inp_searchholotype").attr('checked',true);
+				}else{
+					$( ".inp_searchholotype").attr('checked',false);
+				}
+				if ({{elem['paratype']}} == 1){
+					$( ".inp_searchparatype").attr('checked',true);
+				}else{
+					$( ".inp_searchparatype").attr('checked',false);
+				}
+			
+				$(".inp_searchidmineral").val("{{elem['idmineral']}}");
+				$(".inp_searchmingrade").val("{{elem['grademineral']}}");
+				$(".inp_searchmineralFormula").val("{{elem['formulamineral']}}");
+				
+				$(".inp_searchLithoMinnum_from").val("{{elem['lithominnum_from']}}");
+				$(".inp_searchLithoMinnum_to").val("{{elem['lithominnum_to']}}");
+				$(".inp_searchLithoWeight_from").val("{{elem['lithoweight_from']}}");
+				$(".inp_searchLithoWeight_to").val("{{elem['lithoweight_to']}}");
+				$(".inp_searchLithoObserv").val("{{elem['lithoobserv']}}");
+				if ({{elem['lithogranulo']}} == 1){
+					$( ".inp_searchgranulo").attr('checked',true);
+				}else{
+					$( ".inp_searchgranulo").attr('checked',false);
+				}
+			
+				$(".inp_searchidcontribution").val("{{elem['idcontribution']}}");	
+				{% if elem['date_from']|length > 0%}
+					$(".inp_searchcontfromdate").val("{{elem['date_from']|date('d/m/Y')}}");
+				{% endif%}
+				{% if elem['date_from']|length > 0%}
+					$(".inp_searchconttodate").val("{{elem['date_to']|date('d/m/Y')}}");
+				{% endif%}
+				
+				$(".inp_searchidcontributor").val("{{elem['idcontributor']}}");
+				$(".inp_searchcontorder").val("{{elem['order']}}");
+				
+				$(".inp_searchidlocation").val("{{elem['searchidpoint']}}");
+				$(".inp_searchpointfromdate").val("{{elem['date_from']}}");
+				$(".inp_searchpointtodate").val("{{elem['date_to']}}");				
+				$(".inp_searchfieldnumber").val("{{elem['fieldnum']}}");
+				$(".inp_searchplace").val("{{elem['place']}}");
+				$(".inp_searchgeodesc").val("{{elem['geodescription']}}");
+				$(".inp_searchposdesc").val("{{elem['positiondescription']}}");
+				$(".inp_searchdocref").val("{{elem['docref']}}");
+				$(".inp_search_WKT").val("{{elem['wkt']}}");
+				
+				sortDirection = "{{elem['sortDirection']}}";
+				$namef = "{{elem['sortDirection']}}".replace(" DESC", "_down").replace(" ASC", "_up");
+				$("."+ $namef).css('color', 'black');		
+				
+				$(".lab_number_results").html("{{elem['nbrres']}} records");
+				$(".inp_searchNbrResByPage").val("{{elem['NbrResByPage']}}");
+
+				$('.inp_searchNbrResByPage').on('change', function() {
+					nbrval = $('.inp_searchNbrResByPage option:selected').val();
+					searchclic();
+				});
+	
+				getFeaturesRow();
+			});
+
+	//Map------------------------------------------------------------------------------------------
+
+			  //main search function (du code public)
+			var modeRemovePage=false;
+			var clusters;
+			var overlay;
+			var layerLoaded=false;
+			var coordinates;
+			var container = document.getElementById('popup');
+			$("#popup").css('display','block');
+			var content = document.getElementById('popup-content');
+			var closer = document.getElementById('popup-closer');
+			var features_data = [];
+			
+			function isCluster(feature) {
+				if (!feature || !feature.get('features')) { 
+					return false; 
+				}
+				return feature.get('features').length >= 1;
+			}
+			var getFeaturesRow=function(){
+				var features = new Array();
+				var i=0
+				var coord_tocenter;
+
+			//	map.removeInteraction(draw);
+
+				{% for item in results %}
+					coordinates = [{{item.coord_long}},{{item.coord_lat}}];
+					/*if ('{{item.pk_sample}}' != ""){
+						$pk={{item.pk_sample}};
+					}else{
+						if ('{{item.pk_contribution}}' != ""){
+							$pk={{item.pk_contribution}};
+						}else{
+							if ('{{item.pk_point}}' != ""){
+								$pk={{item.pk_point}};
+							}else{
+								if ('{{item.pk_doc}}' != ""){
+									$pk={{item.pk_doc}};
+								}
+							}
+						}
+					}*/
+
+					features_data.push([coordinates,{{item.pk_point}},'{{item.geodescription}}']); 
+					
+					if (i==0) {
+						coord_tocenter = ol.proj.fromLonLat(coordinates);
+					}
+					features[i] = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(coordinates)));
+					i=i+1
+				{% endfor %}
+				
+				if(layerLoaded===true&&modeRemovePage===true){
+					map.removeLayer(clusters);
+				}
+				
+				/*var tmpFeatures=(new ol.format.GeoJSON()).readFeatures(jQuery.parseJSON(geoJSON), {
+					dataProjection: 'EPSG:4326',
+					featureProjection: 'EPSG:3857'
+				});*/
+				var vectorSource = new ol.source.Vector({features: features});
+				var clusterSource = new ol.source.Cluster({
+					distance: 40,
+					source: vectorSource
+				});
+			
+				var styleCache = {};
+				var keysForClick=[];
+				clusters = new ol.layer.Vector({
+					source: clusterSource,
+					style: function(feature) {
+						$(feature.get('features')).each(
+							function(idx, item){
+								keysForClick[item.get('code_display')||'']=item.get('taxon')||'';
+							}
+						);
+				   
+						var size = feature.get('features').length;
+						var style = styleCache[size];
+						if (!style) {
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									radius: 10,
+									stroke: new ol.style.Stroke({
+										color: '#fff'
+									}),
+									fill: new ol.style.Fill({
+										color: '#3399CC'
+									})
+								}),
+								text: new ol.style.Text({
+									text: size.toString(),
+									fill: new ol.style.Fill({
+										color: '#fff'
+									})
+								})
+							});
+							styleCache[size] = style;
+						}
+						return style;
+					},
+					keysForClick: keysForClick
+				});
+
+				map.addLayer(clusters);
+				
+				layerLoaded=true;
+
+				map.getView().setZoom(4);
+               
+				   /**
+                * Create an overlay to anchor the popup to the map.
+                */
+                overlay = new ol.Overlay( ({
+                    element: container,
+                    autoPan: true,
+                    autoPanAnimation: {
+                      duration: 250
+                    }
+                }));
+                  
+                   /**
+                   * Add a click handler to hide the popup.
+                   * @return {boolean} Don't follow the href.
+                   */
+                closer.onclick = function() {
+                    overlay.setPosition(undefined);
+                    closer.blur();
+                    return false;
+                };
+				
+				map.addOverlay(overlay);
+				map.on('click', function(evt) {
+					var coordinate = evt.coordinate;
+					var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) { return feature; });
+					if (isCluster(feature)) {
+						var features2 = feature.get('features');
+						Textline = "<table class='tablepopup'>";
+						imgsrc = "{{ asset('pics/edit.png') }}";
+						for(var i = 0; i < features2.length; i++) {
+							ind = i+1;
+							Textline = Textline+"<TR><TD class='tablepopup_td1'>"+ind+"</TD><TD class='tablepopup_td2'>"+ features_data[i][2] +"</TD><TD class='tablepopup_td3'><img src=" + imgsrc + " class='but_editpoint_" + features_data[i][1] +"' onclick='editpoint(" + features_data[i][1] +")' alt='home' height='11' width='13' onmouseover='' style='cursor: pointer;'> </TD></TR>";
+						}
+						content.innerHTML = Textline +'</table>';
+						overlay.setPosition(coordinate);
+					} 
+				});
+
+			};	
+		</script>
+	{% endblock %}
+{% endblock %}
+

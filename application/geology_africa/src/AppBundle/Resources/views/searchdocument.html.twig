@@ -1,0 +1,205 @@
+{# src/AppBundle/Resources/views/searchdocument.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} - Documents
+{% endblock %}
+
+{% block body_top %}
+	<table class="ui-front table_search">
+		<tr>
+			<th class="title_table_search" width="100%" colspan = "8">
+				Documents
+			</th>
+		</tr>
+		<tr>
+			<th width = "8%"  style="text-align:right">
+				Collection:
+			</th>
+			<td width = "8%">
+				<select id="inp_searchcoll" class="inp_searchcoll">
+					<option value="all">All</option>
+				</select>
+			</td>
+			<th width = "8%" style="text-align:right">
+				ID :
+			</th>
+			<td  width = "8%">
+				<input type="text" class="inp_searchiddoc vshortlength">
+			</td>
+			<th width = "8%" style="text-align:right">
+				Archive mumber:
+			</th>
+			<td  width = "8%">
+				<input type="text" class="inp_searchnumarchive vshortlength">
+			</td>
+			<th width = "8%" style="text-align:right">
+				Central mumber:
+			</th>
+			<td  width = "45%">
+				<input type="text" class="inp_searchcentralnum vshortlength">
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Caption:
+			</th>
+			<td >
+				<input type="text" class="inp_searchcaption">
+			</td>
+			<th style="text-align:right">
+				Medium:
+			</th>
+			<td  colspan = "5">
+				<select id="inp_searchmedium" class="inp_searchmedium">
+					<option value="all">All</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Location:
+			</th>
+			<td >
+				<input type="text" id="inp_searchdoclocation" class="inp_searchdoclocation"> 
+			</td>
+			<th style="text-align:right">
+				Numerical location:
+			</th>
+			<td >
+				<input type="text" id="inp_searchdocnumlocation" class="inp_searchdocnumlocation shortlength"> 
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Filename:
+			</th>
+			<td >
+				<input type="text" id="inp_searchfilename" class="inp_searchfilename">
+			</td>
+			<th style="text-align:right">
+				Document information:
+			</th>
+			<td >
+				<input type="text" id="inp_searchdocinfo" class="inp_searchdocinfo">
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Edition:
+			</th>
+			<td >
+				<input type="text" class="inp_searchedition">
+			</td>
+			<th style="text-align:right">
+				Publication place:
+			</th>
+			<td >
+				<input type="text" class="inp_searchpubplace">
+			</td>
+			<th style="text-align:right">
+				Document type:
+			</th>
+			<td >
+				<input type="text" class="inp_searchcartotype">
+			</td>
+		</tr>
+	</table>
+
+	<BR/>
+	<input type="button" class="but_searchnum" value="Search">
+	
+	<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   
+	<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	
+	<script src="{{ asset('js/core.js') }}"></script>
+	
+	<script type="text/javascript">
+		var collSelect = $(".inp_searchcoll");
+		var mediumSelect = $(".inp_searchmedium");
+		var sortDirection = "";
+				
+		//ajax to fill the comboboxes------
+		//collections
+		path = "{{ path('app_collection_list', {'querygroup': 'document%' })  }}";
+
+		$.ajax({
+			url: path,
+			type: "GET",
+			dataType: "JSON",
+			success: function (collections) {
+				$.each(collections, function (key, collection) {
+					collSelect.append('<option value="' + collection.codecollection + '">' + collection.collection + '</option>');
+				});
+				//$('.inp_searchcoll option[value="L"]').attr('selected','selected');
+				collval = $('.inp_searchcoll option:selected').val();
+			},
+			error: function (err) {
+				alert("An error ocurred while loading data ...");
+			}
+		});
+		//medium
+		path = "{{ path('app_docmedium_list')  }}";
+
+		$.ajax({
+			url: path,
+			type: "GET",
+			dataType: "JSON",
+			success: function (media) {
+				$.each(media, function (key, medium) {
+					mediumSelect.append('<option value="' + medium.medium + '">' + medium.medium + '</option>');
+				});
+				mediumval = $('.inp_searchmedium option:selected').val();
+			},
+			error: function (err) {
+				alert("An error ocurred while loading data ...");
+			}
+		});
+		
+		//code if coll changed------	
+		$('.inp_searchcoll').on('change', function() {
+			collval = $('.inp_searchcoll option:selected').val();
+		});
+		
+		function searchclic(){
+			var queryvals = "iddoccollection:"+$(".inp_searchcoll").val()
+			+",,iddoc:"+$(".inp_searchiddoc").val() 
+			+",,numarchive:"+$(".inp_searchnumarchive").val()
+			+",,caption:"+$(".inp_searchcaption").val()
+			+",,centralnum:"+$(".inp_searchcentralnum").val()
+			+",,medium:"+$(".inp_searchmedium").val()
+			+",,doclocation:"+$(".inp_searchdoclocation").val()
+			+",,numericallocation:"+$(".inp_searchdocnumlocation").val()
+			+",,filename:"+$(".inp_searchfilename").val()
+			+",,docinfo:"+$(".inp_searchdocinfo").val()
+			+",,edition:"+$(".inp_searchedition").val()
+			+",,pubplace:"+$(".inp_searchpubplace").val()
+			+",,doccartotype:"+$(".inp_searchcartotype").val()
+			;
+
+			if ( $( ".inp_searchNbrResByPage" ).length ) {
+				queryvals = queryvals + ",,NbrResByPage:"+$(".inp_searchNbrResByPage").val();
+			}else{
+				queryvals = queryvals + ",,NbrResByPage:20";
+			}
+		
+			if ( sortDirection.length ) {
+				queryvals = queryvals + ",,sortDirection:"+sortDirection;
+			}else{
+				queryvals = queryvals + ",,sortDirection:idpt ASC";
+			}
+
+			var url = '{{ path("app_result_doc", {'queryvals': 'article_id'}) }}'; 
+			url = url.replace("article_id", queryvals);
+			window.location = url;
+		}
+		
+		$(document).ready(function() {
+			$(".but_searchnum").click(searchclic);
+		});
+	</script>
+{% endblock %}

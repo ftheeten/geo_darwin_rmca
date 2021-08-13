@@ -1,0 +1,106 @@
+{# src/AppBundle/Resources/views/collectionindex.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% trans_default_domain 'FOSUserBundle' %}
+	<Table  class=" table_edit">
+		<tr>
+			<th class="title_table_edit"  colspan=12>
+				Liste des collections
+			</th>
+		</tr>
+        
+			<tr class="border_bottom">
+				<th width="3%">Code</th>
+				<th width="15%">{{ 'form.collection'|trans }}</th>
+				<th width="15%">{{ 'form.typeobjects'|trans }}</th>
+				<th width="10%">{{ 'form.zone'|trans }}</th>
+				<th width="8%">{{ 'form.username'|trans }}</th>
+				<th width="8%">{{ 'form.role'|trans }}</th>
+				<th width="8%">{{ 'form.firstname'|trans }}</th>
+				<th width="8%">{{ 'form.lastname'|trans }}</th>
+				<th width="15%">{{ 'form.email'|trans }}</th>
+				<th width="5%">{{ 'form.enabled'|trans }}</th>
+				<th width="5%">{{ 'form.userid'|trans }}</th>
+				<th width="5%"></th>
+			</tr>
+      
+			{% set colcode="" %}
+			{% set choice="samecoll" %}
+            {% for collection in collections %}
+				{% if colcode != collection.codecollection %}
+					{% if choice == "samecoll" %}
+						{% set choice = "diffcoll" %}
+					{%elseif choice == "diffcoll" %}
+						{% set choice = "samecoll" %}
+					{% endif %}
+				{% endif %}
+				<tr  class="{{choice}}">
+					<TD>
+						{{ collection.codecollection }}
+					</TD>
+                    <TD>
+						{{ collection.collection }}
+					</TD>
+					<TD>
+						{{ collection.typeobjets}}
+					</TD>
+					<TD>
+						{{ collection.zoneutilisation}}
+					</TD>
+					<TD>
+						{{ collection.username}}
+					</TD>
+					<TD>
+						{{ collection.role}}
+					</TD>
+					<TD>
+						{{ collection.first_name}}
+					</TD>
+					<TD>
+						{{ collection.last_name}}
+					</TD>
+					<TD>
+						{{ collection.email}}
+					</TD>
+					<TD>
+						{{ collection.enabled}}
+					</TD>
+					<TD>
+						{{ collection.u_id}}
+					</TD>
+					<TD>
+						<img src="{{ asset('pics/edit.png') }}" class="but_editcoll_{{collection.c_pk}}" onclick="editcoll({{collection.c_pk}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+					</TD>
+                </tr>
+				{% set colcode = collection.codecollection %}
+            {% endfor %}
+        
+    </table>
+	<script type="text/javascript">	
+		function sortTable(n,dir) {
+			if (dir==1){
+				sortDirection = n+" "+"ASC";
+			}
+			if (dir==2){
+				sortDirection = n+" "+"DESC";
+			}
+			//searchclic();
+		}
+		
+		function editcoll(id) {
+			var url = '{{ path("app_edit_collection", {'id': 'article_id'}) }}'; 
+			url = url.replace("article_id", id);
+			window.location = url;
+		}
+		
+	</script>
+{% endblock %}
+
+

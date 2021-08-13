@@ -1,0 +1,253 @@
+{# src/AppBundle/Resources/views/documentform.html.twig #}
+
+{{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'document_form'}}) }}
+
+	<table class="ui-front table_edit">
+		<tr>
+			<TH class="title_table_edit" width="100%" colspan = "8">
+				Documents
+			</TH>
+		</tr>
+
+		<tr>
+			<th width = "8%"  style="text-align:right">
+				Collection:
+			</th>
+			<td width = "8%">
+				{% if ddocument.pk != "" %}
+					{{ddocument.idcollection}}
+				{% else %}
+					{{ form_widget(form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
+				{% endif %}
+			</td>
+			<th width = "8%" style="text-align:right">
+				ID :
+			</th>
+			<td  width = "8%">
+				{% if ddocument.pk != "" %}
+					{{ddocument.iddoc}}
+				{% else %}
+					{{ form_widget(form.iddoc, {'attr': {'class': 'form-control inp_DocID vshortlength'}}) }}
+					{{ form_errors(form.iddoc) }}
+				{% endif %}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Archive mumber:
+			</th>
+			<td  width = "8%">
+				{{ form_widget(form.numarchive, {'attr': {'class': 'form-control inp_Numarchive'}}) }}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Central mumber:
+			</th>
+			<td  width = "45%">
+				{{ form_widget(form.centralnum, {'attr': {'class': 'form-control inp_Centralnum'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Filename:
+			</th>
+			<td >
+				{{ form_widget(form.filename, {'attr': {'class': 'form-control inp_Filename'}}) }}
+			</td>
+			<th style="text-align:right">
+				Caption:
+			</th>
+			<td >
+				{{ form_widget(form.caption, {'attr': {'class': 'form-control inp_Caption'}}) }}
+			</td>
+			<th style="text-align:right">
+				Medium:
+			</th>
+			<td  colspan = "3">
+				{{ form_widget(form.medium, {'attr': {'class': 'form-control'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Location:
+			</th>
+			<td >
+				{{ form_widget(form.location, {'attr': {'class': 'form-control inp_Location'}}) }}
+			</td>
+			<th style="text-align:right">
+				Numerical location:
+			</th>
+			<td  colspan = "5">
+				{{ form_widget(form.numericallocation, {'attr': {'class': 'form-control inp_Numericallocation'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Document information:
+			</th>
+			<td  colspan = "4">
+				{{ form_widget(form.docinfo, {'attr': {'class': 'form-control inp_Docinfo'}}) }}
+			</td>
+			<td  colspan = "3">
+				
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Edition:
+			</th>
+			<td >
+				{{ form_widget(form.edition, {'attr': {'class': 'form-control inp_Edition'}}) }}
+			</td>
+			<th style="text-align:right">
+				Publication place:
+			</th>
+			<td >
+				{{ form_widget(form.pubplace, {'attr': {'class': 'form-control inp_Pubplace'}}) }}
+			</td>
+			<th style="text-align:right">
+				Document type:
+			</th>
+			<td  colspan = "3">
+				{{ form_widget(form.doccartotype, {'attr': {'class': 'form-control inp_Doccartotype'}}) }}
+			</td>
+		</tr>
+		
+	   <tr> <td>Keywords</td> 
+			<td>{% include "@App/foreignkeys/template_subforms.html.twig" with {'nested_template':"@App/foreignkeys/dkeyword.html.twig" , 'ctrl_prefix' : 'ctrl_keywords', 'ajax_route': path('get_widget_keyword'), 'fk_values': keywords|default(null) }  %}</td>
+	   </tr>
+		<tr>
+			<TD> .</TD>
+		</tr>
+		<TR>
+			<TD>
+			</BR><input type="submit" class="btn btn-default pull-right submitbutton" />
+				<div class="alert_message"></div>
+			</TD>
+		</TR>
+	</table>
+
+<div class="modal fade modal_browse_keyword" id="modalbrowse" tabindex="-1" role="dialog" aria-labelledby="browseModalLabel" aria-hidden="true" style="z-index:1000000000">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" id="modal_browse_content">        
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row ">
+                        <div class="col-sm-12">
+							{% set nested_template = nested_francytree|default("@App/keywords/keyword_search_raw_data.html.twig") %}
+                            {% include nested_template with {'checkbox' : 'false', 'modal_bs' : '#modalbrowse'} %}
+                        </div>
+                    </div>                    
+                </div>
+            </div>    
+            <div class="modal-footer">                  
+                  <button type="button" class="btn btn-secondary close-search-keyword" data-bs-dismiss="modal" data-bs-dismiss="modal" data-bs-toggle="modal"
+                                data-bs-target="#modaladd"   data-bs-backdrop="false" >Close</button>
+            </div>
+        </div>
+    </div>    
+</div>
+{{ form_end(form) }}
+
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">   
+<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/core.js') }}"></script>
+
+<script type="text/javascript">
+	var sortDirection = "";
+	var source_selected;
+	var $medium;
+	
+
+	$(document).ready(function() {
+	
+		//show message saying that data is in DB, during 4 sec. Msg comes from controller
+		setTimeout(function() { 
+			{% for msg in app.flashes('success') %}
+			$(".alert_message").html("{{ msg }}");
+			$(".alert_message").fadeOut(2000); 
+			{% endfor %}
+		},1000); 
+		
+		/*{% if lmedium is defined %}
+			{% for lmedium_item in lmedium %}
+				$medium="{{lmedium_item.medium}}";
+			{% endfor %}	
+		{% endif %}
+		
+		{% if lmediumlist is defined %}
+			{% for lmediumlist_item in lmediumlist %}
+				$("#inp_Medium").append(new Option("{{lmediumlist_item.medium}}", "{{lmediumlist_item.medium}}"));
+				if ("{{lmediumlist_item.medium}}" == $medium){
+					$valprec = "{{lmediumlist_item.medium}}";
+				}
+			{% endfor %}	
+		{% endif %}
+		$("#inp_Medium").val($valprec);*/
+		
+		
+		{% if originaction is defined  %}
+			{% if originaction == 'add_beforecommit' %}
+				$(".submitbutton").prop('value', 'Create');
+			{% endif %}
+			{% if originaction != 'add_beforecommit' %}
+				$(".inp_Idcollection").attr("disabled","disabled") 
+				$(".inp_PointID").attr("disabled","disabled") 
+			{% endif %}
+			{% if (originaction == 'edit') or (originaction == 'add_aftercommit') %}
+				$(".submitbutton").prop('value', 'Save');
+			{% endif %}
+			{% if originaction == 'add_aftercommit' %}
+				alert('Data recorded in database!');
+			{% endif %}
+		{% endif %}
+		
+		var collval = "";
+		onElementModified('body', '.inp_Idcollection', function(element){
+			collval = $('.inp_Idcollection option:selected').val();
+		});	
+		var collSelect = $(".inp_Idcollection");
+		
+		var lastid = 0;
+	
+		//ajax to fill the lists------
+		collval = $('.inp_Idcollection option:selected').val();
+		
+		function fill_lastid(collval){
+			path = "{{path('app_last_Documentid', {'querygroup': 'art'}) }}";  
+			path = path.replace('art',collval);
+			lastid = 0;
+			$.ajax({
+				url:  path,
+				type: "GET",
+				dataType: "JSON",
+				success: function (ids) {
+					$.each(ids, function (key, id) {
+						lastid = id.iddoc;
+					});
+
+					$(".inp_DocID").attr("data-toggle", "tooltip");
+					$(".inp_DocID").attr("data-placement", "top");
+					$(".inp_DocID").attr("title", "Last value is "+lastid);
+				},
+				error: function (err) {
+					alert("An error ocurred while loading data ...");
+				}
+			});
+		};
+		fill_lastid(collval);
+		
+		//code if coll changed------	
+		$('.inp_Idcollection').on('change', function() {
+			collval = $('.inp_Idcollection option:selected').val();
+			coderesults = [];
+			fill_lastid(collval);
+		});
+		
+		
+		
+						
+    });	
+</script>

@@ -1,0 +1,59 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+{{ form_start(form, {'method': 'post', 'action': path('fos_user_registration_register'), 'attr': {'class': 'fos_user_registration_register'}}) }}
+<Table  class="table_edit" >
+		<tr>
+			<th class="title_table_edit"  colspan=5>
+				Registration
+			</th>
+		</tr>
+		<TR> 
+			<TH width="10%">
+				{{ form_label(form.firstname) }}:
+			</TH>
+			<TH width="20%">
+				{{ form_widget(form.firstname) }}
+			</TH>
+			<TH width="10%">
+				{{ form_label(form.lastname) }}:
+			</TH>
+			<TH width="20%">
+				{{ form_widget(form.lastname) }}
+			</TH>
+			<TH width="40%">
+				
+			</TH>
+		</TR>
+		<TR>
+			<TH>
+				{{ form_label(form.email) }}:
+			</TH>
+			<TH>
+				{{ form_widget(form.email) }}
+			</TH>
+			<TH>
+				{{ form_label(form.username) }}:
+			</TH>
+			<TH colspan=2>
+				{{ form_widget(form.username) }}
+			</TH>
+		</TR>
+		<TR>
+			<TH>
+				{{ form_label (form.plainPassword.first) }}   
+			</TH>
+			<TH>
+				{{ form_widget (form.plainPassword.first) }}  
+			</TH>
+			<TH>
+				{{ form_label (form.plainPassword.second) }}   
+			</TH>
+			<TH colspan=2>
+				{{ form_widget (form.plainPassword.second) }}
+			</TH>
+		</TR>
+	</Table>
+	<BR/>
+    <input class="btn btn-primary" type="submit" value="{{ 'registration.submit'|trans }}" />
+    
+{{ form_end(form) }}

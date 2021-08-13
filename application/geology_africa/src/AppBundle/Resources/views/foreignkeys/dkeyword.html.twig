@@ -1,0 +1,26 @@
+{# src/AppBundle/Resources/views/foreignkeys/dkeyword.html.twig #}
+
+{% set default_val = default_val|default(null) %}
+
+{% if default_val is null %}
+<input type="text" id="keywords" name="widget_keywords[]" class="widget_keywords_{{ index }}" readonly></input> 
+{% else %}
+<input type="text" id="keywords" name="widget_keywords[]" class="widget_keywords_{{ index }}" value="{{ default_val }}" readonly></input> 
+{% endif %}
+<button type="button" class="btn fk_click_{{ index }} btn-secondary browsekeywords_{{ index }}" id="b_search_keyword_{{ index }}"
+                                data-bs-dismiss="modal" data-bs-toggle="modal"
+                                data-bs-target="#modalbrowse">Search keyword</button>
+								
+<script type="text/javascript">
+var tmp_class{{ index }}="{{ index }}";
+$(".fk_click_{{ index }}").click(
+	function()
+	{
+		
+		current_class=tmp_class{{ index }};
+	
+	}
+	
+
+);
+</script>						

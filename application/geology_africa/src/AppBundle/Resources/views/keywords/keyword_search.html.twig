@@ -1,0 +1,435 @@
+{# src/AppBundle/Resources/views/keywords/keyword_search.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+{% block fancytree %}
+
+
+{% endblock %}
+{% block body %}
+    {% set reload_var ='false' %}
+    {{ form_start(form, {'attr': {'class': 'modal_form','id': 'keyword_form', 'autocomplete': 'off'}}) }}
+    <div class="container">
+    <div class="row">
+    <div class="col-sm-2"><select name="search_key" id="search_key" style="width:100%"  ></select> </div>
+    <div class="col-sm-2"><input type="button" id="submit_key" name="submit_key" value="search"></input></div>
+    <div class="col-sm-2"><input type="button" id="root_key" name="root_key" value="root"></input></div>
+    <div class="col-sm-2"><input type="button" id="add_root" name="add_root" value="add_root_keyword" data-bs-toggle="modal" data-bs-target="#modaladd"></input></div>
+    </div>
+    <div class="row">
+    <div class="col-sm-12"><div id="word_path"></div></div>
+    <div class="col-sm-12"><div id="tree"></div></div>
+    </div>
+    </div>
+
+    {{ include("@App/keywords/modal_add_keyword.html.twig") }}
+    {{ include("@App/keywords/modal_search_keyword.html.twig") }}
+    {{ form_end(form) }}
+    {{ form_start(form_delete, {'attr': {'class': 'modal_form','id': 'keyword_form_delete'}}) }}
+        {{ include("@App/keywords/modal_delete_keyword.html.twig") }}
+    {{ form_end(form_delete) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <link href="{{asset('js/fancytree/dist/skin-win8/ui.fancytree.css')}}" rel="stylesheet" />
+    <script src="{{asset('js/fancytree/dist/jquery.fancytree-all-deps.min.js')}}"></script>
+    <script type="text/javascript">
+    var ft_url="{{ path('app_search_keywords_fancytreejs')}}";
+    
+    var show_validation_msg=true;
+    var global_checkbox=true;
+    var root_mode=false;
+	
+	{% if is_parent %}
+		var is_parent_element=true;
+	{% else %}
+		var is_parent_element=false;
+	{% endif %}
+	
+	
+
+    var reload_tree=function(keyw, expand_first=false)
+    {            
+         var newSourceOption = {
+             url: ft_url,
+              type: 'POST',
+              data: {
+                checkbox: global_checkbox,
+                keyword: keyw,
+				children_only:true,
+				expanded:false,
+                expand_first_level:expand_first
+               },
+               dataType: 'json'
+               };
+         var tree = $('#tree').fancytree('getTree');
+         tree.reload(newSourceOption);
+		 
+		 if(keyw.length>0)
+		 {
+			var url_path="{{ path('app_search_keywords_pathjs')}}";
+			$.getJSON( url_path, {keyword:keyw}, function( data ) {
+				console.log(data);
+				var path_text="";
+				for(var i=0; i< data.length; i++)
+				{
+					var path_text=path_text+"/";
+					var path_text=path_text+"<a href=\"javascript:reload_tree('"+ data[i]["word"]+ "',true);\">"+ data[i]["word"]+"</a>";
+				}
+				$("#word_path").html(path_text);
+			});
+		}
+		else
+		{
+			 $("#word_path").html("/");
+		}
+		
+		 var newOption = new Option(keyw, keyw, true, true);
+		$('#search_key').append(newOption).trigger('change');
+    }
+	
+    onElementInserted('body', '.btn-explore', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("explore");
+						var val=$(this).attr('value');
+						reload_tree(val);   
+						$("#search_key").val(val);
+					}	
+				)
+    });
+    
+    onElementInserted('body', '.btn-delete', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("delete");
+						var val=$(this).attr('value');
+                        console.log(val);
+                        $(".keyw_delete_value").val(val);
+					}	
+				)
+    });
+    
+    onElementInserted('body', '.btn-add', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+                        root_mode=false;  
+						console.log("add");
+						var val=$(this).attr('value');
+                        $(".keyw_parent").val(val);
+						$(".keyw_add_value").val("")
+                        $(".callback_add_action").val("record_creation");
+                        $("#change_parent").hide();
+					}	
+				)
+    });
+
+    
+    onElementInserted('body', '.btn-move', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("move");                        
+						var val=$(this).attr('value');
+                        var val_array=val.split("_PARENT_");
+                        if(val_array.length==2)
+                        {
+                            $(".keyw_parent").val(val_array[0]);
+                            $(".keyw_add_value").val(val_array[1]);
+							$(".keyw_edit_value").val(val_array[1]);
+                            $(".callback_add_action").val("record_edition");
+                             $("#change_parent").show();
+							if(val_array[0]==val_array[1])
+							{
+								is_parent_element=true;
+							}
+							else
+							{
+								is_parent_element=false;
+							}
+                        }
+                        else
+                        {
+                            $(".keyw_parent").val("ERROR");
+                            $(".keyw_add_value").val("ERROR");
+							$(".keyw_edit_value").val("ERROR");
+                            $(".callback_add_action").val("ERROR");
+                        }
+                    }	
+				)
+    });   
+        
+    
+    
+
+    var init_tree=function(keyw, checkbox)
+    {
+        console.log("CALL");
+         console.log(keyw);
+        
+            
+            if(keyw.length>0)
+            {
+                ft_url_sub=ft_url+"?keyword="+keyw;
+            }
+            else
+            {
+                 ft_url_sub=ft_url+"?expanded=false";
+            }
+            if(!checkbox)
+            {
+                ft_url_sub=ft_url_sub+"&checkbox=false";
+                global_checkbox=false;
+            }
+            console.log(ft_url_sub)
+			
+            $("#tree").fancytree(
+			{
+              checkbox: global_checkbox,
+              selectMode: 3,
+              source: {
+                url:
+                  ft_url_sub,
+                   cache: false
+              },
+              select: function(event, data) {
+                console.log("expanded");
+              },
+              click: function(event, data) {
+                var node = data.node;
+                var val=node["key"];
+			    console.log("Selected");
+				console.log(val);                
+              },
+			  init:function(event, data)
+			  {
+				console.log("loaded");				
+               
+               }
+			  ,
+			  renderNode: function (event, data) {
+					var node = data.node;
+					var $nodeSpan = $(node.span);
+
+					// check if span of node already rendered
+					if (!$nodeSpan.data('rendered')) {
+
+						
+						var addButton = $('<button  type="button" class="btn btn-add" value="'+node.key+'"  data-bs-toggle="modal" data-bs-target="#modaladd">add node</button>');
+						var moveButton = $('<button type="button" class="btn btn-move" value="'+ node.data["wordfather"] + "_PARENT_" +node.key+'" data-bs-toggle="modal" data-bs-target="#modaladd" >modify</button>');
+                        var deleteButton = $('<button type="button" class="btn btn-delete" value="'+node.key+'" data-bs-toggle="modal" data-bs-target="#modaldelete"  >delete node</button>');
+						
+						
+						$nodeSpan.append(addButton);
+						$nodeSpan.append(moveButton);
+                        $nodeSpan.append(deleteButton);
+						
+						deleteButton.hide();
+						addButton.hide();
+						moveButton.hide();
+
+						$nodeSpan.hover(function () {
+							// mouse over							
+							deleteButton.show();
+							addButton.show();
+							moveButton.show();
+
+						}, function () {
+
+							// mouse out							
+							deleteButton.hide();
+							addButton.hide();
+							moveButton.hide();
+						})
+
+						// span rendered
+						$nodeSpan.data('rendered', true);
+                        
+					}
+				}
+            });
+    }
+    
+
+	$(document).ready(
+
+		function()
+		{	
+            $("#search_key").select2(select2_generic_full("{{ path('search_all_keywords_full_autocomplete')}}","word","word" ),0, false);
+            var keyw_main=get_param( "keyword", document.location.search );
+            var checkbox_p=get_param( "checkbox", document.location.search );
+            checkbox=true;
+            console.log("check");
+            console.log(checkbox_p.toLowerCase());
+            if(checkbox_p.length>0)
+            {                
+                if(checkbox_p.toLowerCase()=="false")
+                {
+                     console.log("set_false");
+                    checkbox=false;
+                }
+            }
+            
+            console.log(checkbox);
+            if(keyw_main.length>0)
+            {
+                console.log("INIT_GET");
+                $("#search_key").val(keyw_main);
+                init_tree($("#search_key").val(),checkbox);
+            }
+            else
+            {
+                init_tree("",checkbox);
+            }
+            
+            $("#submit_key").click(
+                function()
+                {
+                   reload_tree($("#search_key").val());
+                }
+            );
+			
+			$("#root_key").click(
+                function()
+                {
+                   reload_tree("");
+				   $("#search_key").val("");
+				  
+                }
+            );
+			
+			$("#search_key").keypress(function(event) {
+            if (event.keyCode === 13) {
+			    console.log("submit");
+                $("#submit_key").click();
+            }
+			 });
+			 
+			 
+			 $("#search_key").change(function(event) {
+            
+			    console.log("submit");
+               //reload_tree($("#search_key").val());
+            
+			 });
+			 
+             
+             {% if modal_mode=="show_add" %}
+			        console.log("RECURS");
+					 console.log("{{ parent }}");
+                   $("#modaladd").modal('show');
+				   $(".keyw_parent").val("{{ parent }}");
+             {% endif %}
+             {% if modal_mode=="show_delete" %}
+                   $("#modaldelete").modal('show');
+             {% endif %}
+             
+			
+            $('.modal_form').on('submit', function() {
+				$().on(
+					'hide-bs-modal', function(e)
+					{
+						console.log("A");
+						/*$(".modal_keyword").on('hide.bs.modal',
+							function(e)
+							{
+							console.log("B");
+								e.preventDefault();
+							}
+						);*/
+					}
+				);
+			});
+        
+        $(".remove_add").click(
+            function()
+            {                
+                $(".keyw_parent").val("");
+                $(".keyw_value").val("");
+				//bug because modal in modal
+				$('.modal-backdrop').remove();
+            }
+        );
+        
+        
+        $("#b_change_parent").click(
+                function()
+                {
+                    console.log("browse");
+                }
+            );
+			
+		$("#b_set_root").click(
+                function()
+                {
+                     $(".keyw_parent").val($(".keyw_add_value").val()); 
+                }
+            );
+        
+        /*onElementInserted('body', '.dismiss_modal', function(element) {        
+            $(element).click(
+                function()
+                {
+                    console.log("hide validation");
+                    show_validation_msg=false;
+                    $(".validation_message").hide();
+                }
+            );
+            }
+        );
+        
+       onElementInserted('body', '.reenable_modal', function(element) {        
+            $(element).click(
+                function()
+                {
+                    console.log("show validation");
+                    show_validation_msg=true;
+                    $(".validation_message").show();
+                }
+            );
+            }
+        );*/
+        
+        {% if callback_action=="display_new_data" and term|length > 0 %}
+                                   
+               var option = new Option("{{ term }}", "{{ term }}", true, true);                  
+               $("#search_key").append(option).trigger('change');
+               reload_tree("{{ term }}"); 
+                $(".keyw_value").val("");               
+         {% endif %}
+            
+            
+            
+        }
+      );
+      
+       $("#add_root").click(
+					function()
+					{			
+                        root_mode=true;                  
+                        $(".callback_add_action").val("record_creation");
+						$(".keyw_add_value").val("")
+                        $("#change_parent").hide();
+					}	
+				);
+                
+       $(".keyw_add_value").change(
+            function()
+            {
+                if(root_mode||is_parent_element)
+                {
+                   $(".keyw_parent").val($(".keyw_add_value").val()); 
+                }
+            }
+       );          
+	  
+	  
+</script>
+{% endblock %}

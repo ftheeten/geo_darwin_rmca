@@ -1,0 +1,126 @@
+{# src/AppBundle/Resources/views/viewdoc.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	<Table width="100%" class="table_edit" >
+		<tr>
+			<TH class="title_table_edit" width="100%" colspan = "8">
+				Documents
+			</TH>
+		</tr>
+
+		<tr>
+			<th width = "8%"  style="text-align:right">
+				Collection:
+			</th>
+			<td width = "8%">
+				{{ddocument.idcollection}}
+			</td>
+			<th width = "8%" style="text-align:right">
+				ID :
+			</th>
+			<td  width = "8%">
+				{{ddocument.iddoc}}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Archive mumber:
+			</th>
+			<td  width = "8%">
+				{{ddocument.numarchive}}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Central mumber:
+			</th>
+			<td  width = "45%">
+				{{ddocument.centralnum}}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Filename:
+			</th>
+			<td >
+				{{ddocument.filename}}
+			</td>
+			<th style="text-align:right">
+				Caption:
+			</th>
+			<td >
+				{{ddocument.caption}}
+			</td>
+			<th style="text-align:right">
+				Medium:
+			</th>
+			<td  colspan = "3">
+				{{ddocument.medium.medium}}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Location:
+			</th>
+			<td >
+				{{ddocument.location}}
+			</td>
+			<th style="text-align:right">
+				Numerical location:
+			</th>
+			<td  colspan = "5">
+				{{ddocument.numericallocation}}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Document information:
+			</th>
+			<td  colspan = "4">
+				{{ddocument.docinfo}}
+			</td>
+			<td  colspan = "3">
+				
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Edition:
+			</th>
+			<td >
+				{{ddocument.edition}}
+			</td>
+			<th style="text-align:right">
+				Publication place:
+			</th>
+			<td >
+				{{ddocument.pubplace}}
+			</td>
+			<th style="text-align:right">
+				Document type:
+			</th>
+			<td  colspan = "3">
+				{{ddocument.doccartotype}}
+			</td>
+		</tr>
+	</Table>
+	<BR/>
+	<p>
+		<input type="button" onclick="editdoc()" value="Edit document" onmouseover="" style="cursor: pointer;"> 
+	</p>
+	
+		
+	<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+	<script type="text/javascript">
+		function editdoc() {
+			var url = '{{ path("app_edit_doc", {'pk': 'article_id'}) }}'; 
+			url = url.replace("article_id", "{{ddocument.pk}}");
+			window.location = url;
+		}
+	</script>
+{% endblock %}

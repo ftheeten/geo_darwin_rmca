@@ -1,0 +1,29 @@
+AppBundle\Entity\Dgestionnaire:
+    type: entity
+    table: dgestionnaire
+    uniqueConstraints:
+        dgestionnaire_unique:
+            columns:
+                - idencodeur
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        idencodeur:
+            type: smallint
+            nullable: false
+            options:
+                unsigned: false
+        people:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+    lifecycleCallbacks: {  }

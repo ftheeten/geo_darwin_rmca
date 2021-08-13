@@ -1,0 +1,49 @@
+<div class="modal fade modal_keyword" id="modaladd" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" style="z-index:1000000000">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="modal_add_content">
+            <div class="modal-header">
+                ADD KEYWORD
+                {{ include("@App/validation_errors.html.twig", {'local_form' : form})  }}
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12" id="parent_for_add">
+						{{ parent }}
+						{{ mode }}
+                            Parent : 
+                            {% if mode=="creation" %}
+                                {% set default_parent = parent %}
+                            {% else %}
+                                {% set default_parent = '' %}
+                            {% endif %}                        
+                             {{ form_widget(form.wordfather, {'attr': {'class': 'keyw_parent', 'value':default_parent, 'readonly':true}}) }}
+                             {{ form_widget(form.callback_action, {'attr': {'class': 'callback_add_action', 'value': callback_action, 'readonly':true}}) }}
+                             <div id="change_parent">
+                             <button type="button" class="btn btn-secondary" id="b_change_parent"
+                                data-bs-dismiss="modal" data-bs-toggle="modal"
+                                data-bs-target="#modalbrowse"
+                             >Change parent</button>
+							 <button type="button" class="btn btn-secondary" id="b_set_root"
+                                
+                             >Set root</button>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12" id="parent_for_add">
+                            Value : 
+                             {{ form_widget(form.wordson, {'attr': {'class': 'keyw_add_value'}}) }}
+							 {{ form_widget(form.wordson_edit, {'attr': {'class': 'keyw_edit_value', 'readonly':true}}) }}
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            <div class="modal-footer">
+                  <input type="submit" class="createButton" />
+                  <button type="button" class="btn btn-secondary remove_add" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>    
+</div>

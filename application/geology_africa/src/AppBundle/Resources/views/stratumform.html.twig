@@ -1,0 +1,130 @@
+{# src/AppBundle/Resources/views/stratumform.html.twig #}
+{{ form_start(stratum_form, {'attr': {'class': 'form-horizontal','id': 'stratum_form'}}) }}
+
+	<table class="ui-front table_edit">
+		<TR>
+			<TH class="title_table_edit" width="100%" colspan = "6">
+				Stratum
+			</TH>
+		</TR>
+		<TR>
+			<TD>
+				<Table width="100%">
+					<TR>
+						<th width = "12%"  style="text-align:right">
+							Collection:
+						</th>
+						<td width = "12%">
+							{% if dloclitho.pk != "" %}
+								{{dloclitho.idcollection}}
+							{% else %}
+								{{ form_widget(stratum_form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
+							{% endif %}
+						</td>
+						<th width = "12%" style="text-align:right">
+							Location ID:
+						</th>
+						<td  width = "12%">
+							{% if dloclitho.pk != "" %}
+								{{dloclitho.idpt}}
+							{% else %}
+								{{ form_widget(stratum_form.idpt, {'attr': {'class': 'form-control inp_PointID vshortlength'}}) }}
+								{{ form_errors(stratum_form.idpt) }}
+							{% endif %}
+						</td>
+
+						<th width = "15%"  style="text-align:right">
+							Stratum ID:
+						</th>
+						<td  width = "65%">
+							{% if dloclitho.pk != "" %}
+								{{dloclitho.idstratum}}
+							{% else %}
+								{{ form_widget(stratum_form.idstratum, {'attr': {'class': 'form-control inp_Idstratum vshortlength'}}) }}
+								{{ form_errors(stratum_form.idstratum) }}
+							{% endif %}
+						</td>
+					</tr>
+					<TR>
+						<th  style="text-align:right">
+							Lithostratum:
+						</th>
+						<td colspan = "5">
+							{{ form_widget(stratum_form.lithostratum, {'attr': {'class': 'form-control inp_Lithostratum shortlength'}}) }}
+							{{ form_errors(stratum_form.lithostratum) }}
+						</td>
+					</tr>
+					<TR>
+						<th  style="text-align:right">
+							Top stratum:
+						</th>
+						<td>
+							{{ form_widget(stratum_form.topstratum, {'attr': {'class': 'form-control inp_Topstratum vshortlength'}}) }}
+							{{ form_errors(stratum_form.topstratum) }}
+						</td>
+						<th  style="text-align:right">
+							Bottom stratum:
+						</th>
+						<td colspan = "3">
+							{{ form_widget(stratum_form.bottomstratum, {'attr': {'class': 'form-control inp_Bottomstratum vshortlength'}}) }}
+							{{ form_errors(stratum_form.bottomstratum) }}
+						</td>
+					</tr>
+					<TR>
+						<th  style="text-align:right">
+							Alternance:
+						</th>
+						<td colspan = "5">
+							<input type="radio" id="false" name="alternance" class="alternance"  value="False" checked="checked"> No
+							<input type="radio" id="true" name="alternance" class="alternance"  value="True"> Yes
+							<div style="display:none" >
+								<input id="aappbundle_dloclitho_alternance" name="aappbundle_dloclitho_alternance" class="aappbundle_dloclitho_alternance" > 
+							</div> 
+						</td>
+					</tr>
+					<TR>
+						<th  style="text-align:right">
+							Description:
+						</th>
+						<td colspan = "5">
+							{{ form_widget(stratum_form.descriptionstratum , {'attr': {'class': 'form-control inp_Descriptionstratum  mediumlength'}}) }}
+							{{ form_errors(stratum_form.descriptionstratum ) }}
+						</td>
+					</tr>
+					<tr>
+						<TD> .</TD>
+					</TR>
+				</Table>
+			</TD>
+		</TR>
+			
+		<TR>
+			<TD>
+			<input type="submit" class="btn btn-default pull-right submitbutton" />
+				<div class="alert_message"></div>
+			</TD>
+		</TR>
+	</Table>
+{{ form_end(stratum_form) }}
+
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">   
+<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/core.js') }}"></script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		//show message saying that data is in DB, during 4 sec. Msg comes from controller
+		setTimeout(function() { 
+			{% for msg in app.flashes('success') %}
+			$(".alert_message").html("{{ msg }}");
+			$(".alert_message").fadeOut(2000); 
+			{% endfor %}
+		},1000); 
+		
+		$('.alternance').change(function () {
+            $(".aappbundle_dloclitho_alternance").val($("input[name='alternance']:checked").val());
+        });	
+	});
+</script>

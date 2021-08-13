@@ -1,0 +1,93 @@
+AppBundle\Entity\Duser:
+    type: entity
+    table: duser
+    uniqueConstraints:
+        duser_unique:
+            columns:
+                - id
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        id:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+                default: '0'
+        username:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+        usernamecanonical:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+        email:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        emailcanonical:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        enabled:
+            type: boolean
+            nullable: false
+        salt:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        password:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+        plainpassword:
+            type: string
+            nullable: false
+            length: null
+            options:
+                fixed: false
+        lastlogin:
+            type: datetime
+            nullable: true
+        confirmationtoken:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        passwordrequestedat:
+            type: datetime
+            nullable: true
+        groups:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        roles:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+    lifecycleCallbacks: {  }

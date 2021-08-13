@@ -1,0 +1,38 @@
+{# extends "@FOSUser/layout.html.twig" #}
+{# /var/www/html/geology_africa/app/Resources/FOSUserBundle/views/Registration/confirmed.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% block fos_user_content %}
+		<Table  class="table_edit" >
+			<tr>
+				<th class="title_table_edit">
+					Registration confirmed
+				</th>
+			</tr>
+			<TR> 
+				<TH width="10%">
+					{{ 'registration.confirmed'|trans({'%username%': user.username}) }}
+				</TH>
+			</TR>
+			<!--{ % if targetUrl %}
+				<TR>
+					<TH>
+						<a href="{{ targetUrl }}">{{ 'registration.back'|trans }}</a></p>
+					</TH>
+				</TR>
+			{ % endif %}-->
+		</Table>
+		<BR/>
+		<input class="btn btn-primary" type="button" value="" />
+		
+	{% endblock fos_user_content %}
+{% endblock %}
+

@@ -1,0 +1,23 @@
+<script>
+
+</script>
+<div class="modal fade modal_browse_keyword" id="modalbrowse" tabindex="-1" role="dialog" aria-labelledby="browseModalLabel" aria-hidden="true" style="z-index:1000000000">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" id="modal_browse_content">        
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row ">
+                        <div class="col-sm-12">
+							{% set nested_template = nested_francytree|default("@App/keywords/keyword_search_raw.html.twig") %}
+                            {% include nested_template with {'checkbox' : 'false', 'modal_bs' : '#modalbrowse'} %}
+                        </div>
+                    </div>                    
+                </div>
+            </div>    
+            <div class="modal-footer">                  
+                  <button type="button" class="btn btn-secondary close-search-keyword" data-bs-dismiss="modal" data-bs-dismiss="modal" data-bs-toggle="modal"
+                                data-bs-target="#modaladd"   data-bs-backdrop="false" >Close</button>
+            </div>
+        </div>
+    </div>    
+</div>

@@ -1,0 +1,139 @@
+{# src/AppBundle/Resources/views/userview.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% trans_default_domain 'FOSUserBundle' %}
+	<Table width="100%" class="table_edit" >
+		<tr>
+			<th class="title_table_edit" width="100%" colspan=8>
+				User
+			</th>
+		</tr>
+		<TR>
+			<TD width="5%">
+				<B>ID: </B>
+			</TD>
+			<TD width="20%">
+				{{ duser.id}}
+			</TD>
+			<TD width="5%">
+				<B>{{ 'form.username'|trans }}: </B>
+			</TD>
+			<TD width="10%">
+				{{duser.username}}
+			</TD>
+			<TD width="10%">
+				<B>{{ 'form.firstname'|trans }}: </B>
+			</TD>
+			<TD width="20%">
+				{{ duser.firstName}}
+			</TD>
+			<TD width="15%">
+				<B>{{ 'form.lastname'|trans }}: </B>
+			</TD>
+			<TD width="20%">
+				{{ duser.lastName}}
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<B>{{ 'form.email'|trans }}: </B>
+			</TD>
+			<TD>
+				{{ duser.email}}
+			</TD>
+			<TD>
+				<B>{{ 'form.enabled'|trans }}: </B>
+			</TD>
+			<TD>
+				{% if duser.enabled == 1 %}
+					{{ 'form.yes'|trans }}
+				{%else %}
+					{{ 'form.no'|trans }}
+				{% endif %}
+			</TD>
+			<TD>
+				<B>{{ 'form.lastlogin'|trans }}: </B>
+			</TD>
+			<TD>
+				{{ duser.lastLogin|date('d-m-Y H:i:s')}}
+			</TD>
+			<TD>
+				<B>{{ 'form.passwordrequestedat'|trans }}: </B>
+			</TD>
+			<TD>
+				{{ duser.passwordRequestedAt}}
+			</TD>
+		</TR>
+		<TR>
+			<TH colspan="8"></TH>
+		</TR>
+		<TR>
+			<TH width="10%">
+				{{ 'form.role'|trans }}:
+			</TH>
+			<TD colspan="7">
+				{{ duser.roles[0] }}
+			</TD>
+		</TR>
+		<TR>
+			<TH colspan="8"></TH>
+		</TR>
+		<TR>
+			<TH width="10%">
+				{{ 'form.roles'|trans }}:
+			</TH>
+			<TD colspan="7">
+				{% if roles|length >= 1 %}
+					<table border="1">
+						<TR bgcolor="#F9E3B6">
+
+							<TH width="10%">
+								Code
+							</TH>
+							<TH width="20%">
+								Collection
+							</TH>
+							<TH width="15%">
+								Role
+							</TH>
+						</TR>
+						{% for role in roles %}
+							<TR>
+			
+								<TH>
+									{{role.codecollection}}
+								</TH>
+								<TH>
+									{{role.collection}}
+								</TH>
+								<TH>
+									{{role.role}}
+								</TH>
+							</TR>
+						{% endfor %}
+					</table>
+				{% else %}
+					No roles
+				{% endif %}	
+			</TD>
+		</TR>
+
+	</Table>
+	<BR/>
+	<input type="button" onclick="edituser({{ duser.id}})" value="Edit user" onmouseover="" style="cursor: pointer;"> 
+	<a href="{{ path('app_list_users')}}"><input type="button" value="Back to user list" onmouseover="" style="cursor: pointer;"> </a>
+	
+	<script type="text/javascript">	
+		function edituser(id) {
+			var url = '{{ path("app_edit_profile", {'id': 'article_id'}) }}'; 
+			url = url.replace("article_id", id);
+			window.location = url;
+		}
+	</script>
+{% endblock %}

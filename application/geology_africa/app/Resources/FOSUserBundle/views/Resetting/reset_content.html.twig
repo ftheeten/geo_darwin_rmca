@@ -1,0 +1,29 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+{{ form_start(form, { 'action': path('fos_user_resetting_reset', {'token': token}), 'attr': { 'class': 'fos_user_resetting_reset' } }) }}
+   <!-- {  form_widget(form) }} -->
+	<Table  class="table_edit" >
+		<tr>
+			<th class="title_table_edit"  colspan=5>
+				Reset
+			</th>
+		</tr>
+		<TR>
+			<TH>
+				{{ form_label (form.plainPassword.first) }}   
+			</TH>
+			<TH>
+				{{ form_widget (form.plainPassword.first) }}  
+			</TH>
+			<TH>
+				{{ form_label (form.plainPassword.second) }}   
+			</TH>
+			<TH colspan=2>
+				{{ form_widget (form.plainPassword.second) }}
+			</TH>
+		</TR>
+	</Table>
+	<BR/>
+    <input type="submit" value="{{ 'resetting.reset.submit'|trans }}" />
+    
+{{ form_end(form) }}

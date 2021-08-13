@@ -1,0 +1,76 @@
+{# src/AppBundle/Resources/views/foreignkeys/template_subforms.html.twig #}
+<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/core.js') }}"></script>
+
+{% set nested_template = nested_template %}
+
+{% set fk_len = fk_values | length %}
+{{ fk_len }}
+<div class="{{ ctrl_prefix }}_placeholder" >
+	<ul id="{{ ctrl_prefix }}_list">
+				</ul>
+</div>
+<button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_add">Add</button>
+<button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_remove"">Remove</button>
+<script type="text/javascript">
+var nb_ctrls_{{ ctrl_prefix }}=0;
+	
+$(document).ready(
+	function()
+	{
+		$("#b_{{ ctrl_prefix }}_add").click(
+            function()
+            {
+                nb_ctrls_{{ ctrl_prefix }}++;
+				current_class=nb_ctrls_{{ ctrl_prefix }};
+				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_'+ nb_ctrls_{{ ctrl_prefix }} +'"></div></ul>');
+				jQuery.get("{{ ajax_route }}",
+					{
+						index:nb_ctrls_{{ ctrl_prefix }}
+					},
+					function(result)
+					{
+						$('.widget_subform_'+ nb_ctrls_{{ ctrl_prefix }} ).html(result);
+					}
+				);
+				
+				console.log(nb_ctrls_{{ ctrl_prefix }});
+            }
+        );
+		
+		$("#b_{{ ctrl_prefix }}_remove").click(
+            function()
+            {
+			   if(nb_ctrls_{{ ctrl_prefix }}>0)
+			   {
+				nb_ctrls_{{ ctrl_prefix }}--;
+				current_class=nb_ctrls_{{ ctrl_prefix }};
+				$('#{{ ctrl_prefix }}_list ul:last-child').remove();
+				
+			   }
+			   console.log(nb_ctrls_{{ ctrl_prefix }});
+            }
+        );
+		
+		{% if fk_len >0 %}
+			{% set i=1 %}
+			{% for val in fk_values %}
+				{% set i=i+ 1 %}
+				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_'+{{ i }} +'"></div></ul>');
+				jQuery.get("{{ ajax_route }}",
+					{
+						index:{{ i }},
+						default_val: "{{ val }}"
+					},
+					function(result)
+					{
+						$('.widget_subform_'+ {{ i }} ).html(result);
+					}
+				);
+			{% endfor %}
+			 nb_ctrls_{{ ctrl_prefix }}={{ i }};
+		{% endif %}
+	}
+);
+</script>

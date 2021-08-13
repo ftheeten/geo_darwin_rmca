@@ -1,0 +1,85 @@
+AppBundle\Entity\Dlocdrilling:
+    type: entity
+    table: dlocdrilling
+    uniqueConstraints:
+        dlocdrilling_unique:
+            columns:
+                - idcollection
+                - idpt
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        idcollection:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        idpt:
+            type: integer
+            nullable: true
+            options:
+                unsigned: false
+        drilling:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        diameter:
+            type: decimal
+            nullable: true
+            precision: 18
+            scale: 2
+        unitdiameter:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        waterflow:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        restingwater:
+            type: boolean
+            nullable: true
+        depthwatertable:
+            type: decimal
+            nullable: true
+            precision: 18
+            scale: 2
+        infowater:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        infodrilling:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+    manyToOne:
+        idcollection:
+            targetEntity: Dloccenter
+            cascade: {  }
+            fetch: LAZY
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                idcollection:
+                    referencedColumnName: idcollection
+                idpt:
+                    referencedColumnName: idpt
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

@@ -1,0 +1,70 @@
+AppBundle\Entity\Lminerals:
+    type: entity
+    table: lminerals
+    uniqueConstraints:
+        fmnameunique:
+            columns:
+                - fmname
+        lminerals_unique:
+            columns:
+                - idmineral
+        mnameunique:
+            columns:
+                - mname
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        idmineral:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+        rank:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        fmname:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        mname:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        mformula:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        fmparent:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        mparent:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        id:
+            type: integer
+            nullable: true
+            options:
+                unsigned: false
+    lifecycleCallbacks: {  }

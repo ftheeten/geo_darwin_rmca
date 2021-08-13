@@ -1,0 +1,354 @@
+{# src/AppBundle/Resources/views/viewpoint.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	<table class="ui-front table_edit">
+		<tr>
+			<TH class="title_table_edit" width="100%" colspan = "6">
+				Location points
+			</TH>
+		</tr>
+		<tr>
+			<th width = "12%"  style="text-align:right">
+				Collection:
+			</th>
+			<td width = "12%">
+				{{dloccenter.idcollection}}
+			</td>
+			<th width = "12%" style="text-align:right">
+				ID :
+			</th>
+			<td  width = "12%">
+				{{dloccenter.idpt}}
+			</td>
+
+			<th width = "15%"  style="text-align:right">
+				Field number:
+			</th>
+			<td  width = "65%">
+				{{dloccenter.fieldnum}}
+			</td>
+		</tr>
+		<tr>
+			<TH  style="text-align:right">
+				Place:
+			</TH>
+			<td >
+				{{dloccenter.place}}
+			</td>
+			<TH  style="text-align:right">
+				Country:
+			</TH>
+			<td >
+				{{dloccenter.country}}
+			</td>
+			<TH  style="text-align:right">
+				Doc reference:
+			</TH>
+			<td>
+				{{dloccenter.docref}}
+			</td>
+		</tr>
+		<tr>
+			<TH  style="text-align:right">
+				Date:
+			</TD>
+			<td  colspan = "5">
+				{{dloccenter.date|date('d-m-Y')}}
+			</td>
+		</tr>
+		<tr>
+			<TH  style="text-align:right" valign="top">
+				Geographical description:
+			</TD>
+			<td  valign="top">
+				{{dloccenter.geodescription}}
+			</td>
+			<TH  style="text-align:right" valign="top">
+				Description of the position:
+			</TD>
+			<td  colspan = "3"  valign="top">
+				{{dloccenter.positiondescription}}
+			</td>
+		</tr>
+		<tr>
+			<TH  style="text-align:right" valign="top">
+				Various info:
+			</TD>
+			<td  colspan = "5" valign="top">
+				{{dloccenter.variousinfo}}
+			</td>
+		</tr>
+		<tr>
+			<TH  style="text-align:right">
+				Precision:
+			</TD>
+			<TD colspan = "5">
+				{% if dloccenter.idprecision is not null  %}
+					{{dloccenter.idprecision.precision}}
+				{% endif %}
+			</TD>
+		</tr>
+	</table">
+	<table class="ui-front table_edit">
+		<tr>
+			<TD>
+				<table>
+					<tr>
+						<TH  style="text-align:right"> 
+							Latitude:
+						</TH>
+						<td>
+							{{dloccenter.coordlat}}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Longitude:
+						</TH>
+						<td>
+							{{dloccenter.coordlong}}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right" >
+							WKT:
+						</TH>
+						<td>
+							{{dloccenter.wkt}}
+						</td>
+					</tr>
+					<!--<tr>
+						<TH  style="text-align:right" >
+							Original_coordinates:
+						</TH>
+						<td>
+							{{dloccenter.originalcoord}}
+						</td>
+					</tr>-->
+					<tr>
+						<TH  style="text-align:right">
+							EPSG : 
+						</TH>
+						<td>
+							{{dloccenter.epsg}}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Altitude:
+						</TH>
+						<td  colspan="3">
+							{{dloccenter.altitude}}m
+						</td>
+					</tr>
+				</table>
+			</TD>
+			<td>
+				<table>
+					<tr>
+						<td colspan="4" id="ol_map">
+							<style >
+								p.collapse{
+									display:none;
+								}
+							</style>
+							<div  style="width:700px;height:400px;" id="map" class="map"></div>
+							<div id="mouse-position"></div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4">
+							 <select id="layer-select">
+								<option value="Road">Road</option>
+								<option value="Aerial">Aerial</option>
+								<option value="AerialWithLabels">Aerial with labels</option>
+							 </select>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<BR/>
+	<p>
+		<input type="button" onclick="editpoint()" value="Edit location" onmouseover="" style="cursor: pointer;"> 
+	</p>
+	
+	<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+	<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/css/ol.css" type="text/css">
+
+	<script type="text/javascript">
+		var p_data_epsg;
+		var p_proj_epsg = 'EPSG:3857';
+		
+		$(document).ready(function() {
+			if ('{{dloccenter.epsg}}' == ""){
+				p_data_epsg= 'EPSG:4326';
+			}else{
+				if ('{{dloccenter.epsg}}'.indexOf("EPSG") >= 0){
+					p_data_epsg= '{{dloccenter.epsg}}';
+				}else{
+					p_data_epsg= 'EPSG:{{dloccenter.epsg}}';
+				}
+			}
+			drawmap();
+			
+			if('{{dloccenter.wkt}}'.length > 0 && p_data_epsg.length > 0){
+				draw_wkt('{{dloccenter.wkt}}', p_data_epsg);
+			}
+		});
+		
+		var iLayer=0;
+		var styleWKT= new ol.style.Style({
+		  fill: new ol.style.Fill({
+			color: 'rgba(255, 255, 255, 0.2)'
+		  }),
+		  stroke: new ol.style.Stroke({
+			color: '#ffcc33',
+			width: 4
+		  }),
+		  image: new ol.style.Circle({
+			radius: 7,
+			fill: new ol.style.Fill({
+			  color: '#ffcc33'
+			})
+		  })
+		});
+		
+		function draw_wkt(p_featureWKT, p_epsg){
+			var format = new ol.format.WKT();
+			var featureWKT = format.readFeature(p_featureWKT, {
+					dataProjection: p_epsg,
+					featureProjection: p_proj_epsg
+				});
+			addDarwinLayer(featureWKT,"from values");	
+		}
+	
+		function addDarwinLayer(feature,origininput){
+			 var tmp_geom;
+			 valueType = feature.getGeometry().getType();
+			 switch (valueType)	{
+				case "Point":
+					tmp_geom=new ol.geom.Point(feature.getGeometry().getCoordinates());
+					generic_feature = new ol.Feature({geometry: tmp_geom});
+					break;
+				case "LineString":
+					tmp_geom=new ol.geom.LineString(feature.getGeometry().getCoordinates());
+					generic_feature = new ol.Feature({geometry: tmp_geom});
+					break;
+				case "Polygon": 
+				   tmp_geom=new ol.geom.Polygon(feature.getGeometry().getCoordinates());
+				   generic_feature = new ol.Feature({geometry: tmp_geom});
+				   break;
+				case "Circle": 
+				   tmp_geom=new ol.geom.Circle(feature.getGeometry().getCoordinates());
+				   generic_feature = new ol.Feature({geometry: tmp_geom});
+				   break;
+				 default :
+					generic_feature=feature;
+					tmp_geom=generic_feature.getGeometry();				
+					break;
+			}
+			 
+			var tmpSource=new ol.source.Vector();
+			tmpSource.addFeature(generic_feature);
+			iLayer++;
+			vectorlayer_local = new ol.layer.Vector({
+						name: iLayer,
+						source: tmpSource,
+						style: styleWKT	});
+
+			map.addLayer(vectorlayer_local);
+			map.getView().fit(vectorlayer_local.getSource().getExtent());
+			map.getView().setZoom(7);
+			vectorLoaded=true;		
+		}
+
+		function drawmap(){
+			mousePositionControl= new ol.control.MousePosition({
+				coordinateFormat: ol.coordinate.createStringXY(4),
+				projection:p_data_epsg,
+				className: "custom-mouse-position",
+				target: document.getElementById("mouse-position"),
+				undefinedHTML: "&nbsp;"
+			});
+			scaleLineControl = new ol.control.ScaleLine();
+
+			styleLine= new ol.style.Style({
+			  fill: new ol.style.Fill({
+				color: 'rgba(255, 255, 255, 0.2)'
+			  }),
+			  stroke: new ol.style.Stroke({
+				color: '#ffcc33',
+				width: 4
+			  }),
+			  image: new ol.style.Circle({
+				radius: 7,
+				fill: new ol.style.Fill({
+				  color: '#ffcc33'
+				})
+			  })
+			})
+			
+			source = new ol.source.Vector();
+			vectorlayer = new ol.layer.Vector({
+				source: source,
+				style:styleLine
+			});
+
+			var styles = [
+				'Road',
+				'Aerial',
+				'AerialWithLabels'
+			  ];
+			var layers = [];
+			var i, ii;
+			for (i = 0, ii = styles.length; i < ii; ++i) {
+				layers.push(new ol.layer.Tile({
+					visible: false,
+					preload: Infinity,
+					source: new ol.source.BingMaps({key: "Ai1X7hw9LHgPPF9BdnfLC2tTfhi5izHhCWJ4DCqREjqHBvDCsnBOfj3G3aCyoNwx",imagerySet: styles[i]  })
+				}));
+			}
+
+			layers [styles.length] = vectorlayer;
+			proj="";
+			map = new ol.Map({
+					target: 'map',
+					layers: layers,
+					view: new ol.View({
+						projection:proj,
+						center: ol.proj.fromLonLat(['{{dloccenter.coordlong}}','{{dloccenter.coordlat}}']),
+						zoom: 7
+					}),
+					controls: ol.control.defaults({
+							attributionOptions: ({collapsible: false})
+					}).extend([mousePositionControl, scaleLineControl ])
+			});
+
+			var select = document.getElementById('layer-select');
+			function onChange() {
+				var style = select.value;
+				for (var i = 0, ii = layers.length; i < ii; ++i) {
+				  layers[i].setVisible(styles[i] == style);
+				}
+			}
+			select.addEventListener('change', onChange);
+			onChange();
+			autoDraw=true;
+		}
+	
+		function editpoint() {
+			var url = '{{ path("app_edit_point", {'pk': 'article_id'}) }}'; 
+			url = url.replace("article_id", "{{dloccenter.pk}}");
+			window.location = url;
+		}
+	</script>
+{% endblock %}

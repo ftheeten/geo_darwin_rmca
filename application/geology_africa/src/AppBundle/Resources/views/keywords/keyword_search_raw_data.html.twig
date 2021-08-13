@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/keywords/keyword_search_raw.html.twig #}
+{% block javascripts %}
+     <link rel="stylesheet" href="{{ asset('css/main.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ asset('css/menu.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ asset('js/bootstrap/css/bootstrap.min.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ asset('js/select2/css/select2.min.css') }}" type="text/css"/>
+    <script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+    <script src="{{ asset('js/bootstrap/js/bootstrap.min.js') }}"></script>
+    <link href="{{asset('js/fancytree/dist/skin-win8/ui.fancytree.css')}}" rel="stylesheet" />
+    <script src="{{asset('js/fancytree/dist/jquery.fancytree-all-deps.min.js')}}"></script>
+    <script src="{{ asset('js/select2/js/select2.full.min.js') }}"></script>
+    <script src="{{asset('js/core.js')}}"></script>
+	<script src="{{asset('js/fancy_tree_callback_form.js')}}"></script>
+{% endblock %}
+
+{% block fancytree %}
+
+
+{% endblock %}
+{% block body %}
+ {{ include("@App/keywords/keyword_search_raw_kern.html.twig") }}
+{% endblock %}

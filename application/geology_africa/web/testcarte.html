@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Test carte</title>
+
+    <style>
+      .map {
+        width: 100%;
+        height:400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+      <label for="type">Geometry type &nbsp;</label>
+      <select id="type">
+        <option value="Point">Point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+        <option value="Circle">Circle</option>
+      </select>
+    </form>
+	
+	<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/css/ol.css" type="text/css">
+
+	<script>
+		var vectorLoaded =false;
+		var map;
+		var iLayer = 0;
+		var draw, snap; // global so we can remove them later
+		var typeSelect = document.getElementById('type');
+
+		var raster = new ol.layer.Tile({
+			visible: false,
+			preload: Infinity,
+			source: new ol.source.BingMaps({key: "Ai1X7hw9LHgPPF9BdnfLC2tTfhi5izHhCWJ4DCqREjqHBvDCsnBOfj3G3aCyoNwx",imagerySet: 'Aerial'  })
+		});
+
+		var source = new ol.source.Vector();
+		var vector = new ol.layer.Vector({
+		  source: source,
+		  style: new ol.style.Style({
+			fill: new ol.style.Fill({
+			  color: 'rgba(255, 255, 255, 0.2)',
+			}),
+			stroke: new ol.style.Stroke({
+			  color: '#ffcc33',
+			  width: 2,
+			}),
+			image: new ol.style.Circle({
+			  radius: 7,
+			  fill: new ol.style.Fill({
+				color: '#ffcc33',
+			  }),
+			}),
+		  }),
+		});
+
+		function drawmap(){
+			vector.set('name', 'lastvector');
+			map = new ol.Map({
+			  layers: [raster, vector],
+			  target: 'map',
+			  view: new ol.View({
+				center: [-11000000, 4600000],
+				zoom: 4,
+			  }),
+			});
+			vectorLoaded=true;	
+			iLayer = iLayer +1;
+			autoDraw=true;
+		}	
+		drawmap();
+
+
+
+
+		function removeDarwinLayer(p_max){			
+			if(vectorLoaded){
+				map.getLayers().forEach(function(layer) {	
+					if (layer.get("name") == 'lastvector') {		
+alert("dans if 1 vectorLoaded name=" + layer.get("name"));					
+												
+							map.removeLayer(layer);
+
+					}
+				});
+			}		
+		}
+			
+		function addInteractions() {
+		  draw = new ol.interaction.Draw({
+			source: source,
+			type: typeSelect.value,
+		  });
+		  map.addInteraction(draw);
+		  snap = new ol.interaction.Snap({source: source});
+		  map.addInteraction(snap);
+		}
+
+		typeSelect.onchange = function () {
+		  map.removeInteraction(draw);
+		  map.removeInteraction(snap);
+		  alert("iLayer="+iLayer);
+		  removeDarwinLayer(iLayer);
+		  addInteractions();
+		};
+
+		addInteractions();
+		
+
+		
+	</script>
+  </body>
+</html>

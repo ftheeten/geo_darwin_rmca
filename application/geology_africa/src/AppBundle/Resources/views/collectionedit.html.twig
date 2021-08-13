@@ -1,0 +1,389 @@
+{# AppBundle/Resources/views/collectionedit.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% trans_default_domain 'FOSUserBundle' %}
+
+	{{ form_start(edit_form) }}
+		<Table  class="table_edit">
+			<tr>
+				{% if codecollection.pk is defined %}
+					<th class="title_table_edit"  colspan=10>
+						Collection edit
+					</th>
+				{% else %}
+					<th class="title_table_edit"  colspan=10>
+						New collection
+					</th>
+				{% endif %}
+			</tr>
+			<tr>
+				{% if codecollection.pk is defined %}
+					<TH width="3%">
+						ID:
+					</TH>
+					<TD width="3%">
+						
+							{{codecollection.pk}}
+					</TD>
+				{% endif %}
+				<TH width="3%">
+					{{ form_label(edit_form.codecollection) }}:
+				</TH>
+				<TD width="3%">
+					{{ form_widget(edit_form.codecollection, {'attr': {'class': 'form-control inp_CollectionID vshortlength'}}) }}
+				</TD>
+				<TH width="5%">
+					{{ form_label(edit_form.collection) }}:
+				</TH>
+				<TD width="15%">
+					{{ form_widget(edit_form.collection) }}
+				</TD>
+				<TH width="10%">
+					{{ form_label(edit_form.typeobjets) }}:
+				</TH>
+				<TD width="15%">
+					{{ form_widget(edit_form.typeobjets) }}
+				</TD>
+				<TH width="5%">
+					{{ form_label(edit_form.zoneutilisation) }}:
+				</TH>
+				<TD width="15%">
+					{{ form_widget(edit_form.zoneutilisation) }}
+				</TD>
+			</tr>
+			<TR>
+				<TD colspan=10>
+					{% set i=0 %}
+					<BR/>
+					<Table class="contributorTitle newLine table_results2" style="display:none">
+						<TR>
+							<TH width="5%" class="border_bottom title_table_view">
+								<label class="labelsview">ID </label>
+							</TH>
+							<TH width="15%" class="border_bottom title_table_view">
+								<label class="labelsview">Username </label>
+							</TH>
+							<TH width="15%" class="border_bottom title_table_view">
+								<label class="labelsview">First name </label>
+							</TH>
+							<TH width="15%" class="border_bottom title_table_view">
+								<label class="labelsview">Last name </label>
+							</TH>
+							<TH width="15%" class="border_bottom title_table_view">
+								<label class="labelsview">Email </label>
+							</TH>
+							<TH width="5%" class="border_bottom title_table_view">
+								<label class="labelsview">Enabled </label>
+							</TH>
+							<TH width="15%" class="border_bottom title_table_view">
+								<label class="labelsview">Role </label>
+							</TH>
+						</TR>
+						{% if arraycollusers is defined  %}
+							{% if arraycollusers|length >= 1 %}
+								{% for arraycolluser in arraycollusers %}
+									<TR id="Contributor{{i}}">
+										<TD>
+											{% if arraycolluser.u_id is defined %}
+												<label class="labelsview idcontrib{{i}}">{{arraycolluser.u_id}} </label>
+											
+											{% endif %}
+										</TD>
+										<TD>
+											<label class="labelsview username{{i}}">{{arraycolluser.username}} </label>
+										</TD>
+										<TD>
+											<label class="labelsview firstname{{i}}">{{arraycolluser.first_name}} </label>
+										</TD>
+										<TD>
+											<label class="labelsview lastname{{i}}">{{arraycolluser.last_name}} </label>
+										</TD>
+										<TD>
+											<label class="labelsview email{{i}}">{{arraycolluser.email}} </label>
+										</TD>
+										<TD>
+											<label class="labelsview enabled{{i}}">{{arraycolluser.enabled}} </label>
+										</TD>
+										<TD>
+											<input type="text"  id="inp_addnewuserRole{{i}}" name="inp_addnewuserRole{{i}}" class="inp_addnewuserRole{{i}} fulllength" >
+										</TD>
+										<TD>
+											<img src="{{ asset('pics/delete.jpg') }}" class="but_deletecontributor_{{arraycolluser.id}}" onclick="deleteContributor('{{i}}-{{arraycolluser.id}}')" alt="home" height="12" width="13" onmouseover="" style="cursor: pointer;"> 
+										</TD>
+									</TR>
+									{% set i=i+1%}
+								{% endfor %}
+							{% endif %}			
+						{% else %}
+							<div class="nocontrib">
+								Nobody linked to this collection
+							</div>
+						{% endif %}	
+						<TR>
+							<TD>
+										
+							</TD>
+						</TR>
+					</Table>
+					<Table width="50%">
+						<TR>
+							<TD class="newcontributor">
+								<BR/>
+								<input type="button" id="but_showaddcontributor" value="Add a user"/>	
+							</TD>
+							<TD class="newcontributor" width="5%"  style="display:none" >
+								<label class="labelsview">Last name: </label>
+							</TD>
+							<TD class="newcontributor" style="display:none" width="15%">
+								<input type="text"  id="inp_addnewuserLast_name" name="inp_addnewuserLast_name" class="inp_addnewuserLast_name shortlength" >
+							</TD>
+							<TD class="newcontributor" style="display:none" width="3%">
+								<label class="labelsview">Role: </label>
+							</TD>
+							<TD class="newcontributor" style="display:none" width="15%">
+								<select  id="inp_addnewuserRole" name="inp_addnewuserRole" class="inp_addnewuserRole"></select>
+							</TD>
+						</TR>	
+						<TR>
+							<TD class="newcontributor" colspan="10" style="display:none">
+								<input type="button" id="but_addcontributor" value="Add"  />	
+							</TD>
+						</TR>							
+					</Table>
+					<input type="hidden" id="newcontributors" name="newcontributors" class="newcontributors" >	
+				</TD>
+			</TR>	
+		</table>
+		<div>
+			<input type="submit" value="{{'form.save'|trans }}" />
+			<div class="alert_message"></div>
+		</div>
+			
+	{{ form_end(edit_form) }}
+	
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="{{ asset('js/core.js') }}"></script>
+
+	<script type="text/javascript">
+		var lastindex = "{{i}}";
+		$newcontributorsvals = "";
+		var arraycolluser = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+					
+		$(document).ready(function() {
+			//show message saying that data is in DB, during 4 sec. Msg comes from controller
+			setTimeout(function() { 
+				{% for msg in app.flashes('success') %}
+				$(".alert_message").html("{{ msg }}");
+				$(".alert_message").fadeOut(2000);
+				{% endfor %}
+			},1000); 
+			
+			{% if originaction is defined  %}
+				{% if originaction == 'add_beforecommit' %}
+					$(".submitbutton").prop('value', 'Create');
+				{% endif %}
+				{% if (originaction == 'edit') or (originaction == 'add_aftercommit') %}
+					$(".submitbutton").prop('value', 'Save');
+					{% if arraycollusers is defined %}
+						{% if arraycollusers|length >= 1 %}
+							$(".contributorTitle").css("display", ""); 
+							{% set l=0 %}
+							{% for arraycolluser in arraycollusers %}
+								arraycolluser[{{l}}].push(
+								{	id: "{{arraycolluser.u_id}}",
+									username: "{{arraycolluser.username}}",
+									first_name: "{{arraycolluser.first_name}}",
+									last_name: "{{arraycolluser.last_name}}",
+									email: "{{arraycolluser.email}}",
+									enabled: "{{arraycolluser.enabled}}"}
+								);
+								{% set l=l+1%}
+							{% endfor %}
+							{% set l=0 %}
+							{% for arraylinkcontrib in arraylinkusers %}
+								arraycolluser[{{l}}].push(
+									{role: "{{arraylinkcontrib.role}}"}
+								);
+								{% set l=l+1%}
+							{% endfor %}
+
+							for (i=0;i<{{l}};i++){
+								$(".inp_addnewuserID"+i).val(arraycolluser[i][0].id);
+								$(".inp_addnewuserRole"+i).val(arraycolluser[i][1].role);
+								$(".inp_addnewuserUsername"+i).val(arraycolluser[i][1].username);
+								$(".inp_addnewuserFirst_name"+i).val(arraycolluser[i][0].first_name);
+								$(".inp_addnewuserLast_name"+i).val(arraycolluser[i][0].last_name);
+								$(".inp_addnewuserEmail"+i).val(arraycolluser[i][0].email);
+								$(".inp_addnewuserEnabled"+i).val(arraycolluser[i][0].enabled);
+							}
+						{% endif %}
+					{% endif %}
+				{% endif %}
+			{% endif %}
+		});
+		
+		{% if arrayroles is defined %}
+			{% for arrayrole in arrayroles %}
+				$('.inp_addnewuserRole').append('<option value="' + "{{arrayrole.name}}" + '">' + "{{arrayrole.name}}" + '</option>');
+			{% endfor %}
+		{% else %}
+				alert("no defined");
+		{% endif %}
+			
+		var namesresults = [];
+		namesresults['id'] = [];
+		namesresults['username'] = [];
+		namesresults['first_name'] = [];
+		namesresults['last_name'] = [];
+		namesresults['email'] = [];
+		namesresults['enabled'] = [];
+		
+		$(".inp_addnewuserLast_name").autocomplete({
+			source: function(request, response) {
+				$.ajax({
+					url: "{{ path('app_usersnames_autocomplete')  }}",  
+					data : {code:$(".inp_addnewuserLast_name").val()},  
+					type: "GET",
+					dataType: "JSON",
+					success: function (donnees) {
+						var i = 0;
+
+						$.each(donnees, function (key, donnee) {
+							namesresults['id'][i] = donnee.id;
+							namesresults['username'][i] = donnee.username;
+							namesresults['first_name'][i] = donnee.first_name;
+							namesresults['last_name'][i] = donnee.last_name;
+							namesresults['email'][i] = donnee.email;
+							namesresults['enabled'][i] = donnee.enabled;
+							i++;
+						});
+						response(namesresults['last_name']);
+						
+					}
+				})
+			},
+			minLength: 2,
+		});
+		
+		function completeOtherPeopleData(k){
+			for (i=0;i<namesresults['username'].length;i++){
+				var ind = k;
+				if (namesresults['last_name'][i] == $(".lastname"+ind).html()){
+					$(".inp_addnewuserID"+ind).val(namesresults['id'][i]);
+					$(".idcontrib"+ind).html(namesresults['id'][i]);
+					$(".username"+ind).html(namesresults['username'][i]);
+					$(".firstname"+ind).html(namesresults['first_name'][i]);
+					$(".lastname"+ind).html(namesresults['last_name'][i]);
+					$(".email"+ind).html(namesresults['email'][i]);
+					$(".enabled"+ind).html(namesresults['enabled'][i]);
+				}
+			}
+		}
+		
+		function changecontrib(){
+			for (i=0;i<=lastindex;i++){
+				$(document).on('change',".inp_addnewuserRole"+i,function(){
+					k=$(this).attr('id').substring($(this).attr('id').length-1,$(this).attr('id').length) ;
+					completeOtherPeopleData(k);
+					
+					if ($newcontributorsvals.indexOf($('.idcontrib'+k).html() +"-U") < 0){ 
+						$newcontributorsvals = $newcontributorsvals + "," + k +"-" + $('.idcontrib'+k).html() +"-U"; 
+						$(".newcontributors").val($newcontributorsvals.substring(1,$newcontributorsvals.length));
+					}
+				});
+			}
+		};
+		changecontrib();
+		
+		$('#but_showaddcontributor').click(function(e){
+			$(".newcontributor").toggle();
+			$(".inp_addnewuserLast_name").val("");
+			$(".inp_addnewuserRole").val("");
+		});
+		
+		$('#but_addcontributor').click(function(e){
+			userfound=0;
+			if($(".inp_addnewuserLast_name").val() != "" & $(".inp_addnewuserRole").val() != ""){
+				for (i=0;i<lastindex;i++){
+					if($(".inp_addnewuserLast_name").val().toLowerCase().trim() == $(".lastname"+i).html().toString().toLowerCase().trim()){
+						userfound=1;
+					}
+				}
+
+				if(userfound==0){
+					if ($(".inp_ContributionID").val() != ""){
+						$(".contributorTitle").css("display", "");  
+						$(".nocontrib").hide();
+						
+						$content = '<TR id="Contributor'+lastindex+'">';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview idcontrib'+lastindex+'"></label>';
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview username'+lastindex+'"></label>';
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview firstname'+lastindex+'"></label>';     
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview lastname'+lastindex+'">'+$(".inp_addnewuserLast_name").val()+'</label>';    
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview email'+lastindex+'"></label>';  
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<label class="labelsview enabled'+lastindex+'"></label>';    
+						$content = $content + '</TD>';
+						$content = $content + '<TD>';
+						$content = $content + '<input type="text"  id="inp_addnewuserRole'+lastindex+'" name="inp_addnewuserRole'+lastindex+'" value="'+$(".inp_addnewuserRole").val()+'"  class="inp_addnewuserRole'+lastindex+' fulllength">';
+						$content = $content + '</TD>';
+						$content = $content + '</TR>';
+													
+						$(".contributorTitle").append($content);
+						$(".inp_addnewuserLast_name").val("");
+						$(".inp_addnewuserRole").val("");
+				
+						completeOtherPeopleData(lastindex);
+						//changecontrib();
+							
+						if ($newcontributorsvals.indexOf($('.idcontrib'+lastindex).html() +"-U") < 0){
+							$newcontributorsvals = $newcontributorsvals + "," + lastindex +"-" + $('.idcontrib'+lastindex).html() +"-I"; 
+							$(".newcontributors").val($newcontributorsvals.substring(1,$newcontributorsvals.length));
+						}
+						lastindex++;
+					
+						
+					//	fill_lastContributorid();
+					}else{
+						alert("Please enter a collection before adding users !");
+					}
+				}else{
+					alert("This user has already a role for this collection !");
+				}
+			}
+		});
+		
+		function deleteContributor(idcontr) {
+			var r = confirm("Are you sure to delete that user?");
+			if (r == true) {
+				var idx = idcontr.indexOf("-"); 
+				var i = idcontr.substring(0,idx);
+				var id = idcontr.substring(idx+1);
+
+				$newcontributorsvals = $newcontributorsvals + "," + i +"-" + $('.idcontrib'+i).html() +"-D"; 
+				$(".newcontributors").val($newcontributorsvals.substring(1,$newcontributorsvals.length));
+				$fieldname = "#Contributor"+i;
+				$($fieldname).html("<TD></TD colspan=9>"); 
+			} 
+		}
+	</script>
+		
+{% endblock %}

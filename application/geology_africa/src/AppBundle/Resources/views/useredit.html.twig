@@ -1,0 +1,215 @@
+{# AppBundle/Resources/views/useredit.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% trans_default_domain 'FOSUserBundle' %}
+
+	{{ form_start(edit_form) }}
+		<Table  class="table_edit">
+			<tr>
+				{% if duser.id != 0%}
+					<th class="title_table_edit">
+						User edit
+					</th>
+				{% else %}
+					<th class="title_table_edit">
+						New user
+					</th>
+				{% endif %}
+
+			</tr>
+			<tr>
+				<TD>
+					<Table  width="70%">
+						{% if duser.id != 0%}
+							<tr>
+								<TH width="7%">
+									ID:
+								</TH>
+								<TD width="20%">				
+									{{ duser.id}}
+								</TD>
+								<TH width="10%">
+									{{ 'form.lastlogin'|trans }}: 
+								</TH>
+								<TD width="20%">
+									{{ duser.lastLogin|date('d-m-Y H:i:s') }}
+								</TD>
+								<TH width="20%">
+									{{ 'form.passwordrequestedat'|trans }}:
+								</TH>
+								<TD width="20%">
+									{{ duser.passwordRequestedAt|date('d-m-Y H:i:s') }}
+								
+								</TD>
+							</tr>
+						{% else %}
+							<tr>
+								<TH width="10%">
+									ID:
+								</TH>
+								<TD colspan="5">
+									{{ form_widget(edit_form.id, {'attr': {'class': 'form-control inp_UserID'}}) }}
+								</TD>
+							</tr>
+						{% endif %}
+						<TR>
+							<TH >
+								{{ form_label(edit_form.username) }}:
+							</TH>
+							<TH >
+								{{ form_widget(edit_form.username) }}
+							</TH>
+							<TH >
+								{{ form_label(edit_form.first_name) }}:
+							</TH>
+							<TH >
+								{{ form_widget(edit_form.first_name) }}
+							</TH>
+							<TH >
+								{{ form_label(edit_form.last_name) }}:
+							</TH>
+							<TH >
+								{{ form_widget(edit_form.last_name) }}
+							</TH>
+						</tr>
+						<TR>
+							<TD>
+								<B>{{ form_label(edit_form.email) }}: </B>
+							</TD>
+							<TD>
+								{{ form_widget(edit_form.email) }}
+							</TD>
+							<TD>
+								<B>{{ form_label(edit_form.password) }}: </B>
+							</TD>
+							<TD>
+								{{ form_widget(edit_form.password, {'attr': {'class': 'form-control inp_pw'}}) }}
+							</TD>
+							<TD>
+								<B>Role : </B>
+							</TD>
+							<TD>
+								<select id="role" name="role" class="role" >	
+									<option value="ROLE_USER">ROLE_USER</option>
+									<option value="ROLE_ADMIN">ROLE_ADMIN</option>
+									<option value="ROLE_SUPER_ADMIN">ROLE_SUPER_ADMIN</option>
+								</select>
+							</TD>
+							<TD colspan="2">
+								{{ form_widget(edit_form.enabled) }}
+							</TD>
+
+
+						</TR>
+						<TR>
+						<TH colspan="6"></TH>
+						</TR>
+						{% if duser.id != 0%}						
+							<TR>
+								<TH>
+									Roles in collections: 
+								</TH>
+								<TD colspan="5">
+									{% if roles is defined %}
+										{% if roles|length >= 1 %}
+											<table border="1">
+												<TR bgcolor="#F9E3B6">
+
+													<TH width="10%">
+														Code
+													</TH>
+													<TH width="20%">
+														Collection
+													</TH>
+													<TH width="15%">
+														Role
+													</TH>
+												</TR>
+												{% for role in roles %}
+													<TR>
+									
+														<TH>
+															{{role.codecollection}}
+														</TH>
+														<TH>
+															{{role.collection}}
+														</TH>
+														<TH>
+															{{role.role}}
+														</TH>
+													</TR>
+												{% endfor %}
+
+											</table>
+										{% else %}
+											No roles	
+										{% endif %}	
+									{% endif %}	
+								</TD>
+							</TR>
+						{% endif %}
+					</table>
+					<input type="hidden" id="newpw" name="newpw" class="newpw" >	
+				</TD>
+			</tr>
+			<tr>
+				<th colspan=5>
+					<input type="submit" value="{{'form.save'|trans }}" />
+				</TH>
+			</tr>
+		</table>
+	{{ form_end(edit_form) }}
+	
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+	<script src="{{ asset('js/core.js') }}"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			//show message saying that data is in DB, during 4 sec. Msg comes from controller
+			setTimeout(function() { 
+				{% for msg in app.flashes('success') %}
+				$(".alert_message").html("{{ msg }}");
+				$(".alert_message").fadeOut(2000); 
+				{% endfor %}
+			},1000); 
+			
+			{% if roleuser is defined %}
+				$('.role option[value="{{roleuser}}"]').attr('selected','selected');
+			{% endif %}	
+			
+			function fill_lastid(){
+				path = "{{path('app_last_Userid') }}";  
+				lastid = 0;
+				$.ajax({
+					url:  path,
+					type: "GET",
+					dataType: "JSON",
+					success: function (ids) {
+						$.each(ids, function (key, user) {
+							lastid = user.id;
+						});
+
+						$(".inp_UserID").val(lastid+1);
+					},
+					error: function (err) {
+						alert("An error ocurred while loading data ...");
+					}
+				});
+			};
+			fill_lastid();
+			
+			$(document).on('change',".inp_pw",function(){
+				$('.newpw').val($('.inp_pw').val()); 
+			});
+		});
+
+	</script>
+	
+{% endblock %}

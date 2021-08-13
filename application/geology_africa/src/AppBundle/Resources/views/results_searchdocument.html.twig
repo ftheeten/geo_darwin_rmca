@@ -1,0 +1,286 @@
+{# src/AppBundle/Resources/views/results_searchdocument.html.twig #}
+		
+{% set arrayqueryvals = queryvals|split(',,') %}
+{% set elem = {} %}
+{% for e in arrayqueryvals %}
+{% 		set elem1 = e|split(':') %}
+{%  	set elem = elem|merge({(elem1[0]):(elem1[1])}) %}
+{% endfor %}
+	
+{% block body_top %}
+	{{ include("@App/searchdocument.html.twig") }}
+	
+	<script type="text/javascript">
+		$(document).ready(function() {
+			onElementModified('body', '#inp_searchmedium', function(element){
+				$(".inp_searchcoll option[value='{{elem['iddoccollection']}}']").prop("selected","selected");
+				$(".inp_searchmedium option[value='{{elem['medium']}}']").prop("selected","selected");
+			});	
+
+			$(".inp_searchcoll").val("{{elem['iddoccollection']}}");	
+			$(".inp_searchiddoc").val("{{elem['iddoc']}}");	
+			$(".inp_searchnumarchive").val("{{elem['numarchive']}}");
+			$(".inp_searchcaption").val("{{elem['caption']}}");
+			$(".inp_searchcentralnum").val("{{elem['centralnum']}}");
+			$(".inp_searchdoclocation").val("{{elem['doclocation']}}");
+			$(".inp_searchdocnumlocation").val("{{elem['numericallocation']}}");
+			$(".inp_searchfilename").val("{{elem['filename']}}");
+			$(".inp_searchdocinfo").val("{{elem['docinfo']}}");
+			$(".inp_searchedition").val("{{elem['edition']}}");
+			$(".inp_searchpubplace").val("{{elem['pubplace']}}");
+			$(".inp_searchcartotype").val("{{elem['doccartotype']}}");
+			
+			sortDirection = "{{elem['sortDirection']}}";
+			$namef = "{{elem['sortDirection']}}".replace(" DESC", "_down").replace(" ASC", "_up");
+			$("."+ $namef).css('color', 'black');		
+		});
+	</script>
+
+{% endblock %}
+
+{% block body %}
+	{% block results_search_body %}
+		<table class="table_nbr_results">
+			<tr>
+				<th class="td1">
+					Results :
+				</th>
+				<td class="td1">
+					<label class="lab_number_results">
+				</td>
+				<td align="right">
+					Nbr of results by page:
+				</td>
+				<td width="50px">
+					<select class="inp_searchNbrResByPage">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+						<option value="20">20</option>
+						<option value="25">25</option>
+						<option value="50">50</option>
+						<option value="75">75</option>
+						<option value="100">100</option>
+					</select>
+				</td>
+			</tr>
+		</table>
+		
+		<TABLE class="table_results">
+			<TR>
+				<TH width="5%">
+					Collection
+					<span style="float:right;">
+						<div class="idsample_up up-arrow" onclick="sortTable('idcollection',1)">&#9650</div>
+						<div class="idsample_down down-arrow" onclick="sortTable('idcollection',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					ID document
+					<span style="float:right;">
+						<div class="idsample_up up-arrow" onclick="sortTable('iddoc',1)">&#9650</div>
+						<div class="idsample_down down-arrow" onclick="sortTable('iddoc',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Archive mumber
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('numarchive',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('numarchive',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Central mumber
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('centralnum',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('centralnum',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Caption
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('caption',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('caption',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Medium
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('medium',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('medium',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="10%">
+					Location
+					<span style="float:right;">
+						<div class="mineral_up up-arrow" onclick="sortTable('location',1)">&#9650</div>
+						<div class="mineral_down down-arrow" onclick="sortTable('location',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="10%">
+					Numerical location
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('numericallocation',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('numericallocation',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="15%">
+					Filename
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('filename',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('filename',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="15%">
+					Document info
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('docinfo',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('docinfo',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Edition
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('edition',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('edition',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="10%">
+					Publication place
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('pubplace',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('pubplace',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Doc. type
+					<span style="float:right;">
+						<div class="mformula_up up-arrow" onclick="sortTable('doccartotype',1)">&#9650</div>
+						<div class="mformula_down down-arrow" onclick="sortTable('doccartotype',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="1%">
+				</TH>
+			</TR>
+			{% set i=0 %}
+			{% for item in results %}
+				<TR> 
+					<TD>
+						{{item.idcollection}}
+					</TD>
+					<TD class="but_showdoc_{{item.pk}}" onclick="viewdoc({{item.pk}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">
+						{{item.iddoc}}
+					</TD>
+					<TD>
+						{{item.numarchive}}
+					</TD>
+					<TD>
+						{{item.centralnum}}
+					</TD>
+					<TD>
+						{{item.caption}}
+					</TD>
+					<TD>
+						{{item.medium}}
+					</TD>
+					<TD>
+						{{item.location}}
+					</TD>
+					<TD>
+						{{item.numericallocation}}
+					</TD>
+					<TD>
+						{{ item.filename}} 
+					</TD>
+					<TD>
+						{{ item.docinfo}} 
+					</TD>
+					<TD>
+						{{ item.edition}} 
+					</TD>
+					<TD>
+						{{ item.pubplace}} 
+					</TD>
+					<TD>
+						{{ item.doccartotype}} 
+					</TD>
+					<TD>
+						<img src="{{ asset('pics/edit.png') }}" class="but_editdoc_{{item.pk}}" onclick="editdoc({{item.pk}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+					</TD>
+				</TR>
+				{% set i=i+1%}
+			{% endfor %}
+		</TABLE>
+		<div class="navigation text-center">
+			{{ knp_pagination_render(results) }}
+		</div>
+		
+		<script type="text/javascript">		
+			$(document).ready(function() {
+				{% set arrayqueryvals = queryvals|split(',,') %}
+				{% set elem = {} %}
+				{% for e in arrayqueryvals %}
+				{% 		set elem1 = e|split(':') %}
+				{%  	set elem = elem|merge({(elem1[0]):(elem1[1])}) %}
+
+				{% endfor %}
+		
+				
+				
+				sortDirection = "{{elem['sortDirection']}}";
+				$namef = "{{elem['sortDirection']}}".replace(" DESC", "_down").replace(" ASC", "_up");
+				$("."+ $namef).css('color', 'black');	
+				$(".lab_number_results").html("{{elem['nbrres']}} records");
+				$(".inp_searchNbrResByPage").val("{{elem['NbrResByPage']}}");
+
+				$('.inp_searchNbrResByPage').on('change', function() {
+					nbrval = $('.inp_searchNbrResByPage option:selected').val();
+					searchclic();
+				});
+
+				function fillfields() {
+					$(".inp_searchcoll option[value='{{elem['iddoccollection']}}']").prop("selected","selected");
+					$(".inp_searchmedium option[value='{{elem['medium']}}']").prop("selected","selected");
+					$(".inp_searchiddoc").val("{{elem['iddoc']}}");	
+					$(".inp_searchnumarchive").val("{{elem['numarchive']}}");
+					$(".inp_searchcaption").val("{{elem['caption']}}");
+					$(".inp_searchcentralnum").val("{{elem['centralnum']}}");
+					$(".inp_searchdoclocation").val("{{elem['doclocation']}}");
+					$(".inp_searchdocnumlocation").val("{{elem['numericallocation']}}");
+					$(".inp_searchfilename").val("{{elem['filename']}}");
+					$(".inp_searchdocinfo").val("{{elem['docinfo']}}");
+					$(".inp_searchedition").val("{{elem['edition']}}");
+					$(".inp_searchpubplace").val("{{elem['pubplace']}}");
+					$(".inp_searchcartotype").val("{{elem['doccartotype']}}");
+				};
+				setTimeout(fillfields,250);
+			});
+			
+			function sortTable(n,dir) {
+				if (dir==1){
+					sortDirection = n+" "+"ASC";
+				}
+				if (dir==2){
+					sortDirection = n+" "+"DESC";
+				}
+				searchclic();
+			}
+			
+			function editdoc(pk) {
+				var url = '{{ path("app_edit_doc", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewdoc(pk) {
+				var url = '{{ path("app_view_doc", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+
+		</script>
+	{% endblock %}
+{% endblock %}
+

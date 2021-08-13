@@ -1,0 +1,408 @@
+{# src/AppBundle/Resources/views/results_searchpoint.html.twig #}
+		
+
+	
+{% block body_top %}
+	{{ include("@App/searchpoints.html.twig") }}
+	
+
+
+{% endblock %}
+
+{% block body %}
+	{% block results_search_body %}
+	<style>
+      p.collapse{
+         display:none;
+      }
+      
+      .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -5px;
+        min-width: 500px;
+		white-space: pre-wrap;
+      }
+      .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        left: 4px;
+        margin-left: -10px;
+      }
+
+      .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+      }
+      .ol-popup-closer:after {
+        content: "✖";
+      }
+	  .tablepopup{
+			width:100%;
+			border: 1px solid black;
+	  }
+
+		.tablepopup_td1 {
+			background-color: #bde9ba; 
+			width:5%;
+			border-bottom: 1px solid black;
+		}
+		
+		.tablepopup_td2 {
+			width:90%;
+			border-bottom: 1px solid black;
+		}
+		
+		.tablepopup_td3 {
+			width:5%;
+			border-bottom: 1px solid black;
+		}
+    </style>
+		<table class="table_nbr_results">
+			<tr>
+				<th class="td1">
+					Results :
+				</th>
+				<td class="td1">
+					<label class="lab_number_results">
+				</td>
+				<td align="right">
+					Nbr of results by page:
+				</td>
+				<td width="50px">
+					<select class="inp_searchNbrResByPage">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+						<option value="20">20</option>
+						<option value="25">25</option>
+						<option value="50">50</option>
+						<option value="75">75</option>
+						<option value="100">100</option>
+					</select>
+				</td>
+			</tr>
+		</table>
+		<TABLE class="table_results">				
+			<TR>
+			<!--collection-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idcollection_up up-arrow" onclick="sortTable('idcollection',1)">&#9650</div>
+						<div class="idcollection_down down-arrow" onclick="sortTable('idcollection',2)">&#9660</div>
+					</span>
+				</TH>
+			<!--locations-->
+				<TH width="3%">
+					ID
+					<span style="float:right;">
+						<div class="idpt_up up-arrow" onclick="sortTable('idpt',1)">&#9650</div>
+						<div class="idpt_down down-arrow" onclick="sortTable('idpt',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="5%">
+					Lat.
+					<span style="float:right;">
+						<div class="lat_up up-arrow" onclick="sortTable('coord_lat',1)">&#9650</div>
+						<div class="lat_down down-arrow" onclick="sortTable('coord_lat',2)">&#9660</div>
+					</span>
+				</th>
+				<TH width="5%">
+					Long.
+					<span style="float:right;">
+						<div class="long_up up-arrow" onclick="sortTable('coord_long',1)">&#9650</div>
+						<div class="long_down down-arrow" onclick="sortTable('coord_long',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Place
+					<span style="float:right;">
+						<div class="place_up up-arrow" onclick="sortTable('place',1)">&#9650</div>
+						<div class="place_down down-arrow" onclick="sortTable('place',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Description Geo.
+					<span style="float:right;">
+						<div class="geodescription_up up-arrow" onclick="sortTable('geodescription',1)">&#9650</div>
+						<div class="geodescription_down down-arrow" onclick="sortTable('geodescription',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="7%">
+					Position
+					<span style="float:right;">
+						<div class="positiondescription_up up-arrow" onclick="sortTable('positiondescription',1)">&#9650</div>
+						<div class="positiondescription_down down-arrow" onclick="sortTable('positiondescription',2)">&#9660</div>
+					</span>
+				</TH>
+				<TH width="1%">
+				</TH>
+			</TR>
+			{% for item in results %}
+				<TR> 
+					<TD>
+						{{item.idcollection}}
+					</TD>
+					<TD>
+						<label class="but_showpoint_{{item.pkloccenter}}" onclick="viewpoint({{item.pkloccenter}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;">{{item.idpt}}</label> 
+					</TD>
+					<TD>
+						{% if item.coord_lat != '' %}
+							{{item.coord_lat|number_format(2, '.', ',')}}
+						{% endif %}
+					</TD>
+					<TD>
+						{% if item.coord_long != '' %}
+							{{item.coord_long|number_format(2, '.', ',')}}
+						{% endif %}
+					</TD>
+					<TD>
+						{{item.place}}
+					</TD>
+					<TD>
+						{{item.geodescription}}
+					</TD>
+					<TD>
+						{{item.positiondescription}}
+					</TD>
+					<TD>
+						<img src="{{ asset('pics/edit.png') }}" class="but_editpoint_{{item.pkloccenter}}" onclick="editpoint({{item.pkloccenter}})" alt="home" height="11" width="13" onmouseover="" style="cursor: pointer;"> 
+					</TD>
+				</TR>
+			{% endfor %}
+		</TABLE>
+
+		<div class="navigation text-center">
+			{{ knp_pagination_render(results) }}
+		</div>
+		
+		<script type="text/javascript">
+			function sortTable(n,dir) {
+				if (dir==1){
+					sortDirection = n+" "+"ASC";
+				}
+				if (dir==2){
+					sortDirection = n+" "+"DESC";
+				}
+				searchclic();
+			}
+			
+			function editpoint(pk) {
+				var url = '{{ path("app_edit_point", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			function viewpoint(pk) {
+				var url = '{{ path("app_view_point", {'pk': 'article_id'}) }}'; 
+				url = url.replace("article_id", pk);
+				window.location = url;
+			}
+			
+			$(document).ready(function() {
+				function test_elem_empty($field,$elem){
+					if ($elem.length >0) {
+						$str = $field + " option[value='"+$elem+"'";
+						$($str).prop("selected","selected");
+					}
+				}
+				
+				//{ % set filter = app.session.get('p') % }
+				//{ % set queryvals = filter['queryvals'] % }
+
+				{% set arrayqueryvals = queryvals|split(',,') %}
+				{% set elem = {} %}
+				{% for e in arrayqueryvals %}
+				{% 		set elem1 = e|split(':') %}
+				{%  	set elem = elem|merge({(elem1[0]):(elem1[1])}) %}
+				{% endfor %}
+
+				setTimeout(function(){
+					$("#inp_searchcoll option[value='{{elem['collection']}}']").prop("selected","selected");
+				}, 500);			
+			
+				$(".inp_searchnum").val("{{elem['searchnum']}}");
+				$(".inp_search_elevation").val("{{elem['altitude_from']}}");
+				$(".inp_search_elevation_max").val("{{elem['altitude_to']}}");
+				$(".inp_searchfieldnumber").val("{{elem['fieldnum']}}");
+				$(".inp_searchplace").val("{{elem['place']}}");
+				$(".inp_searchgeodesc").val("{{elem['geodescription']}}");
+				$(".inp_searchposdesc").val("{{elem['positiondescription']}}");
+				$(".inp_searchvarinfo").val("{{elem['variousinfo']}}");	
+				//$(".inp_searchdocref").val("{ {elem['docref']}}");				
+				$(".inp_search_WKT").val("{{elem['wkt']}}");
+			
+				{% if elem['date_from']|length > 0%}
+					$(".inp_searchpointfromdate").val("{{elem['date_from']|date('d/m/Y')}}");
+				{% endif%}
+				{% if elem['date_to']|length > 0%}
+					$(".inp_searchpointtodate").val("{{elem['date_to']|date('d/m/Y')}}");
+				{% endif%}
+			
+				sortDirection = "{{elem['sortDirection']}}";
+				$namef = "{{elem['sortDirection']}}".replace(" DESC", "_down").replace(" ASC", "_up");
+				$("."+ $namef).css('color', 'black');		
+				
+				$(".lab_number_results").html("{{elem['nbrres']}} records");
+				$(".inp_searchNbrResByPage").val("{{elem['NbrResByPage']}}");
+
+				$('.inp_searchNbrResByPage').on('change', function() {
+					nbrval = $('.inp_searchNbrResByPage option:selected').val();
+					searchclic();
+				});
+	
+				getFeaturesRow();
+			});
+
+	//Map------------------------------------------------------------------------------------------
+
+			  //main search function (du code public)
+			var modeRemovePage=false;
+			var clusters;
+			var overlay;
+			var layerLoaded=false;
+			var coordinates;
+			var container = document.getElementById('popup');
+			$("#popup").css('display','block');
+			var content = document.getElementById('popup-content');
+			var closer = document.getElementById('popup-closer');
+			var features_data = [];
+			
+			function isCluster(feature) {
+				if (!feature || !feature.get('features')) { 
+					return false; 
+				}
+				return feature.get('features').length >= 1;
+			}
+			var getFeaturesRow=function(){
+				var features = new Array();
+				var i=0
+				var coord_tocenter;
+
+				map.removeInteraction(draw);
+
+				{% for item in results %}
+					coordinates = [{{item.coord_long}},{{item.coord_lat}}];
+
+					features_data.push([coordinates,{{item.pkloccenter}},'{{item.geodescription}}']); 
+					if (i==0) {
+						coord_tocenter = ol.proj.fromLonLat(coordinates);
+					}
+					features[i] = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(coordinates)));
+					i=i+1
+				{% endfor %}
+				
+				if(layerLoaded===true&&modeRemovePage===true){
+					map.removeLayer(clusters);
+				}
+				
+				var vectorSource = new ol.source.Vector({features: features});
+				var clusterSource = new ol.source.Cluster({
+					distance: 40,
+					source: vectorSource
+				});
+			
+				var styleCache = {};
+				var keysForClick=[];
+				clusters = new ol.layer.Vector({
+					source: clusterSource,
+					style: function(feature) {
+						$(feature.get('features')).each(
+							function(idx, item){
+								keysForClick[item.get('code_display')||'']=item.get('taxon')||'';
+							}
+						);
+				   
+						var size = feature.get('features').length;
+						var style = styleCache[size];
+						if (!style) {
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									radius: 10,
+									stroke: new ol.style.Stroke({
+										color: '#fff'
+									}),
+									fill: new ol.style.Fill({
+										color: '#3399CC'
+									})
+								}),
+								text: new ol.style.Text({
+									text: size.toString(),
+									fill: new ol.style.Fill({
+										color: '#fff'
+									})
+								})
+							});
+							styleCache[size] = style;
+						}
+						return style;
+					},
+					keysForClick: keysForClick
+				});
+
+				map.addLayer(clusters);
+				layerLoaded=true;
+
+				map.getView().setZoom(4);
+               
+				   /**
+                * Create an overlay to anchor the popup to the map.
+                */
+                overlay = new ol.Overlay( ({
+                    element: container,
+                    autoPan: true,
+                    autoPanAnimation: {
+                      duration: 250
+                    }
+                }));
+                  
+                   /**
+                   * Add a click handler to hide the popup.
+                   * @return {boolean} Don't follow the href.
+                   */
+                closer.onclick = function() {
+                    overlay.setPosition(undefined);
+                    closer.blur();
+                    return false;
+                };
+				
+				map.addOverlay(overlay);
+				map.on('click', function(evt) {
+					var coordinate = evt.coordinate;
+					var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) { return feature; });
+					if (isCluster(feature)) {
+						var features2 = feature.get('features');
+						Textline = "<table class='tablepopup'>";
+						imgsrc = "{{ asset('pics/edit.png') }}";
+						for(var i = 0; i < features2.length; i++) {
+							ind = i+1;
+							Textline = Textline+"<TR><TD class='tablepopup_td1'>"+ind+"</TD><TD class='tablepopup_td2'>"+ features_data[i][2] +"</TD><TD class='tablepopup_td3'><img src=" + imgsrc + " class='but_editpoint_" + features_data[i][1] +"' onclick='editpoint(" + features_data[i][1] +")' alt='home' height='11' width='13' onmouseover='' style='cursor: pointer;'> </TD></TR>";
+						}
+						content.innerHTML = Textline +'</table>';
+						overlay.setPosition(coordinate);
+					} 
+				});
+
+			};	
+		</script>
+	{% endblock %}
+{% endblock %}
+

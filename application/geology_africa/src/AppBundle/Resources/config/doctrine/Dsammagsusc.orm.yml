@@ -1,0 +1,70 @@
+AppBundle\Entity\Dsammagsusc:
+    type: entity
+    table: dsammagsusc
+    uniqueConstraints:
+        dsammagsusc_unique:
+            columns:
+                - idcollection
+                - idsample
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        idcollection:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        idsample:
+            type: integer
+            nullable: true
+            options:
+                unsigned: false
+        weight:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        exponent:
+            type: integer
+            nullable: true
+            options:
+                unsigned: false
+        mesure1:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        mesure2:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        mesure3:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        mesure4:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        mesure5:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+        mesure6:
+            type: float
+            nullable: true
+            precision: 10
+            scale: 0
+    lifecycleCallbacks: {  }
