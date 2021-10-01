@@ -3,6 +3,9 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+use AppBundle\Entity\GeodarwinDocForeignKey;
 
 /**
  * Ddoctitle
@@ -10,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ddoctitle", uniqueConstraints={@ORM\UniqueConstraint(name="ddoctitle_unique", columns={"idcollection", "iddoc", "titlelevel"})}, indexes={@ORM\Index(name="IDX_ADADA4C931E478089F44A603", columns={"idcollection", "iddoc"})})
  * @ORM\Entity
  */
-class Ddoctitle
+class Ddoctitle extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -36,16 +39,7 @@ class Ddoctitle
      */
     private $title;
 
-    /**
-     * @var \AppBundle\Entity\Ddocument
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
-     */
-    private $idcollection;
+	
 
 
 
@@ -105,29 +99,5 @@ class Ddoctitle
     public function getTitle()
     {
         return $this->title;
-    }
-
-    /**
-     * Set idcollection
-     *
-     * @param \AppBundle\Entity\Ddocument $idcollection
-     *
-     * @return Ddoctitle
-     */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
-    {
-        $this->idcollection = $idcollection;
-
-        return $this;
-    }
-
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Ddocument
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
+    }   
 }

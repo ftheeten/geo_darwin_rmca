@@ -1,0 +1,37 @@
+{# src/AppBundle/Resources/views/forms/form_buttons.html.twig #}
+{% use "@App/forms/standalonejs.html.twig" %}
+{% block body %}
+{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+<div class="row">
+<div class="col-sm-2">
+	<input type="submit" class="btn-default   submitbutton" id="submit_button"  />
+	{% if originaction =="edit" and is_granted("ROLE_ADMIN") %}
+		<input type="button" class="btn-default   deletebutton" value="Delete" id="delete_button" />
+	{% endif %}
+</div>
+</div>
+{% endblock %}
+{% if originaction =="edit" and is_granted("ROLE_ADMIN") %}
+{% block javascripts %}
+    {{ parent() }}
+<script>
+	$(document).ready(
+		function()
+		{
+			console.log("loaded 2");
+			$("#delete_button").click(
+				function(e)
+				{
+					console.log("try delete");
+					e.preventDefault();
+					$('{{ id_form }}').attr('action', "{{ path(delete_route, {'pk' : form.vars.data.pk } ) }}").submit();
+					
+				}
+			);
+			
+		}
+	
+	);
+</script>
+{% endblock %}
+{% endif %}

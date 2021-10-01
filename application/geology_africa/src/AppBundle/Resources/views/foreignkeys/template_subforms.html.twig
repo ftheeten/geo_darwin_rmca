@@ -1,19 +1,22 @@
 {# src/AppBundle/Resources/views/foreignkeys/template_subforms.html.twig #}
+<!--pb to fx, this libraries should already be loaded-->
 <script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
 <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="{{ asset('js/core.js') }}"></script>
+ <script src="{{ asset('js/select2/js/select2.full.min.js') }}"></script>
 
 {% set nested_template = nested_template %}
 
 {% set fk_len = fk_values | length %}
-{{ fk_len }}
+
 <div class="{{ ctrl_prefix }}_placeholder" >
-	<ul id="{{ ctrl_prefix }}_list">
-				</ul>
+	<ul id="{{ ctrl_prefix }}_list"></ul>
 </div>
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_add">Add</button>
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_remove"">Remove</button>
 <script type="text/javascript">
+console.log("");
+console.log("{{ ctrl_prefix }}");
 var nb_ctrls_{{ ctrl_prefix }}=0;
 	
 $(document).ready(
@@ -24,14 +27,15 @@ $(document).ready(
             {
                 nb_ctrls_{{ ctrl_prefix }}++;
 				current_class=nb_ctrls_{{ ctrl_prefix }};
-				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_'+ nb_ctrls_{{ ctrl_prefix }} +'"></div></ul>');
+				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_{{ ctrl_prefix  }}_'+ nb_ctrls_{{ ctrl_prefix }} +'"></div></ul>');
 				jQuery.get("{{ ajax_route }}",
 					{
-						index:nb_ctrls_{{ ctrl_prefix }}
+						index:nb_ctrls_{{ ctrl_prefix }},
+						ctrl_prefix: '{{ ctrl_prefix }}'
 					},
 					function(result)
 					{
-						$('.widget_subform_'+ nb_ctrls_{{ ctrl_prefix }} ).html(result);
+						$('.widget_subform_{{ ctrl_prefix  }}_'+ nb_ctrls_{{ ctrl_prefix }} ).html(result);
 					}
 				);
 				
@@ -54,10 +58,12 @@ $(document).ready(
         );
 		
 		{% if fk_len >0 %}
-			{% set i=1 %}
+			{% set i=0 %}
 			{% for val in fk_values %}
 				{% set i=i+ 1 %}
-				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_'+{{ i }} +'"></div></ul>');
+				console.log("{{ ajax_route }}");
+				console.log("{{ val }}");
+				$("#{{ ctrl_prefix }}_list").append('<ul><div class="widget_subform_{{ ctrl_prefix  }}_'+{{ i }} +'"></div></ul>');
 				jQuery.get("{{ ajax_route }}",
 					{
 						index:{{ i }},
@@ -65,9 +71,10 @@ $(document).ready(
 					},
 					function(result)
 					{
-						$('.widget_subform_'+ {{ i }} ).html(result);
+						$('.widget_subform_{{ ctrl_prefix  }}_'+ {{ i }} ).html(result);
 					}
 				);
+				
 			{% endfor %}
 			 nb_ctrls_{{ ctrl_prefix }}={{ i }};
 		{% endif %}

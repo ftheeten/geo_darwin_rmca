@@ -1,0 +1,13 @@
+{# src/AppBundle/Resources/views/foreignkeys/select2_jsdefault.html.twig #}
+
+{% if obj_prop is defined %}
+	{% if not obj_key is defined %}
+		{% set obj_key = obj_prop %}
+	{% endif %}
+	{% if not obj_val is defined %}
+		{% set obj_val = obj_prop %}
+	{% endif %}
+	//javascript code for option
+	var newOption = new Option("{{ obj_key }}", "{{ obj_val }}", true, true);
+	$('{{ select2_ctrl }}').append(newOption).trigger('change');
+{% endif %}		

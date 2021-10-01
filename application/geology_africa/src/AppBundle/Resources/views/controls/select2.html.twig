@@ -1,0 +1,6 @@
+{# src/AppBundle/Resources/views/controls/select2.html.twig #}
+
+{% set extra_class = extra_class|default("") %}
+{% set select2_var = form_variable ~ "_sel2" %}
+{{{ form_widget(form_variable, {'attr': {'style': 'display:none' }}
+<select class="select2 {{ form_variable }} "}}"/>

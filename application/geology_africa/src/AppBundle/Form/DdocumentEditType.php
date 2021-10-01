@@ -44,7 +44,7 @@ class DdocumentEditType extends AbstractType {
 			->add('edition', TextType::class, array('required' => false)) 
 			->add('pubplace', TextType::class, array('required' => false))
 			->add('doccartotype', TextType::class, array('required' => false))
-			->add('keywords', ChoiceType::class, array('mapped' => false))
+			
 		;
 		
 		$builder->addEventListener(

@@ -1,0 +1,72 @@
+{# src/AppBundle/Resources/views/addcontributor.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block body %}
+{{ form_start(form, {'attr': {'id': 'form_contributor'}}) }}
+
+<div class="container">
+<div class="row">
+	<div class="col-sm-2">id</div>
+	<div class="col-sm-1">
+		{{ form_widget(form.idcontributor,  {'attr':{'class':'val_next_contrib' }}) }}
+		{% if originaction == "add_beforecommit" %}
+			{% include "@App/forms/get_next_id.html.twig" with {'table_name' : 'contributor', 'name_ctrl': 'bt_next_contributor', 'target_ctrl':'.val_next_contrib'}  %}
+		{% endif %}
+	</div>
+	
+</div>
+<div class="row">	
+	<div class="col-sm-2">name</div>
+	<div class="col-sm-3">{{ form_widget(form.people, {'attr': {}}) }}</div>
+	
+	<div class="col-sm-2">title</div>
+	<div class="col-sm-1">{{ form_widget(form.peopletitre, {'attr': {'class' : 'contribtitle'}}) }}</div>
+</div>
+<div class="row">
+	<div class="col-sm-2">function</div>
+	<div class="col-sm-3">{{ form_widget(form.peoplefonction, {'attr': {'class' : 'contribfunction'}}) }}</div>
+	
+	<div class="col-sm-2">status</div>
+	<div class="col-sm-3">{{ form_widget(form.peoplestatut, {'attr': {'class' : 'contribstatut'}}) }}</div>
+</div>
+<div class="row">
+	<div class="col-sm-2">Institution</div>
+	<div class="col-sm-3">{{ form_widget(form.institut, {'attr': {'class' : 'contribinstitution'}}) }}</div>	
+</div>
+
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#form_contributor' , 'delete_route': 'app_delete_contributor' } %}		
+
+{{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script language='javascript'>
+		$(document).ready(
+			function()
+			{
+				console.log("loaded");
+				
+				$(".contribtitle").select2(select2_generic("{{ path('app_contribtitle_autocomplete')}}","peopletitre","peopletitre" ),0);
+				$(".contribfunction").select2(select2_generic("{{ path('app_contribfunction_autocomplete')}}","peoplefonction","peoplefonction" ),0);
+				$(".contribstatut").select2(select2_generic("{{ path('app_contribstatus_autocomplete')}}","peoplestatut","peoplestatut" ),0);
+				$(".contribinstitution").select2(select2_generic("{{ path('app_contribinstitutions_autocomplete')}}","institut","institut" ),0);
+				console.log("TEST");
+				{% if Dcontributor is defined %}
+					console.log("DEFINED");
+					{% include "@App/foreignkeys/select2_jsdefault.html.twig" with { 'obj_prop' : Dcontributor.institut,'select2_ctrl': ".contribinstitution"} %}
+					{% include "@App/foreignkeys/select2_jsdefault.html.twig" with { 'obj_prop' : Dcontributor.peoplestatut,'select2_ctrl': ".contribstatut"} %}
+					{% include "@App/foreignkeys/select2_jsdefault.html.twig" with { 'obj_prop' : Dcontributor.peoplefonction,'select2_ctrl': ".contribfunction"} %}
+					{% include "@App/foreignkeys/select2_jsdefault.html.twig" with { 'obj_prop' : Dcontributor.peopletitre,'select2_ctrl': ".contribtitle"} %}	
+				{% endif %}
+				
+			}
+		);
+		
+	</script>
+{% endblock %}

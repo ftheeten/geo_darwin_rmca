@@ -20,6 +20,7 @@ use AppBundle\Entity\LPrecision;
 use AppBundle\Entity\LMedium;
 use AppBundle\Entity\DLoccenter;
 use AppBundle\Entity\Ddocument;
+use AppBundle\Entity\Ddoctitle;
 use AppBundle\Entity\Dsamheavymin;
 use AppBundle\Entity\Dsamheavymin2;
 use AppBundle\Entity\Dcontribution;
@@ -27,6 +28,7 @@ use AppBundle\Entity\Dcontributor;
 use AppBundle\Entity\Dlinkcontribute;
 use AppBundle\Entity\Dlinkcontsam;
 use AppBundle\Entity\Dlinkcontloc;
+use AppBundle\Entity\Dlinkcontdoc;
 use AppBundle\Entity\Dlocdrilling; 
 use AppBundle\Entity\DLoclitho;
 use AppBundle\Form\DsampleType;
@@ -34,6 +36,7 @@ use AppBundle\Form\DsampleEditType;
 use AppBundle\Form\LmineralsType;
 use AppBundle\Form\LmineralsEditType;
 use AppBundle\Form\DcontributionType;
+use AppBundle\Form\DcontributorType;
 use AppBundle\Form\DcontributionEditType;
 use AppBundle\Form\DdocumentEditType;
 use AppBundle\Form\DdocumentType;
@@ -58,49 +61,13 @@ class GeoController extends Controller
 	protected $page_size=20;
     protected $limit_autocomplete=30;
 	
-    public function indexAction(Request $request){
-		
+    public function indexAction(Request $request){		
 		return $this->render('@App/home.html.twig');
 		$this->set_sql_session();
     }
 	
-	/*
-	protected function handle_subform($entityManager, $fk_obj, $array_params)
-	{
-		foreach( $array_params as $method=>$val)
-		{
-			print($method);
-			 call_user_func_array(array($fk_obj, $method ), array($val));
-		}
-		
-		$entityManager->persist($fk_obj);
-	}
 	
-	
-	protected function handle_subform_main($entityManager, $form_vars, $pk_obj, $fk_obj,$fk_class_name, $obj_params,$additional_params, $val_method)
-	{
-		if($form_vars!==null)
-		{
-			foreach($form_vars as $val)
-			{
-				//$reflection = new $fk_class_name(); 
-				$params=Array();
-				
-				foreach( $obj_params as $fk_side)
-				{
-					
-					//call_user_func_array(array($reflection, $fk_side ), array($pk_obj));
-				}
-				foreach( $additional_params as $fk_side=> $val2)
-				{
-					$params[$fk_side]=$val2;
-				}
-				$params[$val_method]=$val;
-				$this->handle_subform($entityManager,$reflection, $params);
-			}
-		}
-	}*/
-	
+
 	protected function set_sql_session()
 	{
 		$em = $this->getDoctrine()->getManager();		
@@ -109,6 +76,271 @@ class GeoController extends Controller
 		$statement = $em->getConnection()->prepare($RAW_QUERY);
 		$statement->execute(); 
 	}
+	
+	protected function check_collection_rights_general()
+	{
+		return $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']);
+	}
+	
+	public function add_general($class_name, $form_class,Request $request,$redirect_add, $redirect_edit, $field_to_remove=null )
+	{
+		$collection_rights=$this->check_collection_rights_general();
+		if ($collection_rights == true)
+		{		
+			$reflect = new \ReflectionClass($class_name);
+			$object = $reflect->newInstance();  
+			$em = $this->getDoctrine()->getManager();
+			$form = $this->createForm($form_class, $object, array('entity_manager' => $em,));
+			if($field_to_remove!==null)
+			{
+				
+				$form->remove($field_to_remove);
+			}
+			if ($request->isMethod('POST')) 
+			{
+				$form->handleRequest($request);
+				if ($form->isSubmitted() && $form->isValid()) {
+					try {
+						$em->persist($object);
+						$em->flush();
+						return $this->redirectToRoute($redirect_edit, array("pk"=>$object->getPk() ));
+						
+					}
+					catch(\Doctrine\DBAL\DBALException $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+				}
+			}
+			return $this->render($redirect_add, array(
+				'form' => $form->createView(),
+				'originaction'=>'add_beforecommit'
+			));
+		}
+		else
+		{
+			return $this->render('@App/collnoaccess.html.twig');
+		}
+	}
+	
+	public function edit_general($obj, $form, $name_twig_class, Request $request, $twig, $name_twig_classm)
+	{
+		$collection_rights=$this->check_collection_rights_general();
+		if ($collection_rights == true)
+		{		
+		
+			$em = $this->getDoctrine()->getManager();	
+			$this->set_sql_session();
+			if (!$obj) 
+			{
+				throw $this->createNotFoundException('No document found' );
+			}
+			elseif($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+			{
+				
+				if ($request->isMethod('POST')) 
+				{				
+					
+					$form->handleRequest($request);
+					if ($form->isSubmitted() && $form->isValid()) 
+					{					
+						try 
+						{						
+							$em = $this->getDoctrine()->getManager();
+							$em->flush();
+							$this->addFlash('success','DATA RECORDED IN DATABASE!');  
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+							
+						}catch(\Doctrine\DBAL\DBALException $e ) {
+							
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+						}
+						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));	
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						catch(Exception $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						finally
+						{
+							
+						}
+						
+					}
+					elseif ($form->isSubmitted() && !$form->isValid() )
+					{
+						$form->addError(new FormError("Other validation error"));
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+					}
+					elseif (!$form->isSubmitted())
+					{					
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+					}
+				}
+				else
+				{
+					//print("issue");
+				}
+				
+				
+			}
+			//print("test");
+			return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+		}
+		else
+		{
+			return $this->render('@App/collnoaccess.html.twig');
+		}
+	}	
+	
+	public function delete_general($obj, $form,  $name_twig_class, Request $request, $twig)
+	{	
+		$collection_rights=$this->check_collection_rights_general();
+		if ($collection_rights == true)
+		{		
+			$em = $this->getDoctrine()->getManager();	
+			$this->set_sql_session();
+			if (!$obj) {
+				throw $this->createNotFoundException('No document found' );
+			}
+			elseif($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+			{
+				
+				if ($request->isMethod('POST')) 
+				{				
+					
+					$form->handleRequest($request);
+					if ($form->isSubmitted() && $form->isValid()) 
+					{					
+						try 
+						{						
+							$em = $this->getDoctrine()->getManager();
+							$em->remove($obj);
+							$em->flush();
+							$this->addFlash('success','DATA DELETED!');  
+							
+							return $this->redirectToRoute('app_home');
+							
+						}catch(\Doctrine\DBAL\DBALException $e ) {
+							
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+						}
+						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));	
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						catch(Exception $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+						}
+						finally
+						{
+							
+						}
+						
+					}
+					elseif ($form->isSubmitted() && !$form->isValid() )
+					{
+						$form->addError(new FormError("Other validation error"));
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+					}
+					elseif (!$form->isSubmitted())
+					{					
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+					}
+				}
+				else
+				{
+					print("issue");
+				}
+				
+				
+			}
+			return $this->redirectToRoute('app_home');
+		}
+		else
+		{
+			return $this->render('@App/collnoaccess.html.twig');
+		}
+    }
+
+public function handle_many_to_many_detail_general(Request $request, $index, $target_class_name, $field_target_id, $id_target_obj, $link_class_name, $fk_mapping=Array(), $http_mapping=Array(), $direct_mapping = Array())
+	{
+		
+		$target_obj=$this->getDoctrine()
+			->getRepository($target_class_name)
+			 ->findOneBy(array($field_target_id => $id_target_obj));
+			 
+			 
+		$reflect  = new \ReflectionClass($link_class_name);
+		$dlink_obj=$reflect->newInstance(); 	 
+		foreach($fk_mapping as $get_method=>$set_method)
+		{
+			$src_val=call_user_func(array($target_obj,$get_method));
+			call_user_func_array(array($dlink_obj, $set_method), array($src_val));
+		}
+		foreach($http_mapping as $prefix=>$method)
+		{
+			$val=$request->request->get($prefix.$index);
+			call_user_func_array(array($dlink_obj, $method), array($val));
+		}
+		foreach($direct_mapping as $method=>$val)
+		{
+			call_user_func_array(array($dlink_obj, $method), array($val));
+		}
+		return $dlink_obj;
+		
+	}
+	
+
+	
+	public function handle_many_to_many_relation_general(Request $request, $obj, $prefix_pk_url, $target_class_name, $field_target_id, $link_class_name, $fk_mapping=Array(), $http_mapping=Array(), $direct_mapping = Array())
+	{		
+		
+		if ($request->isMethod('POST'))
+		{		
+			
+			$params=$request->request->all();
+		}
+		else
+		{
+		
+			$params=$request->query->all();
+		}
+		$tmp_array=Array();
+		foreach($params as $key=>$val)
+		{			
+			
+			if(strpos($key, $prefix_pk_url )===0)
+			{					
+				$tmp_idx=preg_replace('/^(.+?)(\d+)$/i', '${2}', $key);	
+				$id_obj=$request->request->get($prefix_pk_url.$tmp_idx);						
+				$tmp_obj=$this->handle_many_to_many_detail_general($request, $tmp_idx, $target_class_name, $field_target_id,$id_obj , $link_class_name, $fk_mapping, $http_mapping, $direct_mapping);
+				$tmp_array[]=$tmp_obj;
+				//$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
+			}
+		}
+		return $tmp_array;
+	}	
+	
+	
+	
 	
 	public function addsampleAction(Request $request){
 		$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('6,12,13',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
@@ -166,6 +398,7 @@ class GeoController extends Controller
 		}
     }
 	
+
 	public function savecontributors($idcontrib,$actionscontribstr,$request){
 		//return new Response('<html><body>'.print_r($actionscontribstr).print_r($actionscontribstr).'</body></html>' );
 		$actionscontrib[] = null;
@@ -333,52 +566,168 @@ class GeoController extends Controller
 		}
 	}
 	
-	public function addcontributionAction(Request $request){
-		$dcontribution = new Dcontribution();
-			
-		$em = $this->getDoctrine()->getManager();
-		$form = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
-		
-		if ($request->isMethod('POST')) {
-			$form->handleRequest($request);
-			if ($form->isSubmitted() && $form->isValid()) {
-				try {
-					$em->persist($dcontribution);
-					$em->flush();
 
-					$m=0;
-					$idcontrib = $dcontribution->getIdcontribution();
-				
-					if ($idcontrib != ""){	
-						$actionscontribstr = $request->get('newcontributors');
-						//return new Response('<html><body>'.print_r($actionscontribstr).'</body></html>' );
-						$this->savecontributors($idcontrib,$actionscontribstr,$request);
-					}  
+	
+	
+	
+	public function addContributionAction(Request $request)
+	{
+	    $this->set_sql_session();
+		$this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']); 
+		$rightoncollection=$this->check_collection_rights_general();
+		if($rightoncollection)
+		{
+			$dcontribution = new Dcontribution();			
+			$em = $this->getDoctrine()->getManager();
+			$form = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
+			if ($request->isMethod('POST')) 
+			{
+				$form->handleRequest($request);
+				if ($form->isSubmitted() && $form->isValid()) 
+				{
+					try 
+					{					
+						$em->persist($dcontribution);
+						$em->flush();					
+						//$link_array=$this->handle_contribution_relations($request, $dcontribution);
+						$link_array=$this->handle_many_to_many_relation_general(
+							$request,
+							$dcontribution,
+							"contribdetail_id_contrib_",
+							Dcontributor::class,
+							"pk",
+							Dlinkcontribute::class,
+							Array("getIdContributor"=>"setIdContributor"),
+							Array("contribdetail_role_contrib_"=>"setContributorrole", "contribdetail_order_contrib_"=>"setContributororder"),
+							Array("setIdContribution"=>$dcontribution->getIdContribution())							
+						);
+						foreach($link_array as $dlink_obj)
+						{
+							$em->persist($dlink_obj);
+						}
+						$em->flush();
+						//print("submit_2");
+						return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
+					}
+					catch(\Doctrine\DBAL\DBALException $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
 					
-					$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
-				
-					return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
-				} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-					echo "<script type='text/javascript'>alert('Record already exists with these values !');</script>";
-				} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-					echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-				} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-					echo "<script type='text/javascript'>alert('Table not found !');</script>";
-				} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-					echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-				} catch(\Doctrine\DBAL\Exception\DriverException $e ) {
-					echo "<script type='text/javascript'>alert('There is a syntax error with one field !');</script>";
 				}
-			}elseif ($form->isSubmitted() && !$form->isValid() ){
-				echo "<script type='text/javascript'>alert('error in form');</script>";
+			}
+			return $this->render('@App/contributions/contributionform.html.twig', array(
+					'form' => $form->createView(),
+					'dcontribution' => $dcontribution,
+					'originaction'=>'add_beforecommit'
+				)
+			);
+		}
+		else
+		{
+			return $this->render('@App/collnoaccess.html.twig');
+		}
+	}
+	
+	public function editContributionAction(Dcontribution $dcontribution, Request $request)
+	{			
+		$em = $this->getDoctrine()->getManager();	
+		$this->set_sql_session();
+		if (!$dcontribution) {
+			throw $this->createNotFoundException('No document found' );
+		}
+		else
+		{		
+			$dlinkcontribute=$dcontribution->initDlinkcontribute($em);	
+			
+			$form = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
+
+			
+			if ($request->isMethod('POST')) 
+			{
+			//print("POST");
+				
+				$form->handleRequest($request);
+				
+
+				if ($form->isSubmitted() && $form->isValid()) {
+					try 
+					{
+					
+						//echo "<script>console.log('dans valid' );</script>";
+						//$dlinkcontribute=$this->handle_contribution_relations($request, $dcontribution);
+						$dlinkcontribute=$this->handle_many_to_many_relation_general(
+							$request,
+							$dcontribution,
+							"contribdetail_id_contrib_",
+							Dcontributor::class,
+							"pk",
+							Dlinkcontribute::class,
+							Array("getIdContributor"=>"setIdContributor"),
+							Array("contribdetail_role_contrib_"=>"setContributorrole", "contribdetail_order_contrib_"=>"setContributororder"),
+							Array("setIdContribution"=>$dcontribution->getIdContribution())
+						);
+						if($dlinkcontribute!==null)
+						{
+							
+							$dcontribution->initNewDlinkcontribute($em, $dlinkcontribute);
+							//reattach after update
+							$dlinkcontribute=$dcontribution->initDlinkcontribute($em);	
+							//throw new UndefinedOptionsException();
+						}
+						
+						$em->flush();
+						//print("DONE");
+						
+						$this->addFlash('success','DATA RECORDED IN DATABASE!');  
+						
+						return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
+						
+					}
+					catch(\Doctrine\DBAL\DBALException $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+					
+				}elseif ($form->isSubmitted() && !$form->isValid() )
+				{
+					//echo "<script type='text/javascript'>alert('error in form');</script>";
+				}
+			}
+			
+			$rightoncollection1 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1',['Curator','Validator','Collection_manager']); //'Viewer'
+			$rightoncollection2 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('2',['Curator','Validator','Collection_manager']);
+			$rightoncollection3 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('3',['Curator','Validator','Collection_manager']);
+			$rightoncollection4 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('7',['Curator','Validator','Collection_manager']);
+			$rightoncollection5 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('9',['Curator','Validator','Collection_manager']);
+			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true){
+				
+				return $this->render('@App/contributions/contributionform.html.twig', array(
+					'dcontribution' => $dcontribution,
+					'form' => $form->createView(),
+					'origin'=>'edit',
+					'originaction'=>'edit',
+					'dlinkcontribute'=>$dlinkcontribute
+				));
+			}else{
+				return $this->render('@App/collnoaccess.html.twig');
 			}
 		}
-		
-		return $this->render('@App/addcontribution.html.twig', array(
-			'form2' => $form->createView(),
-			'originaction'=>'add_beforecommit'
-		));
-    }
+	}	
+	
 	
 	public function addcollectionAction(Request $request){
 		$codecollection = new Codecollection();
@@ -473,12 +822,13 @@ class GeoController extends Controller
 			'lminerals' => $lminerals,
             'Mineral_form' => $form->createView(),
         ));
-    }
+    }	
+
 	
 	public function adddocumentAction(Request $request){
 		$this->set_sql_session();
 		$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
-        $list_keywords=Array();
+        //$list_keywords=Array();
 		if ($rightoncollection == true){
 			$ddocument = new Ddocument();
 
@@ -507,7 +857,41 @@ class GeoController extends Controller
 								$em->persist($keyobj);
 							}
 						}
+						
+						$titles=$request->get("widget_titles",null);
+						if($titles!==null)
+						{
+							$i=1;
+							foreach($titles as $title)
+							{
+								$titleobj=new Ddoctitle();
+								$titleobj->setTitle($title);
+								$titleobj->setTitlelevel($i);
+								$titleobj->setIdcollection($ddocument->getIdCollection());
+								$titleobj->setIddoc($ddocument->getIddoc());
+								//$ddocument->addDkeyword($keyobj);
+								$em->persist($titleobj);
+								$i++;
+							}
+						}
 						$em->persist($ddocument);
+						
+						//$link_array=$this->handle_document_to_contrib($request,$ddocument);
+						$link_array=$this->handle_many_to_many_relation_general(
+							$request,
+							$ddocument,
+							"doc_to_contrib_id_contrib_",
+							Dcontribution::class,
+							"pk",
+							Dlinkcontdoc::class,
+							Array("getIdcontribution"=>"setIdcontribution"),
+							Array(),
+							array("setrelationidcollection"=>$ddocument)
+							);
+						foreach($link_array as $dlink_obj)
+						{
+							$em->persist($dlink_obj);
+						}
 						
 						$em->flush();
 						$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
@@ -594,7 +978,7 @@ class GeoController extends Controller
 			$form = $this->createForm(StratumType::class, $dloclitho, array('entity_manager' => $em,));
 			
 			if ($request->isMethod('POST')) {
-				print_r($request->get('---'.'appbundle_dloclitho_alternance'.'---'));
+				//print_r($request->get('---'.'appbundle_dloclitho_alternance'.'---'));
 				echo "<script type='text/javascript'>alert('++++'+'".$request->get('inp_Bottomstratum')."'+'---');</script>";
 				$form->handleRequest($request);
 				if ($form->isSubmitted() && $form->isValid()) {
@@ -1147,101 +1531,7 @@ class GeoController extends Controller
 				return $this->render('@App/collnoaccess.html.twig');
 			}
 		}
-    }
-	
-	public function editcontributionAction(Dcontribution $dcontribution, Request $request){				
-		if (!$dcontribution) {
-			throw $this->createNotFoundException('No contribution found' );
-		}else{
-			$RAW_QUERY = "";
-			$linkcontribute[]=null;
-			$arraycontributors[] =null;
-			
-			$em = $this->getDoctrine()->getManager();
-			$form = $this->createForm(DcontributionEditType::class, $dcontribution, array('entity_manager' => $em,));
-			
-			$idcontrib = $dcontribution->getIdcontribution();
-			$RAW_QUERYcontributors = "SELECT * FROM dlinkcontribute where idcontribution = '".$idcontrib."';";
-			$statement = $em->getConnection()->prepare($RAW_QUERYcontributors);
-			$statement->execute();
-			$arraylinkcontribs = $statement->fetchAll();
-			
-			if (count($arraylinkcontribs) > 0 ){
-				
-				foreach($arraylinkcontribs as $arraylinkcontribs_obj){
-					$Idcontributor = $arraylinkcontribs_obj["idcontributor"];
-					
-					if ($Idcontributor == null){
-						$actionlinkcontrib = "I";
-					}else{
-						$actionlinkcontrib = "U";
-					}
-				}
-				$RAW_QUERYIdcontrib = "SELECT * FROM dcontributor c left join dlinkcontribute l on l.idcontributor = c.idcontributor where l.idcontribution = '".$idcontrib."';";
-						
-			//	"SELECT * FROM dcontributor where idcontributor = ".$Idcontributor.";";
-				$statement = $em->getConnection()->prepare($RAW_QUERYIdcontrib);
-				$statement->execute();
-				$arraycontributors = $statement->fetchAll();
-				//return new Response('<html><body>'.print_r($arraycontributors).'</body></html>' );
-				foreach($arraycontributors as $arraycontributors_obj){
-					$idcontributors[]=$arraycontributors_obj['idcontributor'];
-				}
-			}else{
-				$actionlinkcontrib = "I";
-			}
-					
-			if ($request->isMethod('POST')) {
-				$form->handleRequest($request);
-				if ($form->isSubmitted() && $form->isValid()) {
-					try {
-						$em->persist($dcontribution);
-						$em->flush();
-
-						$m=0;
-						$idcontrib = $dcontribution->getIdcontribution();
-						
-						if ($idcontrib != ""){	
-							$actionscontribstr = $request->get('newcontributors');
-							$this->savecontributors($idcontrib,$actionscontribstr,$request);
-						}  
-						
-						$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
-					
-						return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
-					} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-						echo "<script type='text/javascript'>alert('Record already exists with these values !');</script>";
-					} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-						echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-					} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-						echo "<script type='text/javascript'>alert('Table not found !');</script>";
-					} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-						echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-					} catch(\Doctrine\DBAL\Exception\DriverException $e ) {
-						echo "<script type='text/javascript'>alert('There is a syntax error with one field !');</script>";
-					}
-				}elseif ($form->isSubmitted() && !$form->isValid() ){
-					echo "<script type='text/javascript'>alert('error in form');</script>";
-				}
-			}
-		
-			if(!isset($arraycontributors[0])){
-				return $this->render('@App/editcontribution.html.twig', array(
-				'dcontribution' => $dcontribution,
-				'form2' => $form->createView(),
-				'originaction'=>'edit'
-				));
-			}else{
-				return $this->render('@App/editcontribution.html.twig', array(
-					'dcontribution' => $dcontribution,
-					'form2' => $form->createView(),
-					'arraylinkcontribs' => $arraylinkcontribs,
-					'arraycontributors' => $arraycontributors,
-					'originaction'=>'edit'
-				));
-			}
-		}
-	}
+    }	
 	
 	public function editmineralAction(Lminerals $lminerals, Request $request){
 		$em = $this->getDoctrine()->getManager();
@@ -1585,8 +1875,12 @@ class GeoController extends Controller
 		}
     }
 	
-	public function editdocAction(Ddocument $ddocument, Request $request){
-		$this->set_sql_session();
+	
+	
+
+	public function editdocAction(Ddocument $ddocument, Request $request)
+	{
+		//print("EDIT");
 			/*	$arrayeditvals =  explode(",,", $editvals); 
 		$elem =array();
 		foreach($arrayeditvals as $e) {
@@ -1598,7 +1892,8 @@ class GeoController extends Controller
 		$this->set_sql_session();
 		if (!$ddocument) {
 			throw $this->createNotFoundException('No document found' );
-		}else{		
+		}else{
+
 			//medium
 			/*if (!is_null($ddocument->getMedium())){
 				$medium = $ddocument->getMedium()->getMedium(); // $ddocument->getMedium() is considered as a table because it's a FK
@@ -1613,10 +1908,16 @@ class GeoController extends Controller
 				
 			
 			$keywords=$ddocument->initDkeywords($em);
+			$titles=$ddocument->initDdoctitles($em);
+			$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
+	
 			
 			$form = $this->createForm(DdocumentEditType::class, $ddocument, array('entity_manager' => $em,));
 
-			if ($request->isMethod('POST')) {
+			
+			if ($request->isMethod('POST')) 
+			{
+			//print("POST");
 				$temp= $request->get('appbundle_ddocument_medium');
 				echo "<script>console.log('$temp' );</script>";
 				$form->handleRequest($request);
@@ -1624,7 +1925,8 @@ class GeoController extends Controller
 
 				if ($form->isSubmitted() && $form->isValid()) {
 					try {
-						echo "<script>console.log('dans valid' );</script>";
+					print("SUBMIT");
+						//echo "<script>console.log('dans valid' );</script>";
 						$keywords=$request->get("widget_keywords",null);
 						if($keywords!==null)
 						{
@@ -1633,10 +1935,64 @@ class GeoController extends Controller
 							//throw new UndefinedOptionsException();
 						}
 						
+						
+						$titles=$request->get("widget_titles",null);
+						if($titles!==null)
+						{
+							$array_titles=Array();
+							$i=1;
+							foreach($titles as $title)
+							{
+								$titleobj=new Ddoctitle();
+								$titleobj->setTitle($title);
+								$titleobj->setTitlelevel($i);
+								$titleobj->setIdcollection($ddocument->getIdCollection());
+								$titleobj->setIddoc($ddocument->getIddoc());
+								$i++;
+								$array_titles[]= $title;
+							}
+							//$ddocument->initNewDdoctitles($em, $titles);
+							//throw new UndefinedOptionsException();
+						}
+						$dlinkcontribute=$this->handle_many_to_many_relation_general(
+							$request,
+							$ddocument,
+							"doc_to_contrib_id_contrib_",
+							Dcontribution::class,
+							"pk",
+							Dlinkcontdoc::class,
+							Array("getIdcontribution"=>"setIdcontribution"),
+							Array(),
+							array("setrelationidcollection"=>$ddocument)
+							);
+						if($dlinkcontribute!==null)
+						{
+							if(count($dlinkcontribute)>0)
+							{
+								//print("EDIT_TEST");
+								$ddocument->initNewDLinkcontdocs($em, $dlinkcontribute);
+								//reattach after update
+								
+							//throw new UndefinedOptionsException();
+							}
+						}
+						$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
 						$em->flush();
+						//print("DONE");
+						
 						$this->addFlash('success','DATA RECORDED IN DATABASE!');  
 						
-						return $this->redirectToRoute('app_edit_doc', array('pk' => $ddocument->getPk()));
+						$current_tab=$request->request->get("current_tab","main-tab");
+			
+						/*return $this->render('@App/editdoc.html.twig', array(
+							'ddocument' => $ddocument,
+							'form' => $form->createView(),
+							'origin'=>'edit',
+							'originaction'=>'edit',
+							'current_tab'=> $current_tab,
+							'keywords'=>$keywords,
+							'dlinkcontribute'=>$dlinkcontribute
+						));*/
 						
 					}catch(\Doctrine\DBAL\DBALException $e ) {
 						$form->addError(new FormError($e->getMessage()));
@@ -1664,22 +2020,27 @@ class GeoController extends Controller
 						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
 					}*/
 				}elseif ($form->isSubmitted() && !$form->isValid() ){
-					echo "<script type='text/javascript'>alert('error in form');</script>";
+					//echo "<script type='text/javascript'>alert('error in form');</script>";
 				}
 			}
-			
+			print("SENT");
 			$rightoncollection1 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1',['Curator','Validator','Collection_manager']); //'Viewer'
 			$rightoncollection2 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('2',['Curator','Validator','Collection_manager']);
 			$rightoncollection3 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('3',['Curator','Validator','Collection_manager']);
 			$rightoncollection4 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('7',['Curator','Validator','Collection_manager']);
 			$rightoncollection5 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('9',['Curator','Validator','Collection_manager']);
 			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true){
+			$current_tab=$request->request->get("current_tab","main-tab");
+			
 				return $this->render('@App/editdoc.html.twig', array(
 					'ddocument' => $ddocument,
 					'form' => $form->createView(),
 					'origin'=>'edit',
 					'originaction'=>'edit',
-					'keywords'=>$keywords
+					'current_tab'=> $current_tab,
+					'keywords'=>$keywords,
+					'titles'=>$titles,
+					'dlinkcontribute'=>$ddocument->initDLinkcontdoc($em)
 				));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -1687,56 +2048,7 @@ class GeoController extends Controller
 		}
     }
 	
-	/*public function deletesammineralAction(String $primkey){
-		$coll = "";
-		$idsample = "";
-		$idmineral = "";
-		if ($primkey != ""){
-			$elem = explode("-", $primkey);
-			$coll = $elem[0];
-			$idsample = $elem[1];
-			$idmineral = $elem[2];
-		}
-						
-		$em = $this->getDoctrine()->getManager();
-		
-		$sammineral = $this->getDoctrine()
-			->getRepository(Dsamminerals::class)
-			 ->findBy(array('idcollection' => $coll, 
-							'idsample' => $idsample,
-							'idmineral' => $idmineral 
-		));
-						   
-	//	if (!$sammineral) {
-	//		throw $this->createNotFoundException('No mineral found' );
-	//	}else{
-		Try{
-			$RAW_QUERY = "DELETE FROM dsamminerals WHERE idcollection = '".$coll."' and idsample = ".$idsample." and idmineral = ".$idmineral." ;";
-			//return new Response('<html><body>query=:'.$RAW_QUERY.'</body></html>' );
-			
-			$statement = $em->getConnection()->prepare($RAW_QUERY);
-			//$statement->execute();
-				
-				return $this->render('@App/editmineral.html.twig', array(
-				'lminerals' => $lminerals,
-				'form' => $form->createView(),
-				'origin'=>'edit'
-			));
-		//}
-		} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-			echo "<script type='text/javascript'>alert('Record already exists with these values of collection and ID !');</script>";
-			//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction already exist" );
-		} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-			echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-			throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Bad request on Transaction" );
-		} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-			echo "<script type='text/javascript'>alert('Table not found !');</script>";
-			//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
-		} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-			echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-			//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
-		}
-    }*/
+
 	
 	public function errorcollectionAction(){
 		return $this->render('@App/collnoaccess.html.twig');
@@ -1937,6 +2249,10 @@ class GeoController extends Controller
 	
 	public function searchcontributionAction(Request $request){
 		return $this->render('@App/searchcontribution.html.twig');  
+	}
+	
+	public function searchcontributorAction(Request $request){
+		return $this->render('@App/searchcontributor.html.twig');  
 	}
 	
 	public function searchpointsAction(Request $request){
@@ -2193,34 +2509,7 @@ class GeoController extends Controller
         return new JsonResponse($minclasses);
     }
 	
-	public function IDContributions_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		
-		$arrayqueryvals =  explode("--", $_GET['code']); 		
-		$type = $arrayqueryvals[0];
-		$year = $arrayqueryvals[1];
-		if ($type <> "" AND $year == ""){
-			$WHERE_QUERY = "WHERE datetype LIKE '".$type."'";
-		};
-		if ($type == "" AND $year <> ""){
-			$WHERE_QUERY = "WHERE year = ".$year;
-		};
-		if ($type <> "" AND $year <> ""){
-			$WHERE_QUERY = "WHERE datetype LIKE '".$type."' AND year = ".$year;
-		};
-		
-		$RAW_QUERY = "	SELECT coalesce(	idcontribution || '--' || datetype || '--' || to_char(date, 'DD/MM/YYYY') || '--' || year, 
-										idcontribution || '--' || datetype || '--' || year,
-										idcontribution || '--' || datetype
-									) as idfull 
-						FROM dcontribution  ".$WHERE_QUERY." ORDER BY idcontribution";
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $idcontr = $statement->fetchAll();
-		//return new Response('<html><body>'.print_r($idcontr).'</body></html>');
-        return new JsonResponse($idcontr);
-    }
+
 	
 	public function DataContributionsAction(Request $request){
 		$em = $this->getDoctrine()->getManager();		
@@ -2250,48 +2539,8 @@ class GeoController extends Controller
         $alldata = $statement->fetchAll();
 		
         return new JsonResponse($alldata);
-    }
-	
-	public function Code_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$coll = strtolower($_GET['coll']);
-		$num = strtolower($_GET['code']);
-		if ($coll != "all"){
-			$RAW_QUERY = "SELECT fieldnum FROM dsample where lower(fieldnum) LIKE '".$num."%' AND lower(idcollection) = '".$coll."';"; 
-		}else{
-			$RAW_QUERY = "SELECT fieldnum FROM dsample where lower(fieldnum) LIKE '".$num."%';"; 
-		}
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-
-        $codes = $statement->fetchAll();
-        
-        return new JsonResponse($codes);
-    }
-	
-	public function contribtype_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-
-		$RAW_QUERY = "SELECT DISTINCT datetype FROM dcontribution ORDER BY datetype;"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $types = $statement->fetchAll();
-        
-        return new JsonResponse($types);
-    }
-	
-    public function contribrole_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-
-		$RAW_QUERY = "SELECT DISTINCT contributorrole FROM dlinkcontribute ORDER BY contributorrole;"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $types = $statement->fetchAll();
-        
-        return new JsonResponse($types);
-    }
+    }	
+    
 	
 	public function contribdata_comboboxAction(Request $request){
 		$em = $this->getDoctrine()->getManager();
@@ -2347,147 +2596,8 @@ class GeoController extends Controller
         $types = $statement->fetchAll();
         
         return new JsonResponse($types);
-    }
-	
-	
-	public function allkeywords_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$word = $request->query->get("code","");
-        if(strlen($word)>0)
-        {
-			
-            $RAW_QUERY = "SELECT * FROM mv_keyword_hierarchy_to_object_list_parent where word ~* :word ORDER BY word LIMIT :limit;"; 
-            
-            $statement = $em->getConnection()->prepare($RAW_QUERY);
-            $statement->bindParam(":word", $word, \PDO::PARAM_INT);
-            $statement->bindParam(":limit", $this->limit_autocomplete, \PDO::PARAM_INT);
-            $statement->execute();
-            $names = $statement->fetchAll();
-        }       
-        
-        return new JsonResponse($names);
-    }
-	
-	public function keywords_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$word = $request->query->get("code","");
-        if(strlen($word)>0)
-        {
-			
-            $RAW_QUERY = "SELECT * FROM mv_keyword_hierarchy_to_object_list_parent where word ~* :word ORDER BY word LIMIT :limit;"; 
-            
-            $statement = $em->getConnection()->prepare($RAW_QUERY);
-            $statement->bindParam(":word", $word, \PDO::PARAM_INT);
-            $statement->bindParam(":limit", $this->limit_autocomplete, \PDO::PARAM_INT);
-            $statement->execute();
-            $names = $statement->fetchAll();
-        }       
-        
-        return new JsonResponse($names);
-    }
-    
-    public function contribnames_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$name = $request->query->get("code","");
-        if(strlen($name)>0)
-        {
-            $RAW_QUERY = "SELECT * FROM dcontributor where lower(people) LIKE :people||'%' ORDER BY people LIMIT :limit;"; 
-            
-            $statement = $em->getConnection()->prepare($RAW_QUERY);
-            $statement->bindParam(":people", $name, \PDO::PARAM_STR);
-            $statement->bindParam(":limit", $this->limit_autocomplete, \PDO::PARAM_INT);
-            $statement->execute();
-            $names = $statement->fetchAll();
-        }
-        else
-        {
-            $names=[[]];
-        }
-        return new JsonResponse($names);
-    }
-	
-	public function usersnames_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$name = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT * FROM duser where lower(last_name) LIKE '".$name."%' ORDER BY last_name;"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $names = $statement->fetchAll();
-        
-        return new JsonResponse($names);
-    }
-	
-	public function Parent_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$num = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT DISTINCT lower(mparent) as mparent FROM lminerals where lower(mparent) LIKE '".$num."%';"; 
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-        return new JsonResponse($codes);
-    }
-	
-	public function Minname_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$num = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT DISTINCT lower(mname) as mname FROM lminerals where lower(mname) LIKE '".$num."%';"; 
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-        return new JsonResponse($codes);
-    }
-	
-	public function Minfname_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$num = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT DISTINCT lower(fmname) as fmname FROM lminerals where lower(fmname) LIKE '".$num."%';"; 
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-        return new JsonResponse($codes);
-    }
-	
-	public function Minformula_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$num = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT DISTINCT mformula as mformula FROM lminerals where lower(mformula) LIKE '".$num."%';"; 
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-        return new JsonResponse($codes);
-    }
-	
-	public function Museumloc_autocompleteAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		$num = strtolower($_GET['code']);
-		$RAW_QUERY = "SELECT DISTINCT lower(museumlocation) as museumlocation FROM dsample where lower(museumlocation) LIKE '".$num."%';"; 
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-        return new JsonResponse($codes);
-    }
-	
-	public function Box_autocompleteAction(Request $request){
-		$num = strtolower($_GET['code']);
-		$em = $this->getDoctrine()->getManager();
-		$RAW_QUERY = "SELECT DISTINCT lower(trim(boxnumber)) as boxnumber FROM dsample where lower(boxnumber) LIKE '".$num."%';";
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-		return new JsonResponse($codes);
-    }
-	
-	public function idobject_autocompleteAction(Request $request){
-		$num = strtolower($_GET['code']);
-		$em = $this->getDoctrine()->getManager();
-		$RAW_QUERY = "SELECT DISTINCT idobject FROM mv_rmca_merge_all_objects_vertical_expand where lower(idobject::varchar) LIKE '".$num."%';";
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codes = $statement->fetchAll();
-		return new JsonResponse($codes);
-    }
-	
+    }   
+
 	
 	public function LastSampleIDAction($querygroup,Request $request){
 		$id = 0;
@@ -3974,11 +4084,414 @@ class GeoController extends Controller
 		
     }
 	
+	public function contribution_searchAction(Request $request)
+	{
+		$current_page=$request->get("current_page",1);
+        $page_size=$request->get("page_size",$this->page_size);
+		$offset=(((int)$current_page)-1)* (int)$page_size;
+		
+		$namecontrib=$request->get("namecontrib");
+		$institute=$request->get("institute");
+		$results=Array();
+		$pagination=Array();
+		
+		$params_sql=Array();
+		$params_sql_or=Array();
+		$params_sql_or_group=Array();
+		$params_pdo=Array();
+		$idx_param=1;
+		
+		if($request->request->has("namecontrib"))
+		{
+			$contribs=$request->get("namecontrib");
+			$params_sql_or=Array();
+			foreach($contribs as $contrib)
+			{
+			
+				$params_sql_or[]="LOWER(people) LIKE LOWER(".$this->gen_pdo_name($idx_param).")||'%'";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["contributor"]=$params_sql_or;
+		}
+		if($request->request->has("institute"))
+		{
+			$institutes=$request->get("institute");
+			$params_sql_or=Array();
+			foreach($institutes as $institute)
+			{
+				$params_sql_or[]="LOWER(institut) = LOWER(".$this->gen_pdo_name($idx_param).")";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$institute;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["institute"]=$params_sql_or;
+		}
+		
+		if($request->request->has("rolecontrib"))
+		{
+			$roles=$request->get("rolecontrib");
+			
+			$params_sql_or=Array();
+			foreach($roles as $role)
+			{
+				$params_sql_or[]="LOWER(contributorrole) = LOWER(".$this->gen_pdo_name($idx_param).")";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$role;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["role"]=$params_sql_or;
+		}
+		
+		if($request->request->has("typecontrib"))
+		{
+			$types=$request->get("typecontrib");
+			
+			$params_sql_or=Array();
+			foreach($types as $type)
+			{
+				$params_sql_or[]="LOWER(datetype) = LOWER(".$this->gen_pdo_name($idx_param).")";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$type;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["typecontrib"]=$params_sql_or;
+		}
+		
+		if($request->request->has("contrib_year_from"))
+		{
+			$year_from=$request->get("contrib_year_from");
+			if(strlen($year_from)>0)
+			{
+				$params_sql_or=Array();
+				
+				$params_sql_or[]="year >= ".$this->gen_pdo_name($idx_param);
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$year_from;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
+				$idx_param++;
+				
+				$params_sql_or_group["year_from"]=$params_sql_or;
+			}
+		}
+		
+		if($request->request->has("contrib_year_to"))
+		{
+			$year_to=$request->get("contrib_year_to");
+			$year_from=$request->get("contrib_year_from");
+			if(strlen($year_to)>0)
+			{
+				$params_sql_or=Array();
+				
+				$params_sql_or[]="year <= ".$this->gen_pdo_name($idx_param);
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$year_to;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
+				$idx_param++;
+				
+				$params_sql_or_group["year_to"]=$params_sql_or;
+			}
+		}
+		
+		$query_or_builder=Array();
+			
+		foreach($params_sql_or_group as $key=>$params_sql_or)
+		{
+			$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
+		}
+		
+		if(count($params_sql)>0)
+		{
+			$query_where=" WHERE ".implode(" AND ", $params_sql );				
+		}
+		else
+		{
+			$query_where="";				
+		}
+		
+		$RAW_QUERY="
+			WITH main_q AS (SELECT dcontribution.pk, 
+				dcontribution.idcontribution ,
+				datetype, date, year
+			
+FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dlinkcontribute.idcontribution 
+				INNER JOIN dcontributor ON dlinkcontribute.idcontributor=dcontributor.idcontributor ".$query_where."  GROUP BY dcontribution.pk, dcontribution.idcontribution ,
+				datetype, date, year),
+		    desc_q AS
+			(SELECT dcontribution.pk ,	string_agg(
+					COALESCE(contributorrole||':','')||
+					COALESCE(' '||people||' '||institut,'')
+				,';' order by contributororder) as people_desc
+				FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dlinkcontribute.idcontribution 
+				INNER JOIN dcontributor ON dlinkcontribute.idcontributor=dcontributor.idcontributor
+				GROUP BY dcontribution.pk, dcontribution.idcontribution ,
+				datetype, date, year				
+				)		
+			SELECT main_q.* ,desc_q.people_desc, count(main_q.*) OVER() AS full_count
+			FROM main_q LEFT JOIN desc_q ON main_q.pk=desc_q.pk  ORDER BY main_q.idcontribution OFFSET :offset LIMIT :limit;";
+		$em = $this->container->get('doctrine')->getEntityManager();	
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		foreach($params_pdo as $key=>$val)
+		{
+			$statement->bindParam($key, $val["value"],  $val["type"]);				
+		}
+		$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
+		$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
+		$statement->execute();
+		$results = $statement->fetchAll(\PDO::FETCH_ASSOC);	
+		if(count($results)>0)
+		{
+			$count_all=$results[0]["full_count"];
+			$pagination = array(
+				'page' => $current_page,
+				'route' => 'search_main',
+				'pages_count' => ceil($count_all / $page_size)
+			);
+			
+			return $this->render('@App/search_results_contributions.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
+		}
+		else
+		{
+			return $this->render('@App/no_results_bs.html.twig');
+		}
+		return $this->render('@App/no_results_bs.html.twig');
+	}
+	
+	
+	public function contributor_searchAction(Request $request)
+	{
+		$current_page=$request->get("current_page",1);
+        $page_size=$request->get("page_size",$this->page_size);
+		$offset=(((int)$current_page)-1)* (int)$page_size;
+		
+		$namecontrib=$request->get("namecontrib");
+		$institute=$request->get("institute");
+		$results=Array();
+		$pagination=Array();
+		
+		$params_sql=Array();
+		$params_sql_or=Array();
+		$params_sql_or_group=Array();
+		$params_pdo=Array();
+		$idx_param=1;
+		
+		if($request->request->has("namecontrib"))
+		{
+			$contribs=$request->get("namecontrib");
+			$params_sql_or=Array();
+			foreach($contribs as $contrib)
+			{
+			
+				$params_sql_or[]="LOWER(people) LIKE LOWER(".$this->gen_pdo_name($idx_param).")||'%'";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["contributor"]=$params_sql_or;
+		}
+		if($request->request->has("institute"))
+		{
+			$institutes=$request->get("institute");
+			$params_sql_or=Array();
+			foreach($institutes as $institute)
+			{
+				$params_sql_or[]="LOWER(institut) = LOWER(".$this->gen_pdo_name($idx_param).")";
+				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$institute;
+				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+				$idx_param++;
+			}
+			$params_sql_or_group["institute"]=$params_sql_or;
+		}
+		
+		$query_or_builder=Array();
+			
+		foreach($params_sql_or_group as $key=>$params_sql_or)
+		{
+			$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
+		}
+		
+		if(count($params_sql)>0)
+		{
+			$query_where=" WHERE ".implode(" AND ", $params_sql );				
+		}
+		else
+		{
+			$query_where="";				
+		}
+		
+		$RAW_QUERY='
+			WITH main_q AS (SELECT * FROM dcontributor '.$query_where.')
+			SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY people, institut, peoplefonction OFFSET :offset LIMIT :limit;';
+		$em = $this->container->get('doctrine')->getEntityManager();	
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		foreach($params_pdo as $key=>$val)
+		{
+			$statement->bindParam($key, $val["value"],  $val["type"]);				
+		}
+		$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
+		$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
+		$statement->execute();
+		$results = $statement->fetchAll(\PDO::FETCH_ASSOC);	
+		if(count($results)>0)
+		{
+			$count_all=$results[0]["full_count"];
+			$pagination = array(
+				'page' => $current_page,
+				'route' => 'search_main',
+				'pages_count' => ceil($count_all / $page_size)
+			);
+			
+			return $this->render('@App/search_results_contrib.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
+		}
+		else
+		{
+			return $this->render('@App/no_results_bs.html.twig');
+		}
+		return $this->render('@App/no_results_bs.html.twig');
+	}
+	
+	
 	public function widget_keywordAction(Request $request)
 	{
 		$index=$request->get("index","1");
-		$default_val=$request->query->get("default_val","");
+		$default_val=$request->query->get("default_val","");		
 		return $this->render('@App/foreignkeys/dkeyword.html.twig', array("index"=>$index, "default_val"=>$default_val));
+	}
+	
+	public function widget_titleAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$default_val=$request->query->get("default_val","");		
+		return $this->render('@App/foreignkeys/ddoctitle.html.twig', array("index"=>$index, "default_val"=>$default_val));
+	}
+	
+    public function widget_doc_to_contribAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","doc_to_contrib");
+		$default_val=$request->query->get("default_val","");
+		$tmp_contriblink=NULL;
+		$tmp_contribution=NULL;
+		if(is_numeric($default_val))
+		{
+			$tmp_contriblink=$this->getDoctrine()
+			->getRepository(Dlinkcontdoc::class)
+			 ->findOneBy(array('pk' => $default_val));
+			 if($tmp_contriblink!==null)
+			 {
+				$tmp_contribution=$this->getDoctrine()
+				->getRepository(Dcontribution::class)
+				 ->findOneBy(array('idcontribution' => $tmp_contriblink->getIdContribution()));
+				$tmp_contribution->setDescriptionDB($this->getDoctrine());
+			}
+		}
+		return $this->render('@App/contributions/detail_doc_to_contribution.html.twig', array("index"=>$index, 
+			"default_val"=>$default_val,
+			"ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontdoc"=>$tmp_contriblink, "Dcontribution"=>$tmp_contribution));		
+	}
+	
+	public function widget_contribdetailAction(Request $request)
+	{
+		
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","contribdetail");
+		$default_val=$request->query->get("default_val","");
+		$tmp_contriblink=NULL;
+		$tmp_contributor=NULL;
+		if($default_val!="")
+		{
+			
+			$tmp_contriblink=$this->getDoctrine()
+			->getRepository(Dlinkcontribute::class)
+			 ->findOneBy(array('pk' => $default_val));
+			$tmp_contributor=$this->getDoctrine()
+			->getRepository(Dcontributor::class)
+			 ->findOneBy(array('idcontributor' => $tmp_contriblink->getIdContributor()));
+		}
+		return $this->render('@App/contributions/detail_contributor.html.twig', array("index"=>$index, "ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontribute"=>$tmp_contriblink, "Dcontributor"=>$tmp_contributor));		
+	}
+	
+	
+	
+	public function get_next_idAction(Request $request)
+	{
+		$val="";
+		$collection=$request->get("collection","");
+		$table=$request->get("table","document");
+		if($collection!="")
+		{
+			if($table=="document")
+			{
+				$sql_table="ddocument";
+				$field="iddoc";
+			}
+			elseif($table=="sample")
+			{
+				$sql_table="dsample";
+				$field="idsample";
+			}
+			elseif($table=="locality")
+			{
+				$sql_table="dloccenter";
+				$field="idpt";
+			}
+			
+			else
+			{
+				return new JsonResponse(Array("id"=>""));
+			}
+			$em = $this->container->get('doctrine')->getEntityManager();
+			$RAW_QUERY="SELECT MAX(COALESCE(".$field.",0))+ 1 as next_id FROM ".$sql_table." WHERE LOWER(idcollection)=LOWER(:idcollection);";
+			$statement = $em->getConnection()->prepare($RAW_QUERY);
+			$statement->bindParam(":idcollection", $collection, \PDO::PARAM_STR);
+			$statement->execute();
+			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			$val=$result[0]["next_id"];
+		}
+		else
+		{
+			if($table=="contributor")
+			{
+				$sql_table="dcontributor";
+				$field="idcontributor";
+			}
+			elseif($table=="dcontribution")
+			{
+				$sql_table="dcontribution";
+				$field="idcontribution";
+			}
+			$em = $this->container->get('doctrine')->getEntityManager();
+			$RAW_QUERY="SELECT MAX(COALESCE(".$field.",0))+ 1 as next_id FROM ".$sql_table." ;";
+			$statement = $em->getConnection()->prepare($RAW_QUERY);
+			$statement->execute();
+			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			$val=$result[0]["next_id"];
+		}
+		return new JsonResponse(Array("id"=>$val));
+	}
+	
+	// note
+	//sudo "php bin/console doctrine:generate:form AppBundle:Dcontributor"
+	//to create the form entity from console
+	public function addcontributorAction(Request $request)
+	{
+	    $this->set_sql_session();	
+		return $this->add_general(Dcontributor::class, DcontributorType::class,$request,'@App/addcontributor.html.twig', 'app_edit_contributor' );		
+	}
+	
+	public function editcontributorAction(Dcontributor $dcontributor, Request $request)
+	{	
+	//print("test");
+		$this->set_sql_session();		
+		$em = $this->getDoctrine()->getManager();
+		$form = $this->createForm(DcontributorType::class, $dcontributor, array('entity_manager' => $em,));		
+		return $this->edit_general($dcontributor, $form,"Dcontributor", $request, '@App/addcontributor.html.twig', 'dcontributor',$dcontributor->getIdContributor() );
+    }
+	
+	public function deletecontributorAction(Dcontributor $dcontributor, Request $request)
+	{
+		$em = $this->getDoctrine()->getManager();
+		$form = $this->createForm(DcontributorType::class, $dcontributor, array('entity_manager' => $em,));		
+		return $this->delete_general($dcontributor, $form, DcontributorType::class, $request, '@App/addcontributor.html.twig', 'dcontributor' );
 	}
 	
 }

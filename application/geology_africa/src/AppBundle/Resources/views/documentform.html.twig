@@ -1,153 +1,28 @@
 {# src/AppBundle/Resources/views/documentform.html.twig #}
 
 {{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'document_form'}}) }}
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="contributions-tab" data-bs-toggle="tab" data-bs-target="#contributions" type="button" role="tab" aria-controls="contributions" aria-selected="false">Contributions</button>
+  </li>
+</ul>
 
-	<table class="ui-front table_edit">
-		<tr>
-			<TH class="title_table_edit" width="100%" colspan = "8">
-				Documents
-			</TH>
-		</tr>
-
-		<tr>
-			<th width = "8%"  style="text-align:right">
-				Collection:
-			</th>
-			<td width = "8%">
-				{% if ddocument.pk != "" %}
-					{{ddocument.idcollection}}
-				{% else %}
-					{{ form_widget(form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
-				{% endif %}
-			</td>
-			<th width = "8%" style="text-align:right">
-				ID :
-			</th>
-			<td  width = "8%">
-				{% if ddocument.pk != "" %}
-					{{ddocument.iddoc}}
-				{% else %}
-					{{ form_widget(form.iddoc, {'attr': {'class': 'form-control inp_DocID vshortlength'}}) }}
-					{{ form_errors(form.iddoc) }}
-				{% endif %}
-			</td>
-			<th width = "8%" style="text-align:right">
-				Archive mumber:
-			</th>
-			<td  width = "8%">
-				{{ form_widget(form.numarchive, {'attr': {'class': 'form-control inp_Numarchive'}}) }}
-			</td>
-			<th width = "8%" style="text-align:right">
-				Central mumber:
-			</th>
-			<td  width = "45%">
-				{{ form_widget(form.centralnum, {'attr': {'class': 'form-control inp_Centralnum'}}) }}
-			</td>
-		</tr>
-
-		<tr>
-			<th style="text-align:right">
-				Filename:
-			</th>
-			<td >
-				{{ form_widget(form.filename, {'attr': {'class': 'form-control inp_Filename'}}) }}
-			</td>
-			<th style="text-align:right">
-				Caption:
-			</th>
-			<td >
-				{{ form_widget(form.caption, {'attr': {'class': 'form-control inp_Caption'}}) }}
-			</td>
-			<th style="text-align:right">
-				Medium:
-			</th>
-			<td  colspan = "3">
-				{{ form_widget(form.medium, {'attr': {'class': 'form-control'}}) }}
-			</td>
-		</tr>
-
-		<tr>
-			<th style="text-align:right">
-				Location:
-			</th>
-			<td >
-				{{ form_widget(form.location, {'attr': {'class': 'form-control inp_Location'}}) }}
-			</td>
-			<th style="text-align:right">
-				Numerical location:
-			</th>
-			<td  colspan = "5">
-				{{ form_widget(form.numericallocation, {'attr': {'class': 'form-control inp_Numericallocation'}}) }}
-			</td>
-		</tr>
-
-		<tr>
-			<th style="text-align:right">
-				Document information:
-			</th>
-			<td  colspan = "4">
-				{{ form_widget(form.docinfo, {'attr': {'class': 'form-control inp_Docinfo'}}) }}
-			</td>
-			<td  colspan = "3">
-				
-			</td>
-		</tr>
-		<tr>
-			<th style="text-align:right">
-				Edition:
-			</th>
-			<td >
-				{{ form_widget(form.edition, {'attr': {'class': 'form-control inp_Edition'}}) }}
-			</td>
-			<th style="text-align:right">
-				Publication place:
-			</th>
-			<td >
-				{{ form_widget(form.pubplace, {'attr': {'class': 'form-control inp_Pubplace'}}) }}
-			</td>
-			<th style="text-align:right">
-				Document type:
-			</th>
-			<td  colspan = "3">
-				{{ form_widget(form.doccartotype, {'attr': {'class': 'form-control inp_Doccartotype'}}) }}
-			</td>
-		</tr>
-		
-	   <tr> <td>Keywords</td> 
-			<td>{% include "@App/foreignkeys/template_subforms.html.twig" with {'nested_template':"@App/foreignkeys/dkeyword.html.twig" , 'ctrl_prefix' : 'ctrl_keywords', 'ajax_route': path('get_widget_keyword'), 'fk_values': keywords|default(null) }  %}</td>
-	   </tr>
-		<tr>
-			<TD> .</TD>
-		</tr>
-		<TR>
-			<TD>
-			</BR><input type="submit" class="btn btn-default pull-right submitbutton" />
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab"> {{ include("@App/documentform_mainpart.html.twig") }}</div>
+  <div class="tab-pane" id="contributions" role="tabpanel" aria-labelledby="contribution-tab">
+ {% include "@App/contributions/documentform_contributions.html.twig" with { 'collection_ref' : ddocument.idcollection, 'document_ref' :  ddocument.pk, 'action':action  } %}</div>
+ </div>
+<div><input type="hidden" name="current_tab" id="current_tab"/><input type="submit" class="btn btn-default pull-right submitbutton" />
 				<div class="alert_message"></div>
-			</TD>
-		</TR>
-	</table>
-
-<div class="modal fade modal_browse_keyword" id="modalbrowse" tabindex="-1" role="dialog" aria-labelledby="browseModalLabel" aria-hidden="true" style="z-index:1000000000">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content" id="modal_browse_content">        
-            <div class="modal-body">
-                <div class="container">
-                    <div class="row ">
-                        <div class="col-sm-12">
-							{% set nested_template = nested_francytree|default("@App/keywords/keyword_search_raw_data.html.twig") %}
-                            {% include nested_template with {'checkbox' : 'false', 'modal_bs' : '#modalbrowse'} %}
-                        </div>
-                    </div>                    
-                </div>
-            </div>    
-            <div class="modal-footer">                  
-                  <button type="button" class="btn btn-secondary close-search-keyword" data-bs-dismiss="modal" data-bs-dismiss="modal" data-bs-toggle="modal"
-                                data-bs-target="#modaladd"   data-bs-backdrop="false" >Close</button>
-            </div>
-        </div>
-    </div>    
-</div>
 {{ form_end(form) }}
+
+
+
 
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">   
@@ -159,6 +34,7 @@
 	var sortDirection = "";
 	var source_selected;
 	var $medium;
+	var current_tab="main-tab";
 	
 
 	$(document).ready(function() {
@@ -246,8 +122,38 @@
 			fill_lastid(collval);
 		});
 		
+		$("#get_idcollection").click(
+			function()
+			{
+				if($(".inp_Idcollection").val().length>0)
+				{
+				 jQuery.getJSON("{{ path('app_get_next_id')}}",
+					{'collection':$(".inp_Idcollection").val(),
+					'table':'document'},
+					function(result)
+					{
+						$('.inp_DocID').val(result.id);						
+					}
+				 );
+				}
+			}
+		);
 		
 		
+		$(".nav-link").click(
+			function()
+			{
+				console.log($(this).attr("id"));
+				current_tab=$(this).attr("id");
+				$("#current_tab").val(current_tab);
+			}
+		);
+		
+		{% if current_tab is defined %}
+			{% if current_tab!='main_tab' %}
+				$("#{{ current_tab }}").click();			
+			{% endif %}
+		{% endif %}
 						
     });	
 </script>

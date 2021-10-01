@@ -1,0 +1,37 @@
+{% set default_val = default_val|default(null) %}
+{% include "@App/forms/standalonejs.html.twig" %}
+<div class="row">
+<input type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" readonly/>
+<input type="text" id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" readonly/>
+<div class="col-sm-2">Role</div>
+<select style="width:300px" class="select2" id="{{ ctrl_prefix }}_role_contrib_{{ index }}"  name="{{ ctrl_prefix }}_role_contrib_{{ index }}"></select>
+<input type="text" class="order_contributor" id="{{ ctrl_prefix }}_order_contrib_{{ index }}" name="{{ ctrl_prefix }}_order_contrib_{{ index }}" readonly/>
+</div>
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		
+		$("#{{ ctrl_prefix }}_order_contrib_{{ index }}").val("{{ index }}");
+		
+		$("#{{ ctrl_prefix }}_role_contrib_{{ index }}").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);
+		
+		
+	/*$("#contrib_year_{{ index }}").datepicker({
+			format: "yyyy",
+			viewMode: "years", 
+			minViewMode: "years"
+		});*/
+		
+		{% if not default_val is null %}
+			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ Dcontributor.pk }}");
+			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ Dcontributor.people }}");
+			
+			var newOption = new Option("{{ Dlinkcontribute.contributorrole }}", "{{ Dlinkcontribute.contributorrole }}", true, true);
+			$('#{{ ctrl_prefix }}_role_contrib_{{ index }}').append(newOption).trigger('change');
+		{% endif %}
+	}
+);
+</script>
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontributor_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index }%}

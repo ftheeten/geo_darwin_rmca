@@ -188,7 +188,7 @@ class Dkeyword
     /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Ddocument
+     * @return integer
      */
     public function getIdcollection()
     {

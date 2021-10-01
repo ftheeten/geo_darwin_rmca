@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/foreignkeys/ddoctitle.html.twig #}
+
+{% set default_val = default_val|default(null) %}
+
+
+<input type="text" name="widget_titles[]" id="titles_{{ index }}" style="width:400px" ></input>
+
+
+
+								
+<script type="text/javascript">
+var tmp_class{{ index }}="{{ index }}";
+$(document).ready(
+	function()
+	{
+		
+		{% if not default_val is null %}
+			$("#titles_{{ index }}").val("{{ default_val }}");
+		{% endif %}
+	}
+);
+</script>						

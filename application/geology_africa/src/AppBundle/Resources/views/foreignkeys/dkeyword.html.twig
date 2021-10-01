@@ -2,25 +2,22 @@
 
 {% set default_val = default_val|default(null) %}
 
-{% if default_val is null %}
-<input type="text" id="keywords" name="widget_keywords[]" class="widget_keywords_{{ index }}" readonly></input> 
-{% else %}
-<input type="text" id="keywords" name="widget_keywords[]" class="widget_keywords_{{ index }}" value="{{ default_val }}" readonly></input> 
-{% endif %}
-<button type="button" class="btn fk_click_{{ index }} btn-secondary browsekeywords_{{ index }}" id="b_search_keyword_{{ index }}"
-                                data-bs-dismiss="modal" data-bs-toggle="modal"
-                                data-bs-target="#modalbrowse">Search keyword</button>
+
+<select name="widget_keywords[]" id="keywords_{{ index }}" style="width:200px" ></select>
+
+
+
 								
 <script type="text/javascript">
 var tmp_class{{ index }}="{{ index }}";
-$(".fk_click_{{ index }}").click(
+$(document).ready(
 	function()
 	{
-		
-		current_class=tmp_class{{ index }};
-	
+		$("#keywords_{{ index }}").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
+		{% if not default_val is null %}
+		var newOption = new Option("{{ default_val }}", "{{ default_val }}", true, true);
+		$('#keywords_{{ index }}').append(newOption).trigger('change');
+		{% endif %}
 	}
-	
-
 );
 </script>						

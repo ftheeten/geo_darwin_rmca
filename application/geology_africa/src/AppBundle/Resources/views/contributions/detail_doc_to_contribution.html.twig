@@ -1,0 +1,19 @@
+<div class="row">
+<input type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" readonly/>
+<input type="text" id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" readonly/>
+</div>
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{	
+		{% if Dcontribution.pk is defined %}
+			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ Dcontribution.pk }}");
+			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ Dcontribution.getDescription() }}");
+			
+			
+		{% endif %}
+	});
+	
+</script>
+
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontribution_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index }%}

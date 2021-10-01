@@ -219,4 +219,27 @@ class Dcontributor
     {
         return $this->institut;
     }
+	
+	//foreign keys
+	public function __construct()
+	{
+		$this->dlinkcontribute=Array();
+	}
+	
+	public function getDlinkcontribute()
+	{
+		return $this->dlinkcontribute;
+	}
+	
+	public function initDlinkcontribute($em)
+	{
+		$this->attachForeignkeys($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontributor"=>$this->idcontributor), "getIdcontributor");
+		return $this->dlinkcontribute;
+	}
+	
+	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
+	{
+		$this->reattachForeignkeys($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontributor"=>$this->idcontributor), "getIdcontributor", "idcontributor", $new_dlinkcontribute, array("setIdcontributor"=>$this->idcontributor),"setIdcontributor");
+		return $this->dlinkcontribute;
+	}
 }

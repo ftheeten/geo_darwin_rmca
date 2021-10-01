@@ -3,6 +3,8 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use AppBundle\Entity\GeodarwinEntity;
 
 /**
  * Dcontribution
@@ -10,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="dcontribution", uniqueConstraints={@ORM\UniqueConstraint(name="dcontribution_unique", columns={"idcontribution"})})
  * @ORM\Entity
  */
-class Dcontribution
+class Dcontribution extends GeodarwinEntity
 {
     /**
      * @var integer
@@ -157,4 +159,73 @@ class Dcontribution
     {
         return $this->year;
     }
+	
+	//foreign keys
+	public function __construct()
+	{
+		$this->dlinkcontribute=Array();
+	}
+	
+	public function getDlinkcontribute()
+	{
+		return $this->dlinkcontribute;
+	}
+	
+	public function initDlinkcontribute($em)
+	{
+		$this->attachForeignkeys(
+			$em,
+			Dlinkcontribute::class,
+			"dlinkcontribute", 
+			array("idcontribution"=>$this->idcontribution), 
+			"getPk", "getContributororder"
+			);
+		
+		$this->description=$this->datetype;	
+		return $this->dlinkcontribute;
+		
+	}
+	
+	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
+	{
+		if(count($new_dlinkcontribute)>0)
+		{
+		$this->reattachForeignKeysSignature(
+			$em,
+			Dlinkcontribute::class,
+			"dlinkcontribute", 
+			"pk",  
+			"getLinkSignature", 
+			$new_dlinkcontribute, 			
+			"getPk",
+			array("idcontribution"=>$this->idcontribution));
+		}
+	}
+	
+	protected $description;
+	
+	public function setDescription($desc)
+	{
+		$this->description=$desc;
+	}
+	
+	public function setDescriptionDB($em)
+	{
+		$tmp=$this->getDatetype(). ": ";
+		$desc_links=$em->getRepository(Dlinkcontribute::class)->findBy(array("idcontribution" => $this->getIdcontribution()), array("contributororder"=>"ASC"));
+		$peoples=Array();
+		foreach($desc_links as $obj)
+		{
+			$contributor=$em->getRepository(Dcontributor::class)->findOneBy(array("idcontributor"=> $obj->getIdcontributor()));
+			$peoples[]=$contributor->getPeople();
+		}
+		$tmp.=implode(", ", $peoples)." (".$this->getYear().")";
+		print($tmp);
+		$this->description=$tmp;
+	}
+	
+	public function getDescription()
+	{	
+		return $this->description;
+	}
 }

@@ -1,4 +1,6 @@
-
+		var global_modal_index_value="";
+		var global_modal_index_text="";
+		
 		var select2_generic=function(url, key, val, minlen)
 		{
 			return select2_generic_full(url, key, val, minlen, true);
@@ -26,12 +28,13 @@
                             {
                                 returned=Array();
                           
+								if(include_pattern)
+								{
+									returned.push({"id": global_pattern , "text":global_pattern });
+								}
                                 if(result.length>0)
                                 {
-									if(include_pattern)
-									{
-										 returned.push({"id": global_pattern , "text":global_pattern });
-									}
+									
                                    
                                     for(var i=0; i<result.length; i++ )
                                     {

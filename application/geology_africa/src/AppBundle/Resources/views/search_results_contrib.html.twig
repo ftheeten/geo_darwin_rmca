@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/search_results_contrib.html.twig #}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+<div class="row">
+	<div class="col-sm-1">pk</div>
+	<div class="col-sm-3">name</div>
+	<div class="col-sm-2">function</div>
+	<div class="col-sm-1">title</div>
+	<div class="col-sm-2">status</div>
+	<div class="col-sm-3">institute</div>
+</div>
+{% for doc in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['people'] }}"  href="{{ path('app_edit_contributor', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>
+	<div class="col-sm-3" class="is_modal_value">{{ doc['people'] }}</div>
+	<div class="col-sm-2">{{ doc['peoplefonction'] }}</div>
+	<div class="col-sm-1">{{ doc['peopletitre'] }}</div>
+	<div class="col-sm-2">{{ doc['peoplestatut'] }}</div>
+	<div class="col-sm-3">{{ doc['institut'] }}</div>
+</div>
+{%  endfor %}

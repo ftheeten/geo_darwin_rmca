@@ -1,0 +1,8 @@
+{% if action =="add" %}
+	Please save the main part of the document first
+{% else %}
+{% include "@App/foreignkeys/template_subforms.html.twig" with {'nested_template':"@App/contributions/detail_doc_to_contribution.html.twig" , 'ctrl_prefix' : 'doc_to_contrib', 'ajax_route': path('get_widget_doc_to_contrib'), 'fk_values': dlinkcontribute|default(null) }  %}
+
+
+
+{% endif %}

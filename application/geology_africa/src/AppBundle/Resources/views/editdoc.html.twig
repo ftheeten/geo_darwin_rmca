@@ -8,7 +8,7 @@
 
 {% block addgeology_body %}
     {{ include("@App/validation_errors.html.twig", {'local_form' : form}) }}
-	{% include"@App/documentform.html.twig" with {'keywords': keywords}%}
+	{% include"@App/documentform.html.twig" with {'keywords': keywords, 'action':'edit'}%}
 
 {% endblock %}
 

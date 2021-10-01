@@ -1,0 +1,26 @@
+{# src/AppBundle/Resources/views/forms/get_next_id.html.twig #}
+{% use "@App/forms/standalonejs.html.twig" %}
+{% block body %}
+<input type='button' id="{{ name_ctrl }}" value="Get next ID"></input>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+<script>
+$("#{{ name_ctrl }}").click(
+			function()
+			{
+				
+				 jQuery.getJSON("{{ path('app_get_next_id')}}",
+					{
+					'table':'{{ table_name }}'
+					},
+					function(result)
+					{
+						$('{{ target_ctrl }}').val(result.id);						
+					}
+				 );
+				
+			}
+		)
+</script>
+{% endblock %}

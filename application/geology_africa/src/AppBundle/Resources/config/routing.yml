@@ -9,6 +9,11 @@ app_add_contribution:
     path:     /add/contribution
     defaults: 
      _controller: AppBundle:Geo:addcontribution
+
+app_add_contributor:
+    path:     /add/contributor
+    defaults: 
+     _controller: AppBundle:Geo:addcontributor     
      
 app_add_sample:
     path:     /add/sample
@@ -74,7 +79,12 @@ app_edit_contribution:
     path:     /edit/contribution/{pk}
     defaults: 
      _controller: AppBundle:Geo:editcontribution
-     
+
+app_edit_contributor:
+    path:     /edit/contributor/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editcontributor    
+
 app_edit_mineral:
     path:     /edit/mineral/{pk}
     defaults: 
@@ -104,7 +114,12 @@ app_search_contribution:
     path:     /search/contribution
     defaults: 
      _controller: AppBundle:Geo:searchcontribution
-     
+    
+app_search_contributor:
+    path:     /search/contributor
+    defaults: 
+     _controller: AppBundle:Geo:searchcontributor
+
 app_search_document:
     path:     /search/document
     defaults: 
@@ -208,12 +223,6 @@ app_lithominerals_list:
      _controller: AppBundle:Geo:listlithominerals
     methods:  GET
     
-app_IDContributions_list:
-    path:     /get_IDContributions
-    defaults: 
-     _controller: AppBundle:Geo:IDContributions_autocomplete
-    methods:  GET
-    
 app_AlldataContributions_list:
     path:     /get_AlldataContributions
     defaults: 
@@ -223,13 +232,13 @@ app_AlldataContributions_list:
 app_contribtype_autocomplete:
     path:     /get_contribtype
     defaults: 
-     _controller: AppBundle:Geo:contribtype_autocomplete
+     _controller: AppBundle:Autocomplete:contribtype_autocomplete
     methods:  GET
     
 app_contribrole_autocomplete:
     path:     /get_contribrole
     defaults: 
-     _controller: AppBundle:Geo:contribrole_autocomplete
+     _controller: AppBundle:Autocomplete:contribrole_autocomplete
     methods:  GET
     
 app_contribdata_combobox:
@@ -242,61 +251,6 @@ app_docsdata_combobox:
     path:     /get_docsdata
     defaults: 
      _controller: AppBundle:Geo:docsdata_combobox
-    methods:  GET
-    
-app_contribnames_autocomplete:
-    path:     /get_contribnames
-    defaults: 
-     _controller: AppBundle:Geo:contribnames_autocomplete
-    methods:  GET
-    
-app_code_autocomplete:
-    path:     /get_code/
-    defaults: 
-     _controller: AppBundle:Geo:Code_autocomplete
-    methods:  GET
-    
-app_parent_autocomplete:
-    path:     /get_parent/
-    defaults: 
-     _controller: AppBundle:Geo:Parent_autocomplete
-    methods:  GET
-    
-app_MinName_autocomplete:
-    path:     /get_minname/
-    defaults: 
-     _controller: AppBundle:Geo:Minname_autocomplete
-    methods:  GET
-    
-app_MinFName_autocomplete:
-    path:     /get_minfname/
-    defaults: 
-     _controller: AppBundle:Geo:Minfname_autocomplete
-    methods:  GET
-    
-app_Minformula_autocomplete:
-    path:     /get_minformula/
-    defaults: 
-     _controller: AppBundle:Geo:Minformula_autocomplete
-    methods:  GET
-    
-app_museumloc_autocomplete:
-    path:     /get_museumloc/
-    defaults: 
-     _controller: AppBundle:Geo:Museumloc_autocomplete
-    methods:  GET
-
-    
-app_box_autocomplete:
-    path:     /get_box/
-    defaults: 
-     _controller: AppBundle:Geo:Box_autocomplete
-    methods:  GET
-
-app_idobject_autocomplete:
-    path:     /idobject/
-    defaults: 
-     _controller: AppBundle:Geo:idobject_autocomplete
     methods:  GET
     
 app_last_Sampleid:
@@ -370,6 +324,117 @@ app_list_users:
     defaults: 
      _controller: AppBundle:User:index
 
+#Autocompletes-------
+
+app_contribnames_autocomplete:
+    path:     /get_contribnames
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribnames_autocomplete
+    methods:  GET
+
+app_contribtitle_autocomplete:
+    path:     /get_contribtitle
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribtitle_autocomplete
+    methods:  GET
+
+app_contribfunction_autocomplete:
+    path:     /get_contribfunction
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribfunction_autocomplete
+    methods:  GET
+
+app_contribstatus_autocomplete:
+    path:     /get_contribstatus
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribstatus_autocomplete
+    methods:  GET
+
+app_contribinstitutions_autocomplete:
+    path:     /get_contribinstitutions
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribinstitutions_autocomplete
+    methods:  GET
+    
+app_code_autocomplete:
+    path:     /get_code/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Code_autocomplete
+    methods:  GET
+    
+app_parent_autocomplete:
+    path:     /get_parent/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Parent_autocomplete
+    methods:  GET
+    
+app_MinName_autocomplete:
+    path:     /get_minname/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minname_autocomplete
+    methods:  GET
+    
+app_MinFName_autocomplete:
+    path:     /get_minfname/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minfname_autocomplete
+    methods:  GET
+    
+app_Minformula_autocomplete:
+    path:     /get_minformula/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minformula_autocomplete
+    methods:  GET
+    
+app_museumloc_autocomplete:
+    path:     /get_museumloc/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Museumloc_autocomplete
+    methods:  GET
+
+    
+app_box_autocomplete:
+    path:     /get_box/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Box_autocomplete
+    methods:  GET
+
+app_idobject_autocomplete:
+    path:     /idobject/
+    defaults: 
+     _controller: AppBundle:Autocomplete:idobject_autocomplete
+    methods:  GET	 
+
+
+app_usersnames_autocomplete:
+    path:     /get_usersnames
+    defaults: 
+     _controller: AppBundle:Autocomplete:usersnames_autocomplete
+    methods:  GET
+
+app_IDContributions_list:
+    path:     /get_IDContributions
+    defaults: 
+     _controller: AppBundle:Autocomplete:IDContributions_autocomplete
+    methods:  GET
+
+search_all_keywords_autocomplete:
+    path:     /get_keywords
+    defaults: 
+     _controller: AppBundle:Autocomplete:keywords_autocomplete
+    methods:  GET
+         
+#delete ----------------
+
+app_delete_contributor:
+    path:     /delete/contributor/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:deletecontributor
+
+app_delete_contribution:
+    path:     /delete/contribution/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:deletecontribution      
 #search2---------------------------------------    
 app_add_collection:
     path:     /collection/add
@@ -385,13 +450,7 @@ app_edit_collection:
     path:     /collection/edit/{id}
     defaults: 
      _controller: AppBundle:Geo:editcollection
-     
-app_usersnames_autocomplete:
-    path:     /get_usersnames
-    defaults: 
-     _controller: AppBundle:Geo:usersnames_autocomplete
-    methods:  GET
-    
+
 app_err_access:
     path:     /error
     defaults: 
@@ -407,19 +466,21 @@ search_all_collections:
     defaults: 
      _controller: AppBundle:Geo:all_collections
      
-search_all_keywords_autocomplete:
-    path:     /get_keywords
-    defaults: 
-     _controller: AppBundle:Geo:keywords_autocomplete
-    methods:  GET
-    
 
-         
 search_main:
     path:    /main_search
     defaults: 
      _controller: AppBundle:Geo:main_search
 
+search_contributor:
+    path:    /contributor_search
+    defaults: 
+     _controller: AppBundle:Geo:contributor_search
+
+search_contribution:
+    path:    /contribution_search
+    defaults: 
+     _controller: AppBundle:Geo:contribution_search
 
 app_search_keywords:
     path: /keywords
@@ -458,4 +519,28 @@ get_widget_keyword:
     defaults: 
      _controller: AppBundle:Geo:widget_keyword
     methods:  GET
+
+get_widget_title:
+    path:     /get_widget_title
+    defaults: 
+     _controller: AppBundle:Geo:widget_title
+    methods:  GET
+
+
+get_widget_doc_to_contrib:
+    path:     /get_widget_doc_to_contrib
+    defaults: 
+     _controller: AppBundle:Geo:widget_doc_to_contrib
+    methods:  GET
+
+get_widget_contribdetail:
+    path:     /get_widget_contribdetail
+    defaults: 
+     _controller: AppBundle:Geo:widget_contribdetail
+    methods:  GET
+    
+app_get_next_id:
+    path:    /get_next_id
+    defaults: 
+     _controller: AppBundle:Geo:get_next_id
   

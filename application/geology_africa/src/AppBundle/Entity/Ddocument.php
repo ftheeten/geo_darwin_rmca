@@ -488,30 +488,124 @@ class Ddocument extends GeodarwinEntity
 	
 	
 	protected $dkeywords;
+	
+	/**
+     * get ddoctitle
+     *
+     * @param \Doctrine\Common\Collections\Collection
+     */
+    public function getDdoctitleList()
+    {
+       return $this->ddoctitle;
+    }
+	
+	
+	protected $ddoctitle;
+	
 
+	/**
+     * get dlinkcontdoc
+     *
+     * @param \Doctrine\Common\Collections\Collection
+     */
+    public function getDLinkcontdocList()
+    {
+       return $this->dlinkcontdocs;
+    }
+	
+	
+	//foreign keys
+	protected $dlinkcontdocs;
 	
     public function __construct()
     {
-        $this->dkeywords =  Array();
-		$this->new_dkeywords =  Array();
+     
+		$this->dkeywords =  Array();
+		$this->dlinkcontdocs =  Array();
+		$this->ddoctitle =  Array();		
     }
 	
+	
+	
+	
+	public function getDkeyword()
+    {
+        return $this->dkeywords;
+    }
+	
+	public function getDlinkcontdoc()
+    {
+        return $this->dlinkcontdocs;
+    }
+	
+	public function getDdocttitle()
+    {
+        return $this->ddoctitle;
+    }
 	
 	public function initDkeywords($em)
 	{
 		$this->attachForeignkeys($em,Dkeyword::class,"dkeywords", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getKeyword");
 		return $this->dkeywords;
 	}
-	public function getDkeyword()
-    {
-        return $this->dkeywords;
-    }
 	
 	public function initNewDkeywords($em, $new_keywords)
 	{
 		$this->reattachForeignkeys($em,Dkeyword::class,"dkeywords", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getKeyword", "keyword", $new_keywords,array("setIdcollection"=>$this->idcollection, "setId"=>$this->iddoc), "setKeyword" );
 		
 		return $this->dkeywords;
+	}
+	
+	public function initDLinkcontdoc($em)
+	{		
+		$this->attachForeignkeys($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
+		print_r($this->dlinkcontdocs);
+		return $this->dlinkcontdocs;
+	}
+	
+	public function initNewDLinkcontdocs($em, $new_contributions)
+	{
+		if(count($new_contributions)>0)
+		{			
+			$this->reattachForeignKeysSignature(
+				$em,
+				DLinkcontdoc::class,
+				"dlinkcontdocs", 
+				"pk",  
+				"getIdContribution", 
+				$new_contributions, 
+				"getPk",
+				 array("idcollection"=>$this->idcollection, "id"=>$this->iddoc)
+			);	
+		}
+		return $this->dlinkcontdocs;
+	}
+	
+	public function initDdoctitles($em)
+	{
+		$this->attachForeignkeys($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc), "getTitle");
+		return $this->ddoctitle;
+	}
+	
+	public function initNewDdoctitles($em, $new_titles)
+	{
+		/*$this->reattachForeignkeys($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc), "getTitle", "title", $new_titles,array("setIdcollection"=>$this->idcollection, "setIddoc"=>$this->iddoc), "setTitle" );
+		*/
+		
+		if(count($new_titles)>0)
+		{			
+			$this->reattachForeignKeysSignature(
+				$em,
+				Ddoctitle::class,
+				"ddoctitle", 
+				"title",  
+				"getTitle", 
+				$new_titles, 
+				null,
+				 array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddoctitle;
 	}
 
 }

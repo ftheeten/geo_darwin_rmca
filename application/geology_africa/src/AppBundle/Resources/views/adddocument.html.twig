@@ -7,6 +7,6 @@
 {% endblock %}
 
 {% block addgeology_body %}
-	{{ include("@App/validation_errors.html.twig", {'local_form' : form}) }}
-	{{ include("@App/documentform.html.twig") }}
+	{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+	{% include "@App/documentform.html.twig" with {'action':'add'}  %}
 {% endblock %}

@@ -1,0 +1,107 @@
+{# src/AppBundle/Resources/views/searchcontribution_raw.html.twig #}
+{% use "@App/forms/standalonejs.html.twig" %}
+{% block body %}
+<div class="container">
+<br/>
+<br/>
+<br/>
+<div class="row">
+	<div class="col-sm-2">Name</div>
+		<div class="col-sm-3"><select name="namecontrib" id="namecontrib" style="width:100%" multiple="multiple" ></select>
+    </div>
+	<div class="col-sm-2">Institution</div>
+		<div class="col-sm-3"><select name="institute" id="institute" style="width:100%" multiple="multiple" ></select>
+    </div>
+</div>
+<div class="row">
+	<div class="col-sm-2">Role</div>
+		<div class="col-sm-3"><select style="width:300px" class="select2" id="rolecontrib"  name="rolecontrib" multiple="multiple"></select>
+    </div>
+	<div class="col-sm-2">Type</div>
+		<div class="col-sm-3"><select style="width:300px" class="select2" id="typecontrib"  name="typecontrib" multiple="multiple"></select>
+    </div>	
+</div>
+<div class="row">
+	<div class="col-sm-2">Year from</div>
+		<div class="col-sm-3"><input type="text" id="contrib_year_from" name="contrib_year_from"></input>
+    </div>
+	<div class="col-sm-2">Year to</div>
+		<div class="col-sm-3"><input type="text" id="contrib_year_to" name="contrib_year_to"></input>
+    </div>	
+</div>
+</div>
+<div class="row">
+     <div class="col-sm-2"></div>
+    <div class="col-sm-2"><input type="button" value="search" id="go_search"/></div>
+</div>
+<div id="div_results" class="row"></div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+	<script language='javascript'>
+	//important to have it outside of jquery scope 
+	var search=function(current_page, page_size)
+		{
+			search_logic(current_page, page_size,false)
+					
+		}
+		
+		 var search_logic=function(current_page, page_size, csv)
+		{
+			criterias={}
+			criterias["current_page"]=current_page;
+			criterias["page_size"]=page_size;
+			criterias["namecontrib"]=$("#namecontrib").val();
+			criterias["institute"]=$("#institute").val();
+			criterias["rolecontrib"]=$("#rolecontrib").val();
+			criterias["typecontrib"]=$("#typecontrib").val();
+			criterias["contrib_year_from"]=$("#contrib_year_from").val();			
+			criterias["contrib_year_to"]=$("#contrib_year_to").val();
+		
+			console.log(criterias);
+			$.post("{{ path('search_contribution')}}", criterias,
+				function(data)
+				{
+					$("#div_results").html(data);
+				}
+			);
+		}
+		
+	$(document).ready(
+		function()
+		{
+			console.log("loaded");
+			$("#namecontrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","people","people" ),0);
+			
+			$("#institute").select2(select2_generic("{{ path('app_contribinstitutions_autocomplete')}}","institut","institut" ),0);
+			
+			$("#rolecontrib").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);
+			
+			$("#typecontrib").select2(select2_generic("{{ path('app_contribtype_autocomplete')}}","datetype","datetype" ),0);
+			
+			$("#contrib_year_from").datepicker({
+					format: "yyyy",
+					viewMode: "years", 
+					minViewMode: "years"
+				});
+				
+			$("#contrib_year_to").datepicker({
+					format: "yyyy",
+					viewMode: "years", 
+					minViewMode: "years"
+				});
+				
+		
+	
+		$("#go_search").click(
+				function()
+				{
+					search(1, $("#page_size").val());
+				});
+		}
+	);
+	</script>
+{% endblock %}

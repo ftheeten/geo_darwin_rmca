@@ -38,21 +38,15 @@ class Dlinkcontribute
 
     /**
      * @var \AppBundle\Entity\Dcontribution
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dcontribution")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcontribution", referencedColumnName="idcontribution")
-     * })
+     * 
+	 * @ORM\Column(name="idcontribution", type="integer", nullable=false)          
      */
     private $idcontribution;
 
     /**
      * @var \AppBundle\Entity\Dcontributor
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dcontributor")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcontributor", referencedColumnName="idcontributor")
-     * })
+     * @ORM\Column(name="idcontributor", type="integer", nullable=false)     
      */
     private $idcontributor;
 
@@ -119,16 +113,20 @@ class Dlinkcontribute
     /**
      * Set idcontribution
      *
-     * @param \AppBundle\Entity\Dcontribution $idcontribution
+     * @param integer $idcontribution
      *
      * @return Dlinkcontribute
      */
-    public function setIdcontribution(\AppBundle\Entity\Dcontribution $idcontribution = null)
+    public function setIdcontribution($idcontribution)
     {
-        $this->idcontribution = $idcontribution;
-
+		//if($idcontribution!==null)
+		//{
+			$this->idcontribution = $idcontribution;
+		//}
         return $this;
     }
+	
+	
 
     /**
      * Get idcontribution
@@ -143,16 +141,18 @@ class Dlinkcontribute
     /**
      * Set idcontributor
      *
-     * @param \AppBundle\Entity\Dcontributor $idcontributor
+     * @param integer $idcontributor
      *
      * @return Dlinkcontribute
      */
-    public function setIdcontributor(\AppBundle\Entity\Dcontributor $idcontributor = null)
-    {
-        $this->idcontributor = $idcontributor;
-
+    public function setIdcontributor($idcontributor )
+    {		
+		$this->idcontributor = $idcontributor;
+		
         return $this;
     }
+	
+	
 
     /**
      * Get idcontributor
@@ -163,4 +163,11 @@ class Dlinkcontribute
     {
         return $this->idcontributor;
     }
+	
+	//ftheeten
+	public function getLinkSignature()
+	{
+		//order is important when rattaching
+		return str_pad($this->contributororder,3,0,STR_PAD_LEFT)."_".$this->idcontributor."_".$this->idcontribution."_".$this->contributorrole;
+	}
 }

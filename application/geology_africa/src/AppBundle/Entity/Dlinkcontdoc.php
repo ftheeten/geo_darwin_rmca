@@ -22,27 +22,27 @@ class Dlinkcontdoc
      */
     private $pk;
 
+    // rmca custom mapping for foreign keys
     /**
-     * @var \AppBundle\Entity\Ddocument
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="id", referencedColumnName="iddoc")
-     * })
+     * @ORM\Column(name="idcollection", type="integer", nullable=false)
      */
     private $idcollection;
-
-    /**
-     * @var \AppBundle\Entity\Dcontribution
+	
+	/**
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dcontribution")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcontribution", referencedColumnName="idcontribution")
-     * })
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     */
+    private $id;
+
+     /**
+     * @var \AppBundle\Entity\Dcontribution
+     * 
+	 * @ORM\Column(name="idcontribution", type="integer", nullable=false)          
      */
     private $idcontribution;
-
 
 
     /**
@@ -82,11 +82,11 @@ class Dlinkcontdoc
     /**
      * Set idcontribution
      *
-     * @param \AppBundle\Entity\Dcontribution $idcontribution
+     * @param integer $idcontribution
      *
      * @return Dlinkcontdoc
      */
-    public function setIdcontribution(\AppBundle\Entity\Dcontribution $idcontribution = null)
+    public function setIdcontribution($idcontribution = null)
     {
         $this->idcontribution = $idcontribution;
 
@@ -101,5 +101,22 @@ class Dlinkcontdoc
     public function getIdcontribution()
     {
         return $this->idcontribution;
+    }
+	
+	//custom_mapping ftheeten
+	/**
+     * Set relationidcollection
+     *
+     * @param \AppBundle\Entity\Ddocument $idcollection
+     *
+     * @return Dkeyword
+     */
+	 
+    public function setrelationidcollection(\AppBundle\Entity\Ddocument $doc = null)
+    {
+        $this->id=$doc->getIddoc();
+		$this->idcollection=$doc->getIdcollection();
+
+        return $this;
     }
 }

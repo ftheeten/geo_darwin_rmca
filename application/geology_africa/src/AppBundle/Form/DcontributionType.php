@@ -14,20 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class DcontributionType extends AbstractType {
-	  /*$em = $options['entity_manager'];
-
-		 list for types---------
-        $RAW_QUERY = "SELECT DISTINCT datetype FROM dcontribution ORDER BY datetype;";
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-        $codestype = $statement->fetchAll();
-		
-		$elemtype =array();
-		foreach($codestype as $e) {
-			foreach($e as $ee) {
-				$elemtype[$ee]=$ee;
-			} 
-		} */
+	 
 		
     /**
      * {@inheritdoc}
@@ -35,21 +22,24 @@ class DcontributionType extends AbstractType {
 	
     public function buildForm(FormBuilderInterface $builder, array $options)  {
 
-		$years=[];
+		/*$years=[];
 		for($i = 2019; $i >1700; $i--) {
 			$years[$i]=$i;
-		}
+		}*/
 		
 		
 		/* builder---------*/
         $builder
 			->add('idcontribution', TextType::class, array('required' => true))
-			->add('datetype', TextType::class, array('required' => true))
-			->add('date', DateType::class, [
-				'widget' => 'single_text'
-			])
-			->add('year', ChoiceType::class, array('choices'  => $years,'data' => '2019'))
+			->add('datetype', ChoiceType::class, array('required' => true))
+			//->add('date', DateType::class, [
+			//	'widget' => 'single_text'
+			//])
+			#->add('year', ChoiceType::class, array('choices'  => $years,'data' => '2019'))
+			->add('date', DateType::class, array('required' => false))
+			->add('year', TextType::class, array('required' => true))
 		;
+		 $builder->get('datetype')->resetViewTransformers();
 		
 		$builder->addEventListener(
 		  FormEvents::PRE_SET_DATA,    
@@ -71,6 +61,9 @@ class DcontributionType extends AbstractType {
         $resolver->setDefaults(array(
             'data_class' => 'AppBundle\Entity\Dcontribution'
         ));
+		$resolver->setDefaults([
+        'validation_groups' => false,
+		]);
     }
 
     /**
