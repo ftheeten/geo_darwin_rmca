@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/dloccenter/detail_point_to_stratum_description.html.twig #}
+{% set default_val = default_val|default(null) %}
+
+<div class="row">			
+		<div class="col-sm-1">{{ index }} PK</div>
+		
+		<div class="col-sm-1"><input type="text" name="{{ ctrl_prefix }}_pk[{{index}}]" id="{{ ctrl_prefix }}_pk_{{ index }}" style="width:100%" readonly></input></div>
+		
+		<div class="col-sm-5"><input type="text" name="{{ ctrl_prefix }}_description[{{index}}]" id="{{ ctrl_prefix }}_description_{{ index }}" style="width:100%"></input></div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		{% if not default_val is null %}
+			console.log("init");
+			$("#{{ ctrl_prefix }}_pk_{{ index }}").val("{{ default_val.pk }}");
+			$("#{{ ctrl_prefix }}_description_{{ index }}").val("{{ default_val.descript }}");
+		{% endif %}
+	});
+</script>

@@ -37,6 +37,14 @@ class Dcontribution extends GeodarwinEntity
      * @ORM\Column(name="datetype", type="string", nullable=true)
      */
     private $datetype;
+	
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", nullable=true)
+     */
+    private $name;
 
     /**
      * @var \DateTime
@@ -44,6 +52,14 @@ class Dcontribution extends GeodarwinEntity
      * @ORM\Column(name="date", type="datetime", nullable=true)
      */
     private $date;
+	
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="date_format", type="integer", nullable=true)
+     */
+    private $date_format;
+
 
     /**
      * @var integer
@@ -111,6 +127,30 @@ class Dcontribution extends GeodarwinEntity
     {
         return $this->datetype;
     }
+	
+	/**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Dcontribution
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
     /**
      * Set date
@@ -134,6 +174,30 @@ class Dcontribution extends GeodarwinEntity
     public function getDate()
     {
         return $this->date;
+    }
+	
+	 /**
+     * Set date_format
+     *
+     * @param integer $dateformat
+     *
+     * @return Dcontribution
+     */
+    public function setDateformat($dateformat)
+    {
+        $this->date_format = $dateformat;
+
+        return $this;
+    }
+
+    /**
+     * Get date_format
+     *
+     * @return integer
+     */
+    public function getDateformat()
+    {
+        return $this->date_format;
     }
 
     /**
@@ -160,49 +224,25 @@ class Dcontribution extends GeodarwinEntity
         return $this->year;
     }
 	
-	//foreign keys
+	//foreign keys and additional fields
+	protected $dlinkcontribute;
+	protected $dlinkcontdoc;
+	protected $description;
 	public function __construct()
 	{
 		$this->dlinkcontribute=Array();
+		$this->dlinkcontdoc=Array();
+	}
+	
+	public function getDlinkcontdoc()
+	{
+		return $this->dlinkcontdoc;
 	}
 	
 	public function getDlinkcontribute()
 	{
 		return $this->dlinkcontribute;
-	}
-	
-	public function initDlinkcontribute($em)
-	{
-		$this->attachForeignkeys(
-			$em,
-			Dlinkcontribute::class,
-			"dlinkcontribute", 
-			array("idcontribution"=>$this->idcontribution), 
-			"getPk", "getContributororder"
-			);
-		
-		$this->description=$this->datetype;	
-		return $this->dlinkcontribute;
-		
-	}
-	
-	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
-	{
-		if(count($new_dlinkcontribute)>0)
-		{
-		$this->reattachForeignKeysSignature(
-			$em,
-			Dlinkcontribute::class,
-			"dlinkcontribute", 
-			"pk",  
-			"getLinkSignature", 
-			$new_dlinkcontribute, 			
-			"getPk",
-			array("idcontribution"=>$this->idcontribution));
-		}
-	}
-	
-	protected $description;
+	}	
 	
 	public function setDescription($desc)
 	{
@@ -228,4 +268,85 @@ class Dcontribution extends GeodarwinEntity
 	{	
 		return $this->description;
 	}
+	
+	public function setDateByElements($year, $month=null, $day=null)
+	{
+		$this->setDate($this->handle_date_general($year, $month, $day));
+		
+		$this->setDateformat($this->handle_date_format_general($year, $month, $day));
+	}
+	
+	public function setDateByElementsForm($form, $year, $month=null, $day=null)
+	{
+		$tmp_date=$this->handle_date_generalForm($form, $year, $month, $day);	
+		$this->setDate($tmp_date);		
+		$this->setDateformat($this->handle_date_format_general($year, $month, $day));
+	}
+	
+	//link to documents
+	
+	public function initDlinkcontdoc($em)
+	{		
+		
+		$this->attachForeignkeysAsObject($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcontribution"=>$this->getIdcontribution()), "getPk");
+        foreach($this->dlinkcontdocs as $obj)
+		{
+			$obj->setDocument_db($em);
+		}
+		
+		return $this->dlinkcontdocs;
+	}
+	
+		public function initDlinkcontribute($em)
+	{
+		//print("BEGIN_1");		
+		$this->attachForeignkeysAsObject($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontribution"=>$this->getIdcontribution()), "getContributororder");
+		
+		$this->description=$this->datetype;
+		
+		foreach($this->dlinkcontribute as $contrib)
+		{
+			$contrib->setContributor_db($em);
+		}
+		//print_r($this->dlinkcontribute);
+		//print("END_1");
+		return $this->dlinkcontribute;
+		
+	}
+	
+	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
+	{
+		//print("BEGIN_2");
+		$this->initDlinkcontribute($em);
+		if(count($new_dlinkcontribute)>0)
+		{
+		
+		
+		$this->reattachForeignKeysAsObject(
+			$em,
+			Dlinkcontribute::class,
+			"dlinkcontribute", 			
+			"getLinkSignature", 
+			$new_dlinkcontribute,		
+			array("idcontribution"=>$this->idcontribution));
+		}
+		//print("END_2");
+	}
+	
+	//2021 10 20
+	public function initNewDlinkdocument($em, $new_dlinkdocument)
+	{
+		$this->initDlinkcontdoc($em);
+		if(count($new_dlinkdocument)>0)
+		{
+			$this->reattachForeignKeysAsObject(
+			$em,
+			Dlinkcontdoc::class,
+			"dlinkcontdoc", 			
+			"getPk", 
+			$new_dlinkdocument,		
+			array("idcontribution"=>$this->idcontribution));
+		}
+	}
+	
 }

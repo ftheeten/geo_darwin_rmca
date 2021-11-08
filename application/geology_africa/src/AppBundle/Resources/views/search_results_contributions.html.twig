@@ -3,18 +3,20 @@
 {{ nb_results }} Record(s)
 {% include '@App/pagination.html.twig' %}
 <div class="row">
-	<div class="col-sm-2">pk</div>
+	<div class="col-sm-1">pk</div>
 	<div class="col-sm-2">type</div>
+	<div class="col-sm-2">name</div>
 	<div class="col-sm-2">date</div>
 	<div class="col-sm-1">year</div>
 	<div class="col-sm-4">People</div>
 </div>
 {% for doc in results %}
 <div class="row" style="border-style:solid; margin: 1px;">
-	<div class="col-sm-2"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['people_desc'] }}"  href="{{ path('app_edit_contribution', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>	
+	<div class="col-sm-1"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['people_desc'] }}"  href="{{ path('app_edit_contribution', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>	
 	<div class="col-sm-2">{{ doc['datetype'] }}</div>
+	<div class="col-sm-2">{{ doc['name'] }}</div>
 	<div class="col-sm-2">{{ doc['date'] }}</div>
 	<div class="col-sm-1">{{ doc['year'] }}</div>
-	<div class="col-sm-5" class="is_modal_value">{{ doc['people_desc'] }}</div>
+	<div class="col-sm-4" class="is_modal_value">{{ doc['people_desc'] }}</div>
 </div>
 {%  endfor %}

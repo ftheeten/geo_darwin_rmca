@@ -99,5 +99,12 @@ class Ddoctitle extends GeodarwinDocForeignKey
     public function getTitle()
     {
         return $this->title;
-    }   
+    }
+
+	public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
+    }	
 }

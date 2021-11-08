@@ -4,13 +4,15 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use AppBundle\Entity\GeodarwinDocForeignKey;
+
 /**
  * Ddocsatellite
  *
  * @ORM\Table(name="ddocsatellite", uniqueConstraints={@ORM\UniqueConstraint(name="DDocSatellite_IDDoc_key", columns={"iddoc"}), @ORM\UniqueConstraint(name="ddocsatellite_unique", columns={"idcollection", "iddoc"}), @ORM\UniqueConstraint(name="ddocsatellite_iddoc_unique", columns={"iddoc"})})
  * @ORM\Entity
  */
-class Ddocsatellite
+class Ddocsatellite extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -155,16 +157,6 @@ class Ddocsatellite
      */
     private $format;
 
-    /**
-     * @var \AppBundle\Entity\Ddocument
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
-     */
-    private $idcollection;
 
 
 
@@ -633,28 +625,51 @@ class Ddocsatellite
     {
         return $this->format;
     }
+	
+	protected $description;
+	
+	public function setDescription($desc)
+	{
+		$this->description=$desc;
+	}
+	
+	public function setDescriptionObject()
+	{
+		$array=[];
+		$array[]=$this->getAscdesc()??'';
+		$array[]=$this->getBackupform()??'';
+		$array[]=$this->getBackupno()??'';
+		$array[]=$this->getBackupnum()??'';
+		$array[]=$this->getDate()??'';
+		$array[]=$this->getFormat()??'';
+		$array[]=$this->getModeradar()??'';
+		$array[]=$this->getModified()??'';
+		$array[]=$this->getOrbit()??'';
+		$array[]=$this->getOriginal()??'';
+		$array[]=$this->getOriginale()??'';
+		$array[]=$this->getOrthorectified()??'';
+		$array[]=$this->getPathtrack()??'';
+		$array[]=$this->getPk()??'';
+		$array[]=$this->getRowframe()??'';
+		$array[]=$this->getSatnum()??'';
+		$array[]=$this->getSattype()??'';
+		$array[]=$this->getSensor()??'';
+		$array[]=$this->getSplit()??'';
+		$array[]=$this->getTime()??'';
+		$tmp=implode('|', $array);
+		$this->description=$tmp;
+	}
+	
+	public function getDescription()
+	{	
+		return $this->description;
+	}
+	
+	public function getDescriptionObj()
+	{	
+		$this->setDescriptionObject();
+		return $this->description;
+	}
 
-    /**
-     * Set idcollection
-     *
-     * @param \AppBundle\Entity\Ddocument $idcollection
-     *
-     * @return Ddocsatellite
-     */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
-    {
-        $this->idcollection = $idcollection;
-
-        return $this;
-    }
-
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Ddocument
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
+   
 }

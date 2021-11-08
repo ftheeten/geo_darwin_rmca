@@ -1,0 +1,153 @@
+#Autocompletes-------
+
+app_contribmainnames_autocomplete:
+    path:     /get_contribmainnames
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribmainnames_autocomplete
+    methods:  GET
+    
+app_contribnames_autocomplete:
+    path:     /get_contribnames
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribnames_autocomplete
+    methods:  GET
+
+app_contribtitle_autocomplete:
+    path:     /get_contribtitle
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribtitle_autocomplete
+    methods:  GET
+
+app_contribfunction_autocomplete:
+    path:     /get_contribfunction
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribfunction_autocomplete
+    methods:  GET
+
+app_contribstatus_autocomplete:
+    path:     /get_contribstatus
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribstatus_autocomplete
+    methods:  GET
+
+app_contribinstitutions_autocomplete:
+    path:     /get_contribinstitutions
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribinstitutions_autocomplete
+    methods:  GET
+    
+app_code_autocomplete:
+    path:     /get_code/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Code_autocomplete
+    methods:  GET
+    
+app_parent_autocomplete:
+    path:     /get_parent/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Parent_autocomplete
+    methods:  GET
+    
+app_MinName_autocomplete:
+    path:     /get_minname/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minname_autocomplete
+    methods:  GET
+    
+app_MinFName_autocomplete:
+    path:     /get_minfname/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minfname_autocomplete
+    methods:  GET
+    
+app_Minformula_autocomplete:
+    path:     /get_minformula/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Minformula_autocomplete
+    methods:  GET
+    
+app_museumloc_autocomplete:
+    path:     /get_museumloc/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Museumloc_autocomplete
+    methods:  GET
+
+    
+app_box_autocomplete:
+    path:     /get_box/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Box_autocomplete
+    methods:  GET
+
+app_idobject_autocomplete:
+    path:     /idobject/
+    defaults: 
+     _controller: AppBundle:Autocomplete:idobject_autocomplete
+    methods:  GET	 
+
+
+app_usersnames_autocomplete:
+    path:     /get_usersnames
+    defaults: 
+     _controller: AppBundle:Autocomplete:usersnames_autocomplete
+    methods:  GET
+
+app_IDContributions_list:
+    path:     /get_IDContributions
+    defaults: 
+     _controller: AppBundle:Autocomplete:IDContributions_autocomplete
+    methods:  GET
+
+search_all_keywords_autocomplete:
+    path:     /get_keywords
+    defaults: 
+     _controller: AppBundle:Autocomplete:keywords_autocomplete
+    methods:  GET
+
+app_sattype_autocomplete:
+    path:     /get_sattype
+    defaults: 
+     _controller: AppBundle:Autocomplete:sattype_autocomplete
+    methods:  GET
+
+app_satorbit_autocomplete:
+    path:     /get_satorbit
+    defaults: 
+     _controller: AppBundle:Autocomplete:satorbit_autocomplete
+    methods:  GET
+
+app_satsensor_autocomplete:
+    path:     /get_satsensor
+    defaults: 
+     _controller: AppBundle:Autocomplete:satsensor_autocomplete
+    methods:  GET
+
+app_satmoderadar_autocomplete:
+    path:     /get_moderadar
+    defaults: 
+     _controller: AppBundle:Autocomplete:satmoderadar_autocomplete
+    methods:  GET
+
+app_satrowframe_autocomplete:
+    path:     /get_rowframe
+    defaults: 
+     _controller: AppBundle:Autocomplete:satrowframe_autocomplete
+    methods:  GET
+    
+app_contribtype_autocomplete:
+    path:     /get_contribtype
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribtype_autocomplete
+    methods:  GET
+    
+app_contribrole_autocomplete:
+    path:     /get_contribrole
+    defaults: 
+     _controller: AppBundle:Autocomplete:contribrole_autocomplete
+    methods:  GET
+    
+app_lithostratum_autocomplete:
+    path:     /get_lithostratum
+    defaults: 
+     _controller: AppBundle:Autocomplete:lithostratum_autocomplete
+    methods:  GET

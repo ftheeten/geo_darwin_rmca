@@ -1,0 +1,47 @@
+#delete ----------------
+
+app_delete_contributor:
+    path:     /delete/contributor/{pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletecontributor
+
+app_delete_contribution:
+    path:     /delete/contribution/{pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletecontribution
+
+app_delete_dkeyword:
+    path:     /delete/dkeyword/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletedkeyword
+
+app_delete_ddoctitle:
+
+    path:     /delete/ddoctitle/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddoctitle
+
+app_delete_dlinkcontdoc:
+    path:     /delete/dlinkcontdoc/{pk}/{container_pk}/{table}
+    defaults: 
+     {_controller: AppBundle:Delete:deletedlinkcontdoc, table:"ddocument"}
+
+app_delete_dlinkcontdoc_from_contrib:
+    path:     /delete/dlinkcontdoc_contrib/{pk}/{container_pk}/{table}
+    defaults: 
+     {_controller: AppBundle:Delete:deletedlinkcontdoc, table:"dcontribution"}
+     
+app_delete_satellite:
+    path:     /delete/ddocsatellite/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletedddocsatellite
+     
+app_delete_stratum_from_point:
+    path:     /delete/stratum_from_point/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletestratum_from_point
+     
+app_delete_stratum_description:
+    path:     /delete/stratum_description/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deletestratum_description

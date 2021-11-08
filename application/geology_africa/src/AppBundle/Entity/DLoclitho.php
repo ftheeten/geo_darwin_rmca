@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="dloclitho", uniqueConstraints={@ORM\UniqueConstraint(name="dloclitho_unique", columns={"idcollection", "idpt", "idstratum"})}, indexes={@ORM\Index(name="IDX_AA614F2531E4780850E3C8BA", columns={"idcollection", "idpt"})})
  * @ORM\Entity
  */
-class DLoclitho
+class DLoclitho extends GeodarwinEntity
 {
     /**
      * @var integer
@@ -65,24 +65,18 @@ class DLoclitho
     private $descriptionstratum;
 
     /**
-     * @var \AppBundle\Entity\Dloccenter
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dloccenter",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
 
-	/**
-     * @var \AppBundle\Entity\Dloccenter
+    /**
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dloccenter",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idpt", referencedColumnName="idpt")
-     * })
+     * @ORM\Column(name="idpt", type="integer", nullable=false)
      */
-    private $idpt;
+    private $idpt = '0';
 
     /**
      * Get pk
@@ -92,6 +86,20 @@ class DLoclitho
     public function getPk()
     {
         return $this->pk;
+    }
+	
+	/**
+     * Set pk
+     *
+     * @param string $pk
+     *
+     * @return Dloclitho
+     */
+    public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
     }
 
     /**
@@ -241,11 +249,11 @@ class DLoclitho
     /**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dloccenter $idcollection
+     * @param string $idcollection
      *
-     * @return Dloclitho
+     * @return DLoclitho
      */
-    public function setIdcollection(\AppBundle\Entity\Dloccenter $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -255,7 +263,7 @@ class DLoclitho
     /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Dloccenter
+     * @return string
      */
     public function getIdcollection()
     {
@@ -266,11 +274,11 @@ class DLoclitho
 	/**
      * Set idpt
      *
-     * @param \AppBundle\Entity\Dloccenter $idpt
+     * @param integer $idpt
      *
-     * @return Dlocdrilling
+     * @return DLoclitho
      */
-    public function setIdpt(\AppBundle\Entity\Dloccenter $idpt = null)
+    public function setIdpt($idpt)
     {
         $this->idpt = $idpt;
 
@@ -280,10 +288,46 @@ class DLoclitho
     /**
      * Get idpt
      *
-     * @return \AppBundle\Entity\Dloccenter
+     * @return integer
      */
     public function getIdpt()
     {
         return $this->idpt;
     }
+	
+	//foreign keys
+	public $dlocstratumdesc;
+	
+	public function initDlocstratumdesc($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum), "getPk");		
+		return $this->dlocstratumdesc;
+	}
+	
+	public function initNewDlocstratumdesc($em, $new_dlocstratumdesc)
+	{		
+		$this->initDlocstratumdesc($em);
+		//take description in the signature
+		if(count($new_dlocstratumdesc)>0)
+		{			
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dlocstratumdesc::class,
+				"dlocstratumdesc",				
+				"getSignature", 
+				$new_dlocstratumdesc, 
+				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum)
+			);	
+		}
+		return $this->dlocstratumdesc;
+	}
+	
+	//ftheeten
+	public function getSignature()
+	{
+		//order is important when rattaching
+		return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum()."_".$this->getTopstratum()."_".$this->getBottomstratum()."_".var_export($this->getAlternance(), true)."_".$this->getDescriptionstratum();
+		
+	}
 }

@@ -2,6 +2,74 @@
 {% extends "@App/searchlayout.html.twig" %}
 
 {% block body %}
-{% include "@App/contributions/contributionform_raw.html.twig"  %}
+{{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'contribution_form'}}) }}
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link " id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="true">Contributors</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="document-tab" data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab" aria-controls="documents" aria-selected="false">To document</button>
+  </li>   
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab">   
+  {% include "@App/contributions/contributionform_raw.html.twig"  %} 
+  </div>
+  <div class="tab-pane" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
+CONTRIB 
+{% if originaction =="add_beforecommit" %}
+  	Please save the main part of the contribution first
+ {% else %}
+	{% include "@App/contributions/contribution_to_contributor.html.twig"  %}
+ {% endif %}
+ </div>
+  <div class="tab-pane" id="document" role="tabpanel" aria-labelledby="document-tab">
+ {% if originaction =="add_beforecommit" %}
+  	Please save the main part of the contribution first
+ {% else %}
+	{% include "@App/contributions/contribution_to_doc.html.twig"  %}
+ {% endif %}
+ </div>
+
+
+ </div>
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#contribution_form' , 'delete_route': 'app_delete_contribution' } %}
+{{ form_end(form) }}
+<script language="javascript">
+	var current_tab="main-tab";
+	$(document).ready(
+		function()
+		{
+			console.log("BLOCK_JAVASCRIPT");
+			
+			$(".nav-link").click(
+				function()
+				{
+					console.log($(this).attr("id"));
+					current_tab=$(this).attr("id");
+					$("#current_tab").val(current_tab);
+				}
+			);
+			
+			{% if current_tab is defined %}
+			console.log("TAB_IS_DEFINED");
+			console.log("{{ current_tab }}");
+				{% if current_tab!='main_tab' %}
+					$("#{{ current_tab }}").click();			
+				{% endif %}
+			{% endif %}
+		}
+		);
+
+</script>
+{% endblock %}
+
+{% block javascript %}
+
 {% endblock %}
 

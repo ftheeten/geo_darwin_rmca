@@ -1,0 +1,11 @@
+{# src/AppBundle/Resources/views/dloccenter/addpoints.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{{ include("@App/dloccenter/pointform.html.twig") }}
+{% endblock %}

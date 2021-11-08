@@ -487,7 +487,7 @@ class Ddocument extends GeodarwinEntity
     }
 	
 	
-	protected $dkeywords;
+	
 	
 	/**
      * get ddoctitle
@@ -500,7 +500,7 @@ class Ddocument extends GeodarwinEntity
     }
 	
 	
-	protected $ddoctitle;
+
 	
 
 	/**
@@ -515,14 +515,18 @@ class Ddocument extends GeodarwinEntity
 	
 	
 	//foreign keys
+	protected $dkeywords;
 	protected $dlinkcontdocs;
+	protected $ddoctitle;
+	protected $ddocsatellite;
 	
     public function __construct()
     {
      
 		$this->dkeywords =  Array();
 		$this->dlinkcontdocs =  Array();
-		$this->ddoctitle =  Array();		
+		$this->ddoctitle =  Array();
+		$this->ddocsatellite =  Array();		
     }
 	
 	
@@ -544,22 +548,37 @@ class Ddocument extends GeodarwinEntity
     }
 	
 	public function initDkeywords($em)
-	{
-		$this->attachForeignkeys($em,Dkeyword::class,"dkeywords", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getKeyword");
+	{		
+		$this->attachForeignkeysAsObject($em,Dkeyword::class,"dkeywords", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc));		
 		return $this->dkeywords;
 	}
 	
 	public function initNewDkeywords($em, $new_keywords)
-	{
-		$this->reattachForeignkeys($em,Dkeyword::class,"dkeywords", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getKeyword", "keyword", $new_keywords,array("setIdcollection"=>$this->idcollection, "setId"=>$this->iddoc), "setKeyword" );
-		
+	{		
+		if(count($new_keywords)>0)
+		{			
+			$this->initDkeywords($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dkeyword::class,
+				"dkeywords",				
+				"getKeyword", 
+				$new_keywords, 
+				array("idcollection"=>$this->idcollection, "id"=>$this->iddoc)
+			);	
+		}
 		return $this->dkeywords;
 	}
 	
 	public function initDLinkcontdoc($em)
 	{		
-		$this->attachForeignkeys($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
-		print_r($this->dlinkcontdocs);
+		//$this->attachForeignkeys($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
+		//$this->dlinkcontdocs->setContributor_db($em);
+		$this->attachForeignkeysAsObject($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
+		foreach($this->dlinkcontdocs as $obj)
+		{
+			$obj->setContribution_db($em);
+		}
 		return $this->dlinkcontdocs;
 	}
 	
@@ -583,29 +602,90 @@ class Ddocument extends GeodarwinEntity
 	
 	public function initDdoctitles($em)
 	{
-		$this->attachForeignkeys($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc), "getTitle");
+		
+		$this->attachForeignkeysAsObject($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
 		return $this->ddoctitle;
 	}
 	
 	public function initNewDdoctitles($em, $new_titles)
-	{
-		/*$this->reattachForeignkeys($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc), "getTitle", "title", $new_titles,array("setIdcollection"=>$this->idcollection, "setIddoc"=>$this->iddoc), "setTitle" );
-		*/
-		
+	{		
 		if(count($new_titles)>0)
-		{			
-			$this->reattachForeignKeysSignature(
+		{	
+			$this->initDdoctitles($em);
+			$this->reattachForeignKeysAsObject(
 				$em,
 				Ddoctitle::class,
-				"ddoctitle", 
-				"title",  
+				"ddoctitle",				
 				"getTitle", 
 				$new_titles, 
-				null,
-				 array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
 			);	
 		}
 		return $this->ddoctitle;
 	}
+	
+	public function initDdocsatellite($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Ddocsatellite::class,"ddocsatellite", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
+		return $this->ddocsatellite;
+	}
+	
+	public function initNewDdocsatellite($em, $new_satellite)
+	{		
+		if(count($new_satellite)>0)
+		{		
+			$this->initDdocsatellite($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Ddocsatellite::class,
+				"ddocsatellite",				
+				"getPk", 
+				$new_satellite, 
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddocsatellite;
+	}
+	
+	//attach title
+	protected $title;
+	
+	public function setTitle($str)
+	{
+		$this->title=$str;
+		return $this;
+	}
+	
+	public function getTitle()
+	{
+		return $this->title;
+	}
+	
+	public function setTitle_db($em)
+	{
+		$titles_obj=$em->getRepository(Ddoctitle::class)
+						 ->findBy(array('iddoc' => $this->getIddoc(),
+									"idcollection"=> $this->getIdcollection()),
+									array('pk'=>'ASC'));
+		$titles_elem=Array();
+		if($titles_obj !==NULL)
+		{
+			foreach($titles_obj as $obj)
+			{
+				$titles_elem[]=$obj->getTitle();
+			}
+		}
+		if($this->getNumarchive()!==NULL)
+		{
+			$titles_elem[]=$this->getNumarchive();
+		}
+		if($this->getCaption()!==NULL)
+		{
+			$titles_elem[]=$this->getCaption();
+		}
+		$this->title= implode("; ", $titles_elem);
+	}
+	
 
 }

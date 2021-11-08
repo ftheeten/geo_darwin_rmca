@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="dloccenter", uniqueConstraints={@ORM\UniqueConstraint(name="dloccenter_unique", columns={"idcollection", "idpt"})}, indexes={@ORM\Index(name="IDX_C376102433EB2703", columns={"idprecision"})})
  * @ORM\Entity
  */
-class DLoccenter
+class DLoccenter extends GeodarwinEntity
 {
     /**
      * @var integer
@@ -140,9 +140,16 @@ class DLoccenter
 	/**
      * @var string
      *
-     * @ORM\Column(name="originalcoord", type="text", nullable=true)
+     * @ORM\Column(name="original_latitude", type="text", nullable=true)
      */
-    private $originalcoord;
+    private $original_latitude;
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="original_longitude", type="text", nullable=true)
+     */
+    private $original_longitude;
 	
 
 
@@ -161,7 +168,7 @@ class DLoccenter
      *
      * @param string $idcollection
      *
-     * @return Dloccenter
+     * @return DLoccenter
      */
     public function setIdcollection($idcollection)
     {
@@ -185,7 +192,7 @@ class DLoccenter
      *
      * @param integer $idpt
      *
-     * @return Dloccenter
+     * @return DLoccenter
      */
     public function setIdpt($idpt)
     {
@@ -492,7 +499,7 @@ class DLoccenter
         return $this->idprecision;
     }
 	
-	    /**
+	/**
      * Set epsg
      *
      * @param string $epsg
@@ -540,28 +547,372 @@ class DLoccenter
         return $this->wkt;
     }
 	
-	    /**
-     * Set originalcoord
+	/**
+     * Set original_latitude
      *
-     * @param string $originalcoord
+     * @param string $original_latitude
      *
      * @return Dloccenter
      */
-    public function setOriginalcoord($originalcoord)
+    public function setOriginalLatitude($original_latitude)
     {
-        $this->originalcoord = $originalcoord;
+        $this->original_latitude = $original_latitude;
 
         return $this;
     }
 
     /**
-     * Get originalcoord
+     * Get original_latitude
      *
      * @return string
      */
-    public function getOriginalcoord()
+    public function getOriginalLatitude()
     {
-        return $this->originalcoord;
+        return $this->original_latitude;
     }
 	
+	/**
+     * Set original_longitude
+     *
+     * @param string $original_longitude
+     *
+     * @return Dloccenter
+     */
+    public function setOriginaLongitude($original_longitude)
+    {
+        $this->original_longitude = $original_longitude;
+
+        return $this;
+    }
+
+    /**
+     * Get originalLongitude
+     *
+     * @return string
+     */
+    public function getOriginalLongitude()
+    {
+        return $this->original_longitude;
+    }
+	
+	
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="coordinate_format", type="text", nullable=true)
+     */
+    private $coordinate_format;
+	
+	/**
+     * Set coordinate_format
+     *
+     * @param string $coordinate_format
+     *
+     * @return Dloccenter
+     */
+    public function setCoordinateFormat($coordinate_format)
+    {
+        $this->coordinate_format = $coordinate_format;
+
+        return $this;
+    }
+
+    /**
+     * Get coordinate_format
+     *
+     * @return string
+     */
+    public function getCoordinateFormat()
+    {
+        return $this->fieldnum;
+    }
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="latitude_degrees", type="integer", nullable=true)
+     */
+    private $latitude_degrees ;
+	
+	/**
+     * @var decimal
+     *
+     * @ORM\Column(name="latitude_minutes", type="decimal", precision=10, scale=8, nullable=true)
+     */
+    private $latitude_minutes;
+	
+    /**
+     * @var decimal
+     *
+     * @ORM\Column(name="latitude_seconds", type="decimal", precision=10, scale=8, nullable=true)
+     */
+    private $latitude_seconds;
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="latitude_direction", type="string",nullable=true)
+     */
+    private $latitude_direction;
+	
+	
+	/**
+     * Set latitude_degrees
+     *
+     * @param integer $latitude_degrees
+     *
+     * @return Dloccenter
+     */
+    public function setLatitudeDegrees($latitude_degrees)
+    {
+        $this->latitude_degrees = $latitude_degrees;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude_degrees
+     *
+     * @return integer
+     */
+    public function getLatitudeDegrees()
+    {
+        return $this->latitude_degrees;
+    }
+	
+	/**
+     * Set latitude_minutes
+     *
+     * @param decimal $latitude_minutes
+     *
+     * @return Dloccenter
+     */
+    public function setLatitudeMinutes($latitude_minutes)
+    {
+        $this->latitude_minutes = $latitude_minutes;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude_seconds
+     *
+     * @return decimal
+     */
+    public function getLatitudeMinutes()
+    {
+        return $this->latitude_minutes;
+    }
+	
+	/**
+     * Set latitude_minutes
+     *
+     * @param decimal $latitude_seconds
+     *
+     * @return Dloccenter
+     */
+    public function setLatitudeSeconds($latitude_seconds)
+    {
+        $this->latitude_seconds = $latitude_seconds;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude_seconds
+     *
+     * @return decimal
+     */
+    public function getLatitudeSeconds()
+    {
+        return $this->latitude_seconds;
+    }
+	
+	/**
+     * Set latitude_direction
+     *
+     * @param string $latitude_direction
+     *
+     * @return Dloccenter
+     */
+    public function setLatitudeDirection($latitude_direction)
+    {
+        $this->latitude_direction = $latitude_direction;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude_direction
+     *
+     * @return string
+     */
+    public function getLatitudeDirection()
+    {
+        return $this->latitude_direction;
+    }
+	
+		/**
+     * @var integer
+     *
+     * @ORM\Column(name="longitude_degrees", type="integer", nullable=true)
+     */
+    private $longitude_degrees ;
+	
+	/**
+     * @var decimal
+     *
+     * @ORM\Column(name="longitude_minutes", type="decimal", precision=10, scale=8, nullable=true)
+     */
+    private $longitude_minutes;
+	
+    /**
+     * @var decimal
+     *
+     * @ORM\Column(name="longitude_seconds", type="decimal", precision=10, scale=8, nullable=true)
+     */
+    private $longitude_seconds;
+	
+	/**
+     * @var string
+     *
+     * @ORM\Column(name="longitude_direction", type="string",nullable=true)
+     */
+    private $longitude_direction;
+	
+	
+	/**
+     * Set longitude_degrees
+     *
+     * @param integer $longitude_degrees
+     *
+     * @return Dloccenter
+     */
+    public function setLongitudeDegrees($longitude_degrees)
+    {
+        $this->longitude_degrees = $longitude_degrees;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude_degrees
+     *
+     * @return integer
+     */
+    public function getLongitudeDegrees()
+    {
+        return $this->longitude_degrees;
+    }
+	
+	/**
+     * Set longitude_minutes
+     *
+     * @param decimal $longitude_minutes
+     *
+     * @return Dloccenter
+     */
+    public function setLongitudeMinutes($longitude_minutes)
+    {
+        $this->longitude_minutes = $longitude_minutes;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude_seconds
+     *
+     * @return decimal
+     */
+    public function getLongitudeMinutes()
+    {
+        return $this->longitude_minutes;
+    }
+	
+	/**
+     * Set longitude_minutes
+     *
+     * @param decimal $longitude_seconds
+     *
+     * @return Dloccenter
+     */
+    public function setLongitudeSeconds($longitude_seconds)
+    {
+        $this->longitude_seconds = $longitude_seconds;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude_seconds
+     *
+     * @return decimal
+     */
+    public function getLongitudeSeconds()
+    {
+        return $this->longitude_seconds;
+    }
+	
+	/**
+     * Set longitude_direction
+     *
+     * @param string $longitude_direction
+     *
+     * @return Dloccenter
+     */
+    public function setLongitudeDirection($longitude_direction)
+    {
+        $this->longitude_direction = $longitude_direction;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude_direction
+     *
+     * @return string
+     */
+    public function getLongitudeDirection()
+    {
+        return $this->longitude_direction;
+    }
+	
+	//foreign keys
+	protected $dloclitho;
+	
+	public function __construct()
+    {     
+		$this->dloclitho =  Array();		
+    }
+	
+	public function initDloclitho($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,DLoclitho::class,"dloclitho", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt));foreach($this->dloclitho as $obj)
+		{
+			$obj->initDlocstratumdesc($em);
+		}		
+		return $this->dloclitho;
+	}
+	
+	public function initNewDloclitho($em, $new_dloclitho)
+	{		
+		$this->initDloclitho($em);
+		//take description in the signature
+		if(count($new_dloclitho)>0)
+		{			
+			$this->reattachForeignKeysAsObject(
+				$em,
+				DLoclitho::class,
+				"dloclitho",				
+				"getSignature", 
+				$new_dloclitho, 
+				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt)
+			);	
+		}
+		return $this->dloclitho;
+	}
+	
+	 
 }

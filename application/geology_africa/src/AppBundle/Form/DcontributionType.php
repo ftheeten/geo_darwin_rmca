@@ -30,16 +30,27 @@ class DcontributionType extends AbstractType {
 		
 		/* builder---------*/
         $builder
-			->add('idcontribution', TextType::class, array('required' => true))
-			->add('datetype', ChoiceType::class, array('required' => true))
-			//->add('date', DateType::class, [
-			//	'widget' => 'single_text'
-			//])
-			#->add('year', ChoiceType::class, array('choices'  => $years,'data' => '2019'))
-			->add('date', DateType::class, array('required' => false))
+			->add('idcontribution', TextType::class, array('required' => true,"label"=> false))//,'attr' => ['style' => 'visibility:hidden'] ))
+			->add('datetype', ChoiceType::class, array('required' => true ))
+			->add('name', TextType::class, array('required' => false ))
+			
+			->add('date', DateType::class, array('required' => false, 'widget' => 'single_text',
+
+                // prevents rendering it as type="date", to avoid HTML5 date pickers
+                'html5' => false,
+				"label"=> false,
+                // adds a class that can be selected in JavaScript
+                'attr' => [ 'style'=> 'visibility:hidden']))
 			->add('year', TextType::class, array('required' => true))
+			->add('date_format', TextType::class, array('required' => false, "label"=> false, "invalid_message"=> "Date is not valid",'attr' => [ 'style'=> 'visibility:hidden']))
+			->add('date_year', TextType::class, array('required' => false, 'mapped' => false))
+			->add('date_month', ChoiceType::class, array('choices'=>array_combine(range(1,12), range(1,12)),'required' => false, 'mapped' => false))
+			->add('date_day', ChoiceType::class, array('choices'=>array_combine(range(1,31), range(1,31)),'required' => false, 'mapped' => false))
 		;
 		 $builder->get('datetype')->resetViewTransformers();
+		 $builder->get('date_year')->resetViewTransformers();
+		 $builder->get('date_month')->resetViewTransformers();
+		 $builder->get('date_year')->resetViewTransformers();
 		
 		$builder->addEventListener(
 		  FormEvents::PRE_SET_DATA,    

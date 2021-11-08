@@ -1,15 +1,16 @@
 {# src/AppBundle/Resources/views/foreignkeys/template_modal_search.html.twig #}
-
+{% set ctrl_suffix = ctrl_suffix|default("") %}
 {% block body %}
+
 <style>
 .select2-container--open {
     z-index: 1000000020
 }
 </style>
 {{ index }}
-<div class="col-sm-2"><input type="button" id="add_modal{{ index }}" name="add_modal" value="Search" data-bs-toggle="modal" data-bs-target="#modaladd"></input>
+<div class="col-sm-2"><input type="button" id="add_modal{{ ctrl_suffix }}{{ index }}" name="add_modal{{ ctrl_suffix }}" value="Search" data-bs-toggle="modal" data-bs-target="#modaladd{{ ctrl_suffix }}"></input>
 {% if index== 1 %}
-<div class="modal fade modal_keyword " id="modaladd" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" style="z-index:1000000000">
+<div class="modal fade modal_keyword " id="modaladd{{ ctrl_suffix }}" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" style="z-index:1000000000">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content" id="modal_add_content">
             <div class="modal-header">
@@ -22,12 +23,13 @@
                 </div>
             </div>
             <div class="modal-footer">                
-                  <button type="button" class="btn btn-secondary remove_add" id="remove_modal" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-secondary remove_add remove_modal" id="remove_modal" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>    
 </div>
 {% endif %}
+</div>
 {% endblock %}
 {% block javascripts %}
 	<script language='javascript'>
@@ -42,32 +44,43 @@
 					//console.log("show for:");
 					//console.log(global_modal_index_value);
 				//});
-				$("#add_modal{{ index }}").click(
+				$("#add_modal{{ ctrl_suffix }}{{ index }}").click(
 					function()
 					{
+						console.log("ADDMODAL!!!!");
 						global_modal_index_value="{{ id_target }}";
 						global_modal_index_text="{{ value_target }}";
 					}
 				);
-				console.log("modal_ready");
+				//console.log("modal_ready");
+				{% if index== 1 %}
 				onElementInserted('body', '.modal_link', function(element) {        
 					$(element).click(
 						function(e)
 						{
+							console.log("click");
+							console.log(e.target.id);
 							console.log("closing {{ id_target }}")
 							console.log("modal_link clicked");
+							console.log("TARGET");
+							console.log(global_modal_index_value);
 							e.preventDefault();
 							var key=  $(element).attr('data-modal-key');
-							console.log(key);
+							//console.log(key);
 							var val=  $(element).attr('data-modal-value');
-							console.log(val);
+							//console.log(val);
 							
 							$(global_modal_index_value).val(key);
 							$(global_modal_index_text).val(val);
-							$('#remove_modal').click();							
+							//to simulate change event
+							// and update information such as link
+							$(global_modal_index_value).click();
+							$('.remove_modal').click();
+							console.log("CLOSED");						
 							return false;
 						}	
 					)});
+					{% endif %}
 				
 			}
 		);

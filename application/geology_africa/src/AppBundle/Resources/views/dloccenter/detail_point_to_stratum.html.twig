@@ -1,0 +1,66 @@
+{# src/AppBundle/Resources/views/dloccenter/detail_point_to_stratum.html.twig #}
+{% set default_val = default_val|default(null) %}
+{% set search_form = search_form|default(null) %}
+{% include "@App/forms/standalonejs.html.twig" %}
+
+
+<div class="row">			
+		<div class="col-sm-1">{{ index }} PK</div>
+		
+		<div class="col-sm-2"><input type="text" name="{{ ctrl_prefix }}_pk[{{index}}]" id="{{ ctrl_prefix }}_pk_{{ index }}" style="width:100%" readonly></input></div>
+		
+		
+		<input type="hidden" name="{{ ctrl_prefix }}_idcollection[{{index}}]" id="{{ ctrl_prefix }}_idcollection_{{ index }}" style="width:100%" ></input>
+		
+		<input type="hidden" name="{{ ctrl_prefix }}_idpt[{{index}}]" id="{{ ctrl_prefix }}_idpt_{{ index }}" style="width:100%" ></input>
+</div>
+<div class="row">	
+	<div class="col-sm-1">Order stratum</div>		
+	<div class="col-sm-2"><input type="number" name="{{ ctrl_prefix }}_orderstratum[{{index}}]" id="{{ ctrl_prefix }}_orderstratum_{{ index }}" step="1" style="width:100%" /></div>
+	<div class="col-sm-1">Alternance</div>
+	<div class="col-sm-2"><input type="checkbox" name="{{ ctrl_prefix }}_alternance[{{index}}]" id="{{ ctrl_prefix }}_alternance_{{ index }}"  /></div>	
+</div>
+<div class="row">	
+	<div class="col-sm-1">Stratum</div>
+
+	<div class="col-sm-2"><select name="{{ ctrl_prefix }}_lithostratum[{{index}}]" id="{{ ctrl_prefix }}_lithostratum_{{ index }}" style="width:100%" multiple="multiple" ></select></div>
+	
+	<div class="col-sm-1">Top stratum</div>
+	<div class="col-sm-2"><input type="number" name="{{ ctrl_prefix }}_topstratum[{{index}}]" id="{{ ctrl_prefix }}_topstratum_{{ index }}" step="0.01" style="width:100%" /></div>
+	
+	<div class="col-sm-1">Bottom stratum</div>
+	<div class="col-sm-2"><input type="number" name="{{ ctrl_prefix }}_bottomstratum[{{index}}]" id="{{ ctrl_prefix }}_bottomstratum_{{ index }}" step="0.01" style="width:100%" /></div>
+</div>
+<div class="row">
+	<div class="col-sm-12">Description :</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+	{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/dloccenter/detail_point_to_stratum_description.html.twig" , 'ctrl_prefix' : 'point_to_stratum_description_' ~ index , 'ajax_route': path('get_widget_point_to_stratum_description', {'table':"dloccenter"}), 'fk_values': default_val.dlocstratumdesc|default(null),
+'delete_route':'app_delete_stratum_description',
+'fk_key_field':'pk'
+ }  %}
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		$("#{{ ctrl_prefix }}_lithostratum_{{ index }}").select2(select2_generic("{{ path('app_lithostratum_autocomplete')}}","lithostratum","lithostratum" ),0);
+		
+		{% if not default_val is null %}
+			$("#{{ ctrl_prefix }}_pk_{{ index }}").val("{{ default_val.pk  }}");
+			$("#{{ ctrl_prefix }}_orderstratum_{{ index }}").val("{{ default_val.idstratum  }}");
+			$("#{{ ctrl_prefix }}_topstratum_{{ index }}").val("{{ default_val.topstratum  }}");
+			$("#{{ ctrl_prefix }}_bottomstratum_{{ index }}").val("{{ default_val.bottomstratum  }}");
+			
+			var newOption = new Option("{{ default_val.lithostratum }}", "{{ default_val.lithostratum  }}", true, true);
+			$('#{{ ctrl_prefix }}_lithostratum_{{ index }}').append(newOption).trigger('change');
+			
+			{% if default_val.alternance %}
+				$("#{{ ctrl_prefix }}_alternance_{{ index }}").prop("checked",true);
+			{% endif %}
+		{% endif %}
+	});
+</script>

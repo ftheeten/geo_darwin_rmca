@@ -1,9 +1,12 @@
 {# src/AppBundle/Resources/views/foreignkeys/ddoctitle.html.twig #}
 
-{% set default_val = default_val|default(null) %}
+{% set val_to_display = default_val.title|default(null) %}
+{% set val_pk = default_val.pk|default(null) %}
 
-
+<input type="hidden" name="widget_titles_pk[]" id="titles_pk_{{ index }}" readonly ></input>
 <input type="text" name="widget_titles[]" id="titles_{{ index }}" style="width:400px" ></input>
+
+				
 
 
 
@@ -15,7 +18,8 @@ $(document).ready(
 	{
 		
 		{% if not default_val is null %}
-			$("#titles_{{ index }}").val("{{ default_val }}");
+			$("#titles_{{ index }}").val("{{ val_to_display }}");
+			$("#titles_pk_{{ index }}").val("{{ val_pk }}");
 		{% endif %}
 	}
 );

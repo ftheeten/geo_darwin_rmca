@@ -6,6 +6,16 @@
 			return select2_generic_full(url, key, val, minlen, true);
 		}
 		
+		var select2_pattern_only=function(minlen)
+		{			
+			var tmp_data={
+				tags: true,				
+				minimumInputLength: minlen
+			};
+			return tmp_data
+			
+		}
+		
 		var select2_generic_full=function(url, key, val, minlen, include_pattern)
 		{
 			var global_pattern="";

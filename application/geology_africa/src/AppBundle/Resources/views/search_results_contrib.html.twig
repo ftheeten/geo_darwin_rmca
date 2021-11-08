@@ -12,7 +12,7 @@
 </div>
 {% for doc in results %}
 <div class="row" style="border-style:solid; margin: 1px;">
-	<div class="col-sm-1"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['people'] }}"  href="{{ path('app_edit_contributor', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>
+	<div class="col-sm-1"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['people'] ~ " " ~(doc['institut']??"")}}"  href="{{ path('app_edit_contributor', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>
 	<div class="col-sm-3" class="is_modal_value">{{ doc['people'] }}</div>
 	<div class="col-sm-2">{{ doc['peoplefonction'] }}</div>
 	<div class="col-sm-1">{{ doc['peopletitre'] }}</div>

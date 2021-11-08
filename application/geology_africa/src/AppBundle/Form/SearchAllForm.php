@@ -21,8 +21,8 @@ class SearchAllForm extends AbstractType
                     ],
                     "multiple"=> true
                 ]);
-         $builder->add("contributor", ChoiceType::class, array('required' => false));
-		 $builder->add("role", ChoiceType::class, array('required' => false));
+         //$builder->add("contributor", ChoiceType::class, array('required' => false));
+		 //$builder->add("role", ChoiceType::class, array('required' => false));
 		 $builder->add('wkt_search', TextType::class, array('required' => false));
     }
     

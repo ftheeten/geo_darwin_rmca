@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="dlinkcontdoc", uniqueConstraints={@ORM\UniqueConstraint(name="dlinkcontdoc_unique", columns={"idcontribution", "idcollection", "id"})}, indexes={@ORM\Index(name="IDX_C63E6DE031E47808BF396750", columns={"idcollection", "id"}), @ORM\Index(name="IDX_C63E6DE0AC9A611C", columns={"idcontribution"})})
  * @ORM\Entity
  */
-class Dlinkcontdoc
+class Dlinkcontdoc 
 {
     /**
      * @var integer
@@ -23,10 +23,10 @@ class Dlinkcontdoc
     private $pk;
 
     // rmca custom mapping for foreign keys
-    /**
-     * @var integer
+     /**
+     * @var string
      *
-     * @ORM\Column(name="idcollection", type="integer", nullable=false)
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
 	
@@ -55,14 +55,14 @@ class Dlinkcontdoc
         return $this->pk;
     }
 
-    /**
+     /**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Ddocument $idcollection
+     * @param string $idcollection
      *
-     * @return Dlinkcontdoc
+     * @return Ddocument
      */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -72,7 +72,7 @@ class Dlinkcontdoc
     /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Ddocument
+     * @return string
      */
     public function getIdcollection()
     {
@@ -118,5 +118,79 @@ class Dlinkcontdoc
 		$this->idcollection=$doc->getIdcollection();
 
         return $this;
+    }
+	
+	
+    /**
+     * Set id
+     *
+     * @param integer $id
+     *
+     * @return Dlinkcontdoc
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
+    }
+	
+	/**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+	
+	
+	//document
+	public $document;
+	public $contribution;
+	
+	public function getDocument()
+	{
+		return $this->document;
+	}
+	
+	public function getContribution()
+	{
+		return $this->contribution;
+	}
+	
+	public function setDocument_db($em)
+	{
+		$tmp_doc=$em->getRepository(Ddocument::class)
+						 ->findOneBy(array('iddoc' => $this->getId(),
+									"idcollection"=> $this->getIdcollection()));
+		if($tmp_doc !==null)
+		{
+			$tmp_doc->setTitle_db($em);
+		}
+		$this->document=$tmp_doc;
+	}
+	
+	public function setContribution_db($em)
+	{
+		$tmp_cont=$em->getRepository(Dcontribution::class)
+						 ->findOneBy(array('idcontribution' => $this->getIdcontribution()
+									));
+		if($tmp_cont !==null)
+		{
+			$tmp_cont->setDescriptionDB($em);
+		}
+		$this->contribution=$tmp_cont;
+	}
+	
+	public function getLinkSignature()
+	{		
+		return $this->idcontribution."_".$this->idcollection."_".$this->id;
+		
+	}
+	
+	public function setPk($param)
+    {
+        $this->pk=$param;
     }
 }

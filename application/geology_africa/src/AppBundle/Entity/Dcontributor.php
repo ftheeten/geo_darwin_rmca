@@ -237,9 +237,18 @@ class Dcontributor
 		return $this->dlinkcontribute;
 	}
 	
-	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
+	/*public function initNewDlinkcontribute($em, $new_dlinkcontribute)
 	{
 		$this->reattachForeignkeys($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontributor"=>$this->idcontributor), "getIdcontributor", "idcontributor", $new_dlinkcontribute, array("setIdcontributor"=>$this->idcontributor),"setIdcontributor");
 		return $this->dlinkcontribute;
-	}
+	}*/
+	
+	//attach displayed name
+	protected $displayed_name;
+	
+	/*public function setDisplayedName($str)
+	{
+		$this->displayed_name=$this->getPeopletitre()??"".$this->getPeople()??""." ".$this->getInstitut()?"";
+		return $this;
+	}*/
 }

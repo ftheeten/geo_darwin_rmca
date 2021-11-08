@@ -1,7 +1,8 @@
 {# src/AppBundle/Resources/views/contributions/contribution_form_raw.html.twig #}
 {% include "@App/forms/standalonejs.html.twig" %}
 {% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
-{{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'contribution_form'}}) }}
+
+
 <div class="row">
 	<div class="col-sm-2">ID</div>
 	<div class="col-sm-3">
@@ -15,22 +16,29 @@
 </div>
 <div class="row">
 	<div class="col-sm-2">Type</div>
-	<div class="col-sm-3">{{ form_widget(form.datetype, {'attr': {'class': 'form-control inp_contribTypeDate'}}) }}</div>
+	<div class="col-sm-3">{{ form_widget(form.datetype , {'attr': {'class': 'form-control inp_contribTypeDate'}})  }}</div>
+</div>
+<div class="row">
+	<div class="col-sm-2">Name</div>
+	<div class="col-sm-3">{{ form_widget(form.name , {'attr': {'class': 'form-control inp_contribName'}})  }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Year</div>
 	<div class="col-sm-3">{{ form_widget(form.year, {'attr': {'class': 'form-control inp_contribYear'}}) }}</div>
 </div>
 <div class="row">
-	<div class="col-sm-2">Date</div>
-	<div class="col-sm-3">{{ form_widget(form.date, {'attr': {'class': 'form-control inp_contribDate'}}) }}</div>
+	<div class="col-sm-2">Date year</div>
+	<div class="col-sm-2">{{ form_widget(form.date_year, {'attr': {'class': 'form-control inp_contribDate date_year'}}) }}</div>
+	<div class="col-sm-2">Date month</div>
+	<div class="col-sm-2">{{ form_widget(form.date_month, {'attr': {'class': 'form-control inp_contribDate date_month'}}) }}</div>
+	<div class="col-sm-2">Date day</div>
+	<div class="col-sm-2">{{ form_widget(form.date_day, {'attr': {'class': 'form-control inp_contribDate date_day'}}) }}</div>
 </div>
-{% set new_prefix = 'contribdetail' %}
-{% include "@App/foreignkeys/template_subforms.html.twig" with {'nested_template':"@App/contributions/detail_contributor.html.twig" , 'ctrl_prefix' : new_prefix, 'ajax_route': path('get_widget_contribdetail'), 'fk_values': dlinkcontribute|default(null) }  %}
-{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#contribution_form' , 'delete_route': 'app_delete_contribution' } %}
 
 
-{{ form_end(form) }}
+
+
+
 <script language="javascript">
 	$(document).ready(
 		function()
@@ -53,11 +61,7 @@
 				
 				$(".inp_contribTypeDate").select2(select2_generic("{{ path('app_contribtype_autocomplete')}}","datetype","datetype" ),0);
 				
-				$(".inp_contribYear").datepicker({
-					format: "yyyy",
-					viewMode: "years", 
-					minViewMode: "years"
-				});
+				
 				
 				//$(".inp_contribDate").datepicker();
 				
@@ -66,6 +70,9 @@
 					$('.inp_contribTypeDate').append(newOption).trigger('change');
 
 				{% endif %}
+				
+			
+				
 			
 		}
 	);

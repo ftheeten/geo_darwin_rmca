@@ -8,6 +8,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 /** GeodarwinDocForeignKey*/
 class GeodarwinDocForeignKey
 {
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="pk", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="SEQUENCE")
+     * @ORM\SequenceGenerator(sequenceName="dlinkcontdoc_pk_seq", allocationSize=1, initialValue=1)
+     */
+    private $pk;
+	
 	 /**
      * @var integer
      *
@@ -67,5 +78,21 @@ class GeodarwinDocForeignKey
     public function getIddoc()
     {
         return $this->iddoc;
-    }		
+    }
+
+	
+	/**
+     * Get pk
+     *
+     * @return integer
+     */
+    public function getPk()
+    {
+        return $this->pk;
+    }
+	
+	public function setPk($param)
+    {
+        $this->pk=$param;
+    }	
 }

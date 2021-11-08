@@ -1,0 +1,292 @@
+{# src/AppBundle/Resources/views/search_all/searchallbs_raw.html.twig #}
+
+{% set type_filter = type_filter|default("all") %}
+{% set is_modal = is_modal|default(false) %}
+{% if is_modal==false %}
+	{% use "@App/forms/standalonejs.html.twig" %}
+{% endif %}
+{% block body %}
+<div class="container">
+<div class="row">
+    <div class="col-sm-2">What</div>
+    <div class="col-sm-3"><select name="document_type" id="document_type" style="width:100%" multiple="multiple" ></select>
+    </div>
+    <div class="col-sm-2">keywords</div>
+    <div class="col-sm-3"><select name="keywords" id="keywords" style="width:100%" multiple="multiple" ></select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-2">Contributors</div>
+    <div class="col-sm-3"><select name="ac_contrib" id="ac_contrib" style="width:100%" multiple="multiple" ></select></div>
+	<div class="col-sm-2">role</div>	
+	<div class="col-sm-3"><select name="ac_role" id="ac_role" style="width:100%" multiple="multiple" ></select></div>
+</div>
+
+<div class="row">
+	
+		<div class="col-sm-2">Collection</div>
+		<div class="col-sm-3"><select name="collections" id="collections" style="width:100%" multiple="multiple" ></select></div>
+		<div class="col-sm-2">Id object</div>
+		<div class="col-sm-3"><select name="idobject" id="idobject" style="width:100%" multiple="multiple" ></select></div>
+	
+</div>
+<div class="row">
+	
+		 <div class="col-md-2">
+			Date from 
+		</div>
+		<div class="col-md-3">
+		<input type="text" name="date_from" id="date_from"/>
+		</div>
+		 <div class="col-md-2">
+			Date from 
+		</div>
+		<div class="col-md-3">
+		<input type="text" name="date_to" id="date_to"/>
+		</div>
+</div>
+<div class="row">
+		<div class="col-md-2">
+			Type of date
+		</div>
+		<div class="col-md-2">
+			<select id="date_type" name="date_type">
+				<option value="ALL">All</option>
+				<option value="contribution_year">contribution (year)</option>
+				<option value="contribution_day">contribution (day)</option>
+				<option value="locality">locality</option>
+			</select>
+		</div>
+	
+</div>
+{% if is_modal==false %}
+<div class="row">
+	<div class="col-sm-12">
+	  <button id="display_map" class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#searchMapDiv" aria-expanded="false" aria-controls="searchMapDiv">
+			Toggle map
+	</button>
+	</div>	
+	  <div class="collapse" id="searchMapDiv" >
+	  <div class="col-sm-12" >
+		{{ include("@App/openlayers/search_map.html.twig")  }}
+	 </div>
+	 <div class="col-sm-12">{{ form_widget(form.wkt_search, {'attr': {'class': 'wkt_search form-control' }}) }}</div>
+	</div>
+</div>
+{% endif %}
+
+<div class="row">
+     <div class="col-sm-2"></div>
+    <div class="col-sm-2"><input type="button" value="search" id="go_search_alldocs"/></div>
+    <div class="col-sm-2"><input type="button" value="get csv" id="get_csv"/></div>
+</div>
+
+
+</div>
+<div id="div_results_searchall" class="row"></div>
+{%endblock%}
+{% block javascripts %}
+    {{ parent() }}
+    <script language='javascript'>
+	
+	    var global_sort={};
+        var map_loaded=false;
+		var global_csv=false;
+		
+		var parse_json_list=function(url, attribute, sel2)
+		 {
+			
+			var list=$.getJSON( url, function( data ) {
+				var items=[];
+				var returned=[];
+				var features=data;
+				//console.log("features : ");
+				//console.log(features);
+				for(var i=0; i<features.length;i++)
+				{
+					var tmp=features[i];
+					//console.log("tmp (dans boucle) : ");
+					//console.log(tmp);
+					var tmp2=tmp[attribute];
+					if(!items.includes(tmp2))
+					{
+						items.push(tmp2);
+						
+					}
+				}
+				//console.log("items non triés");
+				//console.log(items);
+				items.sort();
+				//console.log("items triés");
+				//console.log(items);
+				for(var i=0; i<items.length;i++)
+				{
+					var tmp_dict={};
+					var tmp2=items[i];
+					tmp_dict["id"]=tmp2;
+					tmp_dict["text"]=tmp2;
+					returned.push(tmp_dict);
+				}
+				//console.log("select 2:");
+				//console.log(returned);
+				
+				//initialisé dans l'Ajax pour synchroniser
+				$(sel2).select2({
+				  data: returned,
+				  multiple:true
+				})
+						//return returned;		
+			});			
+		 }
+
+		
+	    var search_all_docs=function(current_page, page_size)
+		{
+			search_logic_all_docs(current_page, page_size,false)
+					
+		}
+		
+		function download(filename, text) 
+		{
+			  var element = document.createElement('a');
+			  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+			  element.setAttribute('download', filename);
+
+			  element.style.display = 'none';
+			  document.body.appendChild(element);
+
+			  element.click();
+
+			  document.body.removeChild(element);
+		}
+		
+		 var search_logic_all_docs=function(current_page, page_size, csv)
+		{
+					
+					console.log("SEARCH_CALLED");
+					criterias={}
+					criterias["current_page"]=current_page;
+                    criterias["page_size"]=page_size;
+					criterias["doc_type"]=$("#document_type").val();
+					criterias["collections"]=$("#collections").val();
+					criterias["idobject"]=$("#idobject").val();
+					criterias["contributor"]=$("#ac_contrib").val();
+					criterias["role"]=$("#ac_role").val();
+                    criterias["keywords"]=$("#keywords").val();
+					criterias["wkt_search"]=$(".wkt_search").val();
+					criterias["date_from"]=$("#date_from").val();
+					criterias["date_to"]=$("#date_to").val();
+					criterias["date_type"]=$("#date_type").val();
+					if(csv)
+					{
+						criterias["csv"]="true";
+						global_csv=true;
+					}
+					else
+					{
+						global_csv=false;
+					}
+					if(Object.keys(global_sort).length>0)
+					{
+						criterias["order"]=Object.keys(global_sort)[0];
+						criterias["order_dir"]=global_sort[Object.keys(global_sort)[0]];
+					}
+					console.log(criterias);
+					$.post("{{ path('search_main')}}", criterias,
+						function(data)
+						{
+							console.log("DATA");
+							if(global_csv)
+							{
+								download("geodarwin.txt",data);
+							}
+							else
+							{
+								console.log("DISPLAY");
+								$("#div_results_searchall").html(data);
+							}
+						}
+					);
+		}
+		
+		var sort=function(sort)
+		{
+			if(sort in global_sort)
+			{
+				if(global_sort[sort]=="ASC")
+				{
+					global_sort[sort]="DESC";
+				}
+				else
+				{
+					global_sort[sort]="ASC";
+				}
+			}
+			else
+			{
+			    global_sort={};
+				global_sort[sort]="ASC";
+			}
+			
+			search_all_docs(1, $("#page_size").val());
+		}
+		
+
+
+		
+        $(document).ready(
+            function()
+            {
+               jQuery.getJSON("{{ path('app_refresh_mv')}}")
+                
+				{% if type_filter=="all" %}
+					parse_json_list("{{ path('search_all_object_categories')}}","main_type", "#document_type");
+				{% elseif type_filter=="document" %}
+					parse_json_list("{{ path('search_all_document_categories')}}","main_type", "#document_type");
+				{% endif %}
+				parse_json_list("{{ path('search_all_collections')}}","idcollection", "#collections");
+                $("#ac_contrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","idcontributor","people" ),2);
+				$("#ac_role").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);               
+                $("#keywords").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
+				$("#idobject").select2(select2_generic("{{ path('app_idobject_autocomplete')}}","idobject","idobject" ),0);
+				
+				$("#date_from").datepicker( 
+					{
+						format: 'yyyy-mm-dd'
+					}
+				);
+				$("#date_to").datepicker( 
+					{
+						format: 'yyyy-mm-dd'
+					}
+				);
+				
+				$("#go_search_alldocs").click(
+				function()
+				{
+					search_all_docs(1, $("#page_size").val());
+				});
+				
+				$("#get_csv").click(
+				function()
+				{
+					search_logic_all_docs(1, $("#page_size").val(),true);
+				});
+				{% if is_modal==false %}
+				$("#searchMapDiv").on('shown.bs.collapse',
+					function()
+					{
+                        if(!map_loaded)
+                        {
+                           $("#search_map").html("");
+						   map_loaded=true;
+						   init_map("searchmap");                           
+                        }                        
+                    }
+				);
+				{% endif %}		
+            }		
+        );
+
+</script>
+{% endblock %}

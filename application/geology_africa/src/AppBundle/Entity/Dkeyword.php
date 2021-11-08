@@ -195,4 +195,11 @@ class Dkeyword
         return $this->idcollection;
     }	
 	//FTHEETEN HAD to remove explicit foreign key mapping to persist
+	
+	public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
+    }	
 }

@@ -1,0 +1,12 @@
+{# src/AppBundle/Resources/views/adddocument.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block addgeology_body %}
+	{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+	{% include "@App/documents/documentform.html.twig" with {'action':'add'}  %}
+{% endblock %}

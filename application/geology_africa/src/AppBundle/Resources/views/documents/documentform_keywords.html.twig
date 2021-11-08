@@ -1,0 +1,10 @@
+{# src/AppBundle/Resources/views/documents/documentform_keywords.html.twig #}
+
+<table>
+ <tr> <td>Keywords</td> 
+			<td>{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/foreignkeys/dkeyword.html.twig" , 'ctrl_prefix' : 'ctrl_keywords', 'ajax_route': path('get_widget_keyword'), 'fk_values': keywords|default(null), 'fk_value_field':'pk', 'fk_key_field':'pk', 'delete_route':'app_delete_dkeyword', 'container_pk':ddocument.pk }  %}</td>
+	   </tr>
+	    <tr> <td>Titles</td> 
+			<td>{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/foreignkeys/ddoctitle.html.twig" , 'ctrl_prefix' : 'ctrl_titles', 'ajax_route': path('get_widget_title'), 'fk_values': titles|default(null), 'fk_value_field':'pk', 'fk_key_field':'pk' ,'delete_route':'app_delete_ddoctitle', 'container_pk':ddocument.pk}  %}</td>
+	   </tr>
+</table>

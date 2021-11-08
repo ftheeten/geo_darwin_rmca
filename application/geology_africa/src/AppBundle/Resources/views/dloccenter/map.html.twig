@@ -1,0 +1,491 @@
+{# src/AppBundle/Resources/views/dloccenter/pointform.html.twig #}
+<style>
+
+      .draw-point {
+        top: 65px;
+        left: .5em;
+        width: 1.375em;
+        height: 1.375em; 
+        background-color: rgba(255,255,255,.4); 
+        text-align: center; 
+           
+      }
+
+	.draw-polygon {
+        top: 100px;
+        left: .5em;
+        width: 1.375em;
+        height: 1.375em; 
+        background-color: rgba(255,255,255,.4); 
+        text-align: center; 
+           
+      }
+      
+      
+      .move-map {
+        top: 135px;
+        left: .5em;
+        width: 1.375em;
+        height: 1.375em; 
+        background-color: rgba(255,255,255,.4); 
+        text-align: center; 
+           
+      }
+	  
+	  .disable-bootstrap
+	  {
+		display:inline;
+		padding: 0; 
+		margin: 0;
+	  }
+</style>
+
+<ol class="widget-list" id="Geographical_info">
+						<div>
+							<Table class="table_view">
+								<tr>
+									<td colspan="3" >
+										
+
+										<table>
+											<tr>
+												<TH  style="text-align:right">Altitude:</TH>
+												<td  colspan="3"> {{ form_widget(point_form.altitude, {'attr': {'class': 'form-control inp_Altitude vshortlength'}}) }}m
+													<!--<input type="text" id="inp_altitude" name="inp_altitude" class="inp_altitude vshortlength">m-->
+												</td>
+											</tr>
+											<tr>
+												<TH  style="text-align:right">
+													<b>Coordinates source:</b>
+												</TH>
+												<td>
+													{{ form_widget(point_form.coordinate_format, {'attr': {'class': 'coordinate_format'}}) }}
+												</td>
+											</tr>
+											<tr>
+												<td>
+													WKT
+												</td>
+												<td>
+													{{ form_widget(point_form.wkt, {'attr': {'class': 'wkt'}}) }}
+												</td>
+											</tr>
+											
+											<!--<tr>
+												<th colspan="3">
+													<label>Enter coordinates :</label>
+												</th>
+											</tr>-->
+											<tr  class="coord_dd">
+												<td>
+													Decimal latitude
+												</td>
+												<td>
+													{{ form_widget(point_form.coordlat, {'attr': {'class': 'coordlat coord_dd shortlength disable-bootstrap'}}) }}
+												</td>
+											</tr>
+											<tr  class="coord_dd">
+												<td>
+													Decimal longitude
+												</td>
+												<td>
+													{{ form_widget(point_form.coordlong, {'attr': {'class': 'coordlong coord_dd shortlength disable-bootstrap'}}) }}
+												</td>
+											</tr>
+											<tr class="coord_dms">
+												<td>
+													latitude DMS
+												</td>
+												<td>
+													{{ form_widget(point_form.latitude_degrees, {'attr': {'class': 'latitude_degrees coord_dms vshortlength disable-bootstrap'}}) }}°
+													{{ form_widget(point_form.latitude_minutes, {'attr': {'class': 'latitude_minutes coord_dms shortlength disable-bootstrap'}}) }}'
+													{{ form_widget(point_form.latitude_seconds, {'attr': {'class': 'latitude_seconds coord_dms shortlength disable-bootstrap'}}) }}"
+													{{ form_widget(point_form.latitude_direction, {'attr': {'class': 'latitude_direction  coord_dms  disable-bootstrap', 'style':'width:auto'}}) }}
+												</td>
+											</tr>
+											<tr  class="coord_dms">
+												<td>
+													longitude DMS
+												</td>
+												<td>
+													{{ form_widget(point_form.longitude_degrees, {'attr': {'class': 'longitude_degrees coord_dms vshortlength disable-bootstrap'}}) }}°
+													{{ form_widget(point_form.longitude_minutes, {'attr': {'class': 'longitude_minutes coord_dms shortlength disable-bootstrap'}}) }}'
+													{{ form_widget(point_form.longitude_seconds, {'attr': {'class': 'longitude_seconds coord_dms shortlength disable-bootstrap'}}) }}"
+													{{ form_widget(point_form.longitude_direction, {'attr': {'class': 'longitude_direction coord_dms disable-bootstrap', 'style':'width:auto'}}) }}
+												</td>
+											</tr>
+											
+											
+											
+										
+											
+										</table>
+									</td>
+									
+									
+									<td colspan="2">
+										<table>
+											<tr>
+												<td colspan="4" >
+													MAP
+													<!--<input type="button" id="modeMap" name="modeMap" value="Enable selection"></input> -->
+													<div  style="width:700px;height:400px;" id="ol_map" class="ol_map"></div>
+													<div id="mouse-position"></div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="4">
+													<select id="layer-select">
+														<option value="OSM">OpenStreetMap</option>
+														<option value="esri_satelite">ESRI Web service</option>
+													</select>
+													<!-- <input type="radio" name="type" value="hover" id="hoverToggle"
+											   onclick="toggleControl(this);" />
+										<label for="hoverToggle">view WKT for feature</label>-->
+												</td>
+											</tr>
+										</table>
+										<input type="button" id="cleanSelect" name="cleanSelect" value="Clean selection"></input>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</ol>
+
+<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/css/ol.css" type="text/css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">   
+<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/core.js') }}"></script>
+
+<script type="text/javascript">
+var map_loaded=false;	
+var map;
+var mousePositionControl;
+var scaleLineControl;
+var source_draw = new ol.source.Vector({wrapX: false});
+var draw;
+var iLayer=0;
+var vectorLoaded =false;
+var type_draw="";
+var last_layer=null;
+
+var layerLoaded=false;
+var overlay;
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+
+var vectorlayer_local;
+
+var ol_ext_inherits = function(child,parent) {
+		child.prototype = Object.create(parent.prototype);
+		child.prototype.constructor = child;
+		
+
+};
+
+
+  function addDarwinLayer_point(feature, type, proj="EPSG:3857")
+    {
+			console.log(feature.getGeometry().getCoordinates());
+			if(type=="polygon")
+			{
+				var tmp_geom =new ol.geom.Polygon(feature.getGeometry().getCoordinates());
+			}
+			else if(type=="point")
+			{
+				var tmp_geom =new ol.geom.Point(feature.getGeometry().getCoordinates());
+			}
+			
+            var  generic_feature = new ol.Feature({geometry: tmp_geom});
+              
+            var tmpSource=new ol.source.Vector();
+            tmpSource.addFeature(generic_feature);
+            iLayer++;
+			if(vectorLoaded)
+			{
+				map.removeLayer(vectorlayer_local);
+			}
+            vectorlayer_local = new ol.layer.Vector({
+                        name: iLayer,
+                        source: tmpSource,
+                        style: styleWKT	});
+                        
+            
+            map.addLayer(vectorlayer_local);
+            var format = new ol.format.WKT();
+			tmp_geom4326= tmp_geom.clone();
+			if(proj!="EPSG:4326")
+			{
+				tmp_geom4326.transform(proj, "EPSG:4326");
+			}
+			wktfeaturegeom = format.writeGeometry(tmp_geom4326);
+			$('.wkt').val(wktfeaturegeom);
+            vectorLoaded=true;		
+    }
+        
+var test_has_coords=function()
+{
+	var wkt=$(".wkt").val();
+	if(wkt.length>0)
+	{
+		console.log("put point");
+		const format = new ol.format.WKT();
+		var feature=format.readFeature(wkt, {
+			  dataProjection: 'EPSG:4326',
+			  featureProjection: 'EPSG:3857',
+			});
+		if(wkt.indexOf("POINT")==0)
+		{
+			addDarwinLayer_point(feature, "point",'EPSG:3857' );
+		}
+		else if(wkt.indexOf("POLYGON")==0)
+		{
+			addDarwinLayer_point(feature, "polygon",'EPSG:3857' );
+		}
+	}
+}
+
+
+var init_data_map=function(target)
+ {
+	 
+	var layers = [];
+	var styles=["esri_satelite"];
+	var esri= new ol.layer.Tile({
+		  source: new ol.source.XYZ({
+			url:
+			  'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+	
+			  maxZoom:12
+		  }),
+		});
+	layers.push(esri);
+	var OSM_layer = new ol.layer.Tile({
+		    visible: false,
+            source: new ol.source.OSM()
+          });
+	mousePositionControl= new ol.control.MousePosition({
+			 coordinateFormat: ol.coordinate.createStringXY(4),
+			projection:'EPSPG:4326',
+			className: "custom-mouse-position",
+			target: document.getElementById("mouse-position"),
+			undefinedHTML: "&nbsp;"
+		});
+		
+//button draw bbox
+      DrawPointControl = function(opt_options) {
+                
+                
+                var options = opt_options || {};
+                var element = document.createElement('div');
+                element.className = 'draw-point ol-unselectable ol-control';
+                element.innerHTML='°';   
+                $(element).click(
+                    function()
+                    {
+                        type_draw="point";
+						 removeDarwinLayer(iLayer);
+                        map.removeInteraction(draw);
+                        draw = new ol.interaction.Draw({
+                        source: source_draw,
+                        type: 'Point'
+                        });
+						map.addInteraction(draw);
+						console.log("poitn");
+						draw.on('drawend', function (event) {
+							console.log(event.feature);
+                            addDarwinLayer_point(event.feature,"point");
+                            map.removeInteraction(draw);
+                        });
+						
+                    }
+                );
+                 ol.control.Control.call(this, {
+                  element: element,
+                  target: options.target
+                });
+      };
+     ol_ext_inherits(DrawPointControl, ol.control.Control);
+     
+     //button draw Polygons
+      DrawPolygonControl = function(opt_options) {
+               
+                var options = opt_options || {};
+                var element = document.createElement('div');
+                element.className = 'draw-polygon ol-unselectable ol-control';
+                element.innerHTML='&#11040;';   
+                $(element).click(
+                    function()
+                    {
+                         type_draw="polygon";
+                        removeDarwinLayer(iLayer);
+                        map.removeInteraction(draw);
+                        draw = new ol.interaction.Draw({
+                        source: source_draw,
+                        type: 'Polygon'
+                        });
+                        draw.on('drawend', function (event) {
+                            addDarwinLayer_point(event.feature, "polygon");
+                            map.removeInteraction(draw);
+                        });
+                        map.addInteraction(draw);
+                    }
+                );
+                 ol.control.Control.call(this, {
+                  element: element,
+                  target: options.target
+                });
+      };
+     ol_ext_inherits(DrawPolygonControl, ol.control.Control);	
+	 
+	scaleLineControl = new ol.control.ScaleLine();
+	var fullScreenControl = new ol.control.FullScreen();
+	 
+	      
+	 
+	map = new ol.Map({
+				target: target,
+				layers: layers,    
+				 
+				view: new ol.View({                    
+				  center: ol.proj.fromLonLat([0,0]),
+				  zoom: 2
+				}),
+				controls: ol.control.defaults({
+						attributionOptions: ({collapsible: false})
+				}).extend([mousePositionControl, scaleLineControl,  fullScreenControl,  new DrawPointControl(),  new DrawPolygonControl()])
+		});
+	console.log("MAP_ADDED");
+	map.addLayer(OSM_layer);
+	//init_overlay();
+    mousePositionControl.setProjection("EPSG:4326");
+	
+		var select = document.getElementById('layer-select');
+			function onChange() {
+			
+			if(select.value=="esri_satelite")
+			{
+				OSM_layer.setVisible(false);
+				var style = select.value;
+				for (var i = 0, ii = layers.length; i < ii; ++i) {
+				  layers[i].setVisible(styles[i] === style);
+				}
+			}
+			else
+			{
+				//console.log("trye");
+				for (var i = 0, ii = layers.length; i < ii; ++i) {
+				  layers[i].setVisible(false);
+				}
+				OSM_layer.setVisible(true);
+			}
+		}
+		select.addEventListener('change', onChange);
+		onChange();
+		test_has_coords();
+		
+
+
+
+ }
+
+
+$(document).ready(
+	function()
+	{
+		init_data_map("ol_map");
+		test_coord_visibility();
+		
+	}
+)
+
+var test_coord_visibility=function()
+{
+				var val=$(".coordinate_format").val();
+				console.log(val);
+				if(val=="dd")
+				{
+					$(".coord_dms").hide();
+					$(".coord_dd").show();
+				}
+				else if(val=="dms")
+				{
+					$(".coord_dms").show();
+					$(".coord_dd").hide();
+				}
+			}
+
+$('.coord_dms').change(
+			function()
+			{
+				var lat_deg=$(".latitude_degrees").val();
+				var lat_min=0;
+				if($(".latitude_minutes").val()>0)
+				{
+					lat_min=$(".latitude_minutes").val()
+				}
+				var lat_sec=0;
+				if($(".latitude_seconds").val()>0)
+				{
+					lat_sec=$(".latitude_seconds").val()
+				}
+				var lat_direction=$(".latitude_direction").val();
+				var lat_dd=parseInt(lat_deg)+(parseFloat(lat_min)/60)+(parseFloat(lat_sec)/3600);
+				if(lat_direction=="S")
+				{
+					lat_dd=lat_dd*-1;
+				}
+				$(".coordlat").val(lat_dd);
+				
+				var long_deg=$(".longitude_degrees").val();
+				var long_min=0;
+				if($(".longitude_minutes").val()>0)
+				{
+					long_min=$(".longitude_minutes").val()
+				}
+				var long_sec=0;
+				if($(".longitude_seconds").val()>0)
+				{
+					long_sec=$(".longitude_seconds").val()
+				}
+				var long_direction=$(".longitude_direction").val();
+				var long_dd=parseInt(long_deg)+(parseFloat(long_min)/60)+(parseFloat(long_sec)/3600);
+				if(long_direction=="W")
+				{
+					long_dd=long_dd*-1;
+				}
+				$(".coordlong").val(long_dd);
+				
+				var wkt="POINT("+long_dd+" "+lat_dd+")";
+				console.log(wkt);
+				$(".wkt").val(wkt);
+				test_has_coords();
+			}
+		);
+		
+		$('.coord_dd').change(
+			function()
+			{
+				var long_dd=$(".coordlong").val();
+				var lat_dd=$(".coordlat").val();
+				var wkt="POINT("+long_dd+" "+lat_dd+")";
+				console.log(wkt);
+				$(".wkt").val(wkt);
+				test_has_coords();
+				
+			}
+		);
+		
+		$(".coordinate_format").change(
+			function()
+			{
+				test_coord_visibility();
+			}
+		);
+
+
+</script>

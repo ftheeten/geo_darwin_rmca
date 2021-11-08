@@ -6,7 +6,12 @@
 <br/>
 <br/>
 <div class="row">
-	<div class="col-sm-2">Name</div>
+	<div class="col-sm-2">Name (event)</div>
+		<div class="col-sm-3"><select name="nameeventcontrib" id="nameeventcontrib" style="width:100%" multiple="multiple" ></select>
+    </div>	
+</div>
+<div class="row">
+	<div class="col-sm-2">Name (person)</div>
 		<div class="col-sm-3"><select name="namecontrib" id="namecontrib" style="width:100%" multiple="multiple" ></select>
     </div>
 	<div class="col-sm-2">Institution</div>
@@ -15,20 +20,21 @@
 </div>
 <div class="row">
 	<div class="col-sm-2">Role</div>
-		<div class="col-sm-3"><select style="width:300px" class="select2" id="rolecontrib"  name="rolecontrib" multiple="multiple"></select>
+		<div class="col-sm-3"><select style="width:100%" class="select2" id="rolecontrib"  name="rolecontrib" multiple="multiple"></select>
     </div>
 	<div class="col-sm-2">Type</div>
-		<div class="col-sm-3"><select style="width:300px" class="select2" id="typecontrib"  name="typecontrib" multiple="multiple"></select>
-    </div>	
+	<div class="col-sm-3"><select style="width:300px" class="select2" id="typecontrib"  name="typecontrib" multiple="multiple"></select>
+	</div>	
 </div>
 <div class="row">
 	<div class="col-sm-2">Year from</div>
 		<div class="col-sm-3"><input type="text" id="contrib_year_from" name="contrib_year_from"></input>
     </div>
 	<div class="col-sm-2">Year to</div>
-		<div class="col-sm-3"><input type="text" id="contrib_year_to" name="contrib_year_to"></input>
-    </div>	
-</div>
+	<div class="col-sm-3">
+			<input type="text" id="contrib_year_to" name="contrib_year_to"></input>
+	</div>	
+	
 </div>
 <div class="row">
      <div class="col-sm-2"></div>
@@ -54,6 +60,7 @@
 			criterias={}
 			criterias["current_page"]=current_page;
 			criterias["page_size"]=page_size;
+			criterias["nameevent"]=$("#nameeventcontrib").val();
 			criterias["namecontrib"]=$("#namecontrib").val();
 			criterias["institute"]=$("#institute").val();
 			criterias["rolecontrib"]=$("#rolecontrib").val();
@@ -74,6 +81,8 @@
 		function()
 		{
 			console.log("loaded");
+			$("#nameeventcontrib").select2(select2_generic("{{ path('app_contribmainnames_autocomplete')}}","name","name" ),0);
+			
 			$("#namecontrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","people","people" ),0);
 			
 			$("#institute").select2(select2_generic("{{ path('app_contribinstitutions_autocomplete')}}","institut","institut" ),0);

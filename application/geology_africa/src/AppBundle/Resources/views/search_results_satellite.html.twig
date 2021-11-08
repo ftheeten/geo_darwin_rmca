@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/search_results_satellite.html.twig #}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+<div class="row">
+	<div class="col-sm-2">pk (document)</div>
+	<div class="col-sm-1">pk (satellite)</div>
+	<div class="col-sm-2">idcollection</div>
+	<div class="col-sm-2">iddoc</div>
+	<div class="col-sm-1">sattype</div>
+	<div class="col-sm-1">satnum</div>
+</div>
+{% for doc in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-2"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk_doc'] }}" data-modal-value="{{ doc['iddoc'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk_doc'], 'current_tab':'satellite-tab' }) }}" >{{ doc['pk_doc'] }}</a></div>
+	<div class="col-sm-1">{{ doc['pk'] }}</div>	
+	<div class="col-sm-2">{{ doc['idcollection'] }}</div>
+	<div class="col-sm-2" class="is_modal_value" >{{ doc['iddoc'] }}</div>
+	<div class="col-sm-1">{{ doc['sattype'] }}</div>
+	<div class="col-sm-5" >{{ doc['satnum'] }}</div>
+</div>
+{%  endfor %}

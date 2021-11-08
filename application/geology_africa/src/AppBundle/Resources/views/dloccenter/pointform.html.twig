@@ -1,0 +1,204 @@
+{# src/AppBundle/Resources/views/dloccenter/pointform.html.twig #}
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link " id="stratum-tab" data-bs-toggle="tab" data-bs-target="#stratum" type="button" role="tab" aria-controls="stratum" aria-selected="true">Stratum</button>
+  </li>
+  
+</ul>
+
+{{ form_start(point_form, {'attr': {'class': 'form-horizontal','id': 'point_form'}}) }}
+{% set form =point_form %}
+<div class="tab-content">
+{% include "@App/validation_errors.html.twig" with {'local_form' : point_form}  %}
+ <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab">   
+
+	<table class="ui-front table_edit">
+		<TR>
+			<TH class="title_table_edit" width="100%" colspan = "6">
+				Location points
+			</TH>
+		</TR>
+
+		<TR>
+			<TD>
+				<Table width="100%">
+					<TR>
+						<th width = "12%"  style="text-align:right">
+							Collection:
+						</th>
+						<td width = "12%">
+							{% if dloccenter.pk != "" %}
+								{{dloccenter.idcollection}}
+							{% else %}
+								{{ form_widget(point_form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
+							{% endif %}
+						</td>
+						<th width = "12%" style="text-align:right">
+							ID :
+						</th>
+						<td  width = "12%">
+							{% if dloccenter.pk != "" %}
+								{{dloccenter.idpt}}
+							{% else %}
+								{{ form_widget(point_form.idpt, {'attr': {'class': 'form-control inp_PointID'}}) }}
+								{{ form_errors(point_form.idpt) }}
+							{% endif %}
+							<input type='button' id="get_idcollection" value="Get next ID"></input>
+						</td>
+
+						<th width = "15%"  style="text-align:right">
+							Field number:
+						</th>
+						<td  width = "65%" colspan = "3">
+							{{ form_widget(point_form.fieldnum, {'attr': {'class': 'form-control inp_Fieldnum'}}) }}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Place:
+						</TH>
+						<td >
+							{{ form_widget(point_form.place, {'attr': {'class': 'form-control inp_Place'}}) }}
+						</td>
+						<TH  style="text-align:right">
+							Country:
+						</TH>
+						<td >
+							{{ form_widget(point_form.country, {'attr': {'class': 'form-control inp_Country'}}) }}
+						</td>
+						<TH  style="text-align:right">
+							Doc reference:
+						</TH>
+						<td>
+							{{ form_widget(point_form.docref, {'attr': {'class': 'form-control inp_Docref'}}) }}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Date:
+						</TD>
+						<td >
+							{{ form_widget(point_form.date, {'attr': {'class': 'form-control inp_Date js-datepicker'}}) }}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Geographical description:
+						</TD>
+						<td >
+							{{ form_widget(point_form.geodescription, {'attr': {'class': 'form-control inp_Geodescription'}}) }}
+						</td>
+						<TH  style="text-align:right">
+							Description of the position:
+						</TD>
+						<td >
+							{{ form_widget(point_form.positiondescription, {'attr': {'class': 'form-control inp_Positiondescription'}}) }}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Various info:
+						</TD>
+						<td >
+							{{ form_widget(point_form.variousinfo, {'attr': {'class': 'form-control inp_Variousinfo'}}) }}
+						</td>
+					</tr>
+					<tr>
+						<TH  style="text-align:right">
+							Precision:
+						</TD>
+						<TD>
+							{{ form_widget(point_form.idprecision, {'attr': {'class': 'form-control inp_Idprecision'}}) }}
+						</TD>
+					</tr>
+					<tr>
+						<TD> .</TD>
+					</TR>
+				</Table>
+			</TD>
+		</TR>
+		<tr >
+			<TD>
+				
+				<div class="widget">
+					{% if  originaction  == 'edit' or originaction == 'add_aftercommit' %}
+										
+					{% endif %}
+					{% include "@App/dloccenter/map.html.twig" %}
+
+					<ul class="widget-tabs">
+						{% if  originaction  == 'edit' or originaction == 'add_aftercommit' %}
+							
+						{% endif %}
+						<li class="widget-tab">
+						  <a href="#Geographical_info" class="widget-tab-link" id=tab1a>Geographical info</a>
+					</ul>
+				</div>
+			</TD>
+		</TR>
+			
+		<TR>
+			<TD>
+			
+			</TD>
+		</TR>
+	</Table>
+	</div>
+	 <div class="tab-pane" id="stratum" role="tabpanel" aria-labelledby="stratum-tab">
+	 {% include "@App/dloccenter/point_to_stratum.html.twig"  %}
+	 </div>
+  </div>
+  <input type="submit" class="btn btn-default pull-right submitbutton" />
+				<div class="alert_message"></div>
+	<div><input type="hidden" name="current_tab" id="current_tab"/></div>
+{{ form_end(point_form) }}
+
+<script type="text/javascript">
+var current_tab="main-tab";
+$(document).ready(
+	function()
+	{
+		$(".nav-link").click(
+			function()
+			{
+				console.log($(this).attr("id"));
+				current_tab=$(this).attr("id");
+				$("#current_tab").val(current_tab);
+			}
+		);
+		
+		{% if current_tab is defined %}
+		console.log("TAB_IS_DEFINED");
+		console.log("{{ current_tab }}");
+			{% if current_tab!='main_tab' %}
+				$("#{{ current_tab }}").click();			
+			{% endif %}
+		{% endif %}
+	}
+);
+
+$("#get_idcollection").click(
+			function()
+			{
+				if($(".inp_Idcollection").val().length>0)
+				{
+				 console.log($(".inp_Idcollection").val());
+				 jQuery.getJSON("{{ path('app_get_next_id')}}",
+					{'collection':$(".inp_Idcollection").val(),
+					'table':'dloccenter'},
+					function(result)
+					{
+						$('.inp_PointID').val(result.id);						
+					}
+				 );
+				}
+			}
+		);
+		
+</script>
+
+
+

@@ -288,7 +288,7 @@ var ol_ext_inherits = function(child,parent) {
  $(document).ready(
 	function()
 	{
-		console.log("LOADMAP");
+		//console.log("LOADMAP");
 		//init_map("searchmap");
 	}
 );

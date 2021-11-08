@@ -373,29 +373,7 @@
                 }
             );
         
-        /*onElementInserted('body', '.dismiss_modal', function(element) {        
-            $(element).click(
-                function()
-                {
-                    console.log("hide validation");
-                    show_validation_msg=false;
-                    $(".validation_message").hide();
-                }
-            );
-            }
-        );
-        
-       onElementInserted('body', '.reenable_modal', function(element) {        
-            $(element).click(
-                function()
-                {
-                    console.log("show validation");
-                    show_validation_msg=true;
-                    $(".validation_message").show();
-                }
-            );
-            }
-        );*/
+
         
         {% if callback_action=="display_new_data" and term|length > 0 %}
                                    

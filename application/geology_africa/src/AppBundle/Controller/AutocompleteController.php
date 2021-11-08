@@ -15,23 +15,23 @@ class AutocompleteController extends Controller
 	protected $page_size=20;
     protected $limit_autocomplete=30;
 	
-	public function template_autocomplete($tablename, $fieldname, $searched, $all_mode=false ,$field_retrieved=null , $where=null, $searched_type=\PDO::PARAM_STR, $comparator="LIKE", $suffix_searched="")
+	public function template_autocomplete($tablename, $fieldname, $searched, $all_mode=false ,$key_field=null , $where=null, $searched_type=\PDO::PARAM_STR, $comparator="LIKE", $suffix_searched="")
 	{
 		$em = $this->getDoctrine()->getManager();
-		if($field_retrieved ===null)
+		if($key_field ===null)
 		{
-				$field_retrieved=$fieldname;
+				$key_field=$fieldname;
 		}
         if(strlen($searched)>0||(strlen($searched)==0 && $where!==null))
         {
 			
 			if(strlen($searched)>0)
 			{
-				$RAW_QUERY = "SELECT DISTINCT ".$field_retrieved." FROM ".$tablename." where ".$fieldname." ~* :func ". $suffix_searched." ORDER BY ".$fieldname." LIMIT :limit;"; 
+				$RAW_QUERY = "SELECT DISTINCT ".$key_field." FROM ".$tablename." where ".$fieldname." ~* :func ". $suffix_searched." ORDER BY ".$fieldname." LIMIT :limit;"; 
             }
 			elseif($where!==null)
 			{
-				$RAW_QUERY = "SELECT DISTINCT ".$field_retrieved." FROM ".$tablename." ". $where. " ORDER BY ".$fieldname." LIMIT :limit;"; 
+				$RAW_QUERY = "SELECT DISTINCT ".$key_field." FROM ".$tablename." ". $where. " ORDER BY ".$fieldname." LIMIT :limit;"; 
 			}
             $statement = $em->getConnection()->prepare($RAW_QUERY);
 			if($where==null)
@@ -46,7 +46,7 @@ class AutocompleteController extends Controller
         }
 		elseif(strlen($searched)==0 && $all_mode)
 		{
-			$RAW_QUERY = "SELECT DISTINCT ".$field_retrieved." FROM ".$tablename." ORDER BY ".$fieldname." LIMIT :limit;";
+			$RAW_QUERY = "SELECT DISTINCT ".$key_field." FROM ".$tablename." ORDER BY ".$fieldname." LIMIT :limit;";
 			$statement = $em->getConnection()->prepare($RAW_QUERY);
 			$statement->bindParam(":limit", $this->limit_autocomplete, \PDO::PARAM_INT);
             $statement->execute();
@@ -162,11 +162,16 @@ class AutocompleteController extends Controller
 		return $this->template_autocomplete( "dcontribution", "datetype", $request->query->get("code","") ,true);		
     }
 	
+	public function contribmainnames_autocompleteAction(Request $request)
+	{	
+       return $this->template_autocomplete("dcontribution", "name",$request->query->get("code",""), true );		
+    }
+	
 	public function contribnames_autocompleteAction(Request $request)
 	{	
-       return $this->template_autocomplete("dcontributor", "people",$request->query->get("code","") );
-		
+       return $this->template_autocomplete("dcontributor", "people",$request->query->get("code",""), false, "people, idcontributor" );		
     }
+	
 	
 	public function contribfunction_autocompleteAction(Request $request)
 	{		
@@ -181,9 +186,7 @@ class AutocompleteController extends Controller
 	public function contribtitle_autocompleteAction(Request $request)
 	{		
 		return $this->template_autocomplete("dcontributor", "peopletitre",$request->query->get("code",""),true);
-    }
-	
-	
+    }	
 	
 	public function contribinstitutions_autocompleteAction(Request $request){
 		return $this->template_autocomplete("dcontributor", "institut",$request->query->get("code","") );		
@@ -191,8 +194,38 @@ class AutocompleteController extends Controller
 	
 	public function keywords_autocompleteAction(Request $request){
 	
-		return $this->template_autocomplete("mv_keyword_hierarchy_to_object_list_parent", "word", $request->query->get("code",""), false, "*" , null, \PDO::PARAM_INT, "~*","");
+		return $this->template_autocomplete("mv_merge_keywords", "word", $request->query->get("code",""), false, "*" , null, \PDO::PARAM_INT, "~*","");
     }
+	
+	public function sattype_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocsatellite", "sattype",$request->query->get("code",""),false);
+	}
+	
+	public function satorbit_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocsatellite", "orbit",$request->query->get("code",""),false);
+	}
+	
+	public function satsensor_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocsatellite", "sensor",$request->query->get("code",""),false);
+	}
+	
+	public function satmoderadar_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocsatellite", "moderadar",$request->query->get("code",""),false);
+	}
+	
+	public function satrowframe_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocsatellite", "rowframe",$request->query->get("code",""),false);
+	}
+	
+	public function lithostratum_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("dloclitho", "lithostratum",$request->query->get("code",""),false);
+	}
 
 
 }

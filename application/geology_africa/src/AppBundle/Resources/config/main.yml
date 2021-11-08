@@ -1,0 +1,425 @@
+# src/AppBundle/Resources/config/main.yml
+app_home:
+    path:     /
+    defaults: 
+     _controller: AppBundle:Geo:index
+
+app_add_contribution:
+    path:     /add/contribution
+    defaults: 
+     _controller: AppBundle:Geo:addcontribution
+
+app_add_contributor:
+    path:     /add/contributor
+    defaults: 
+     _controller: AppBundle:Geo:addcontributor     
+     
+app_add_sample:
+    path:     /add/sample
+    defaults: 
+     _controller: AppBundle:Geo:addsample
+     
+app_add_mineral:
+    path:     /add/mineral
+    defaults: 
+     _controller: AppBundle:Geo:addmineral
+     
+app_add_document:
+    path:     /add/document
+    defaults: 
+     _controller: AppBundle:Geo:adddocument
+     
+app_add_points:
+    path:     /add/points
+    defaults: 
+     _controller: AppBundle:Geo:addpoints
+     
+app_add_stratum:
+    path:     /add/stratum
+    defaults: 
+     _controller: AppBundle:Geo:addstratum
+     
+app_add_drilling:
+    path:     /add/drilling
+    defaults: 
+     _controller: AppBundle:Geo:adddrilling
+     
+app_view_mineral:
+    path:     /view/mineral/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:viewmineral
+     
+app_view_sample:
+    path:     /view/sample/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:viewsample
+     
+app_view_contribution:
+    path:     /view/contribution/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:viewcontribution
+     
+app_view_doc:
+    path:     /view/doc/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:viewdoc
+     
+app_view_point:
+    path:     /view/point/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:viewpoint
+     
+app_edit_sample:
+    path:     /edit/sample/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editsample
+     
+app_edit_contribution:
+    path:     /edit/contribution/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editcontribution
+
+app_edit_contributor:
+    path:     /edit/contributor/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editcontributor    
+
+app_edit_mineral:
+    path:     /edit/mineral/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editmineral
+     
+app_edit_doc:
+    path:     /edit/doc/{pk}/{current_tab}
+    defaults: 
+     {_controller: AppBundle:Geo:editdoc,current_tab:"main-tab" }
+     
+app_edit_point:
+    path:     /edit/point/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editpoint
+     
+app_search_mineral:
+    path:     /search/mineral
+    defaults: 
+     _controller: AppBundle:Search:searchmineral
+     
+app_search_sample:
+    path:     /search/sample
+    defaults: 
+     _controller: AppBundle:Search:searchsample
+     
+app_search_contribution:
+    path:     /search/contribution
+    defaults: 
+     _controller: AppBundle:Search:searchcontribution
+    
+app_search_contributor:
+    path:     /search/contributor
+    defaults: 
+     _controller: AppBundle:Search:searchcontributor
+
+app_search_document:
+    path:     /search/document
+    defaults: 
+     _controller: AppBundle:Search:searchdocument
+
+app_search_satellite:
+    path:     /search/satellite
+    defaults: 
+     _controller: AppBundle:Search:searchsatellite     
+
+app_search_points:
+    path:     /search/points
+    defaults: 
+     _controller: AppBundle:Search:searchpoints
+     
+app_search_stratum:
+    path:     /search/stratum
+    defaults: 
+     _controller: AppBundle:Geo:searchstratum
+     
+app_search_drilling:
+    path:     /search/drilling
+    defaults: 
+     _controller: AppBundle:Search:searchdrilling
+     
+app_search_all:
+    path:     /search/all
+    defaults: 
+     _controller: AppBundle:Search:searchall
+     app_search_all:
+
+app_search_allbs:    
+    path:     /search/allbs
+    defaults: 
+     _controller: AppBundle:Search:searchallbs
+     
+app_search_allbs_raw:    
+    path:     /search/allbs_raw
+    defaults: 
+     _controller: AppBundle:Search:searchallbs_raw
+
+app_search_allbs_documents_raw:    
+    path:     /search/allbs_documents_raw
+    defaults: 
+     _controller: AppBundle:Search:searchallbs_documents_raw
+     
+app_result_sample:
+    path:     /results/sample/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchsample
+     queryvals: ""
+     
+app_result_mineral:
+    path:     /results/mineral/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchmineral
+     queryvals: ""
+     
+app_result_contribution:
+    path:     /results/contribution/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchcontribution
+     queryvals: ""
+     
+app_result_point:
+    path:     /results/points/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchpoints
+     queryvals: ""
+     
+app_result_doc:
+    path:     /results/docs/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchdocs
+     queryvals: ""
+     
+app_result_all:
+    path:     /results/all/{queryvals}  
+    defaults: 
+     _controller: AppBundle:Search:results_searchall
+     queryvals: ""
+     
+app_HM_list:
+    path:     /get_hmminerals 
+    defaults: 
+     _controller: AppBundle:Geo:listHM
+    methods:  GET
+    
+app_collection_list:
+    path:     /get_collections/{querygroup}  
+    defaults: 
+     _controller: AppBundle:Geo:listcodecollection
+    methods:  GET
+    
+app_docmedium_list:
+    path:     /get_collections  
+    defaults: 
+     _controller: AppBundle:Geo:listdocmedium
+    methods:  GET
+    
+app_minerals_list:
+    path:     /get_minerals/{querygroup}  
+    defaults: 
+     _controller: AppBundle:Geo:listminerals
+    methods:  GET
+    
+app_mineralparents_list:
+    path:     /get_mineralparents
+    defaults: 
+     _controller: AppBundle:Geo:listmineralparents
+    methods:  GET
+    
+app_lithominerals_list:
+    path:     /get_lithominerals
+    defaults: 
+     _controller: AppBundle:Geo:listlithominerals
+    methods:  GET
+    
+app_AlldataContributions_list:
+    path:     /get_AlldataContributions
+    defaults: 
+     _controller: AppBundle:Geo:DataContributions
+    methods:  GET
+    
+
+    
+app_contribdata_combobox:
+    path:     /get_contribdata
+    defaults: 
+     _controller: AppBundle:Geo:contribdata_combobox
+    methods:  GET
+    
+app_docsdata_combobox:
+    path:     /get_docsdata
+    defaults: 
+     _controller: AppBundle:Geo:docsdata_combobox
+    methods:  GET
+    
+app_last_Sampleid:
+    path:     /get_lastsampleid/{querygroup}  
+    defaults: 
+     _controller: AppBundle:Geo:LastSampleID
+    methods:  GET
+    
+app_last_Locationid:
+    path:     /get_lastlocationid/{querygroup}  
+    defaults: 
+     _controller: AppBundle:Geo:LastLocationID
+    methods:  GET
+    
+app_last_Documentid:
+    path:     /get_lastdocumentid/{querygroup}  
+    defaults: 
+     _controller: AppBundle:Geo:LastDocumentID
+    methods:  GET
+    
+app_last_Contributionid:
+    path:     /get_lastcontribid 
+    defaults: 
+     _controller: AppBundle:Geo:Lastcontribid
+    methods:  GET
+    
+app_last_Contributorid:
+    path:     /get_lastcontributorid 
+    defaults: 
+     _controller: AppBundle:Geo:Lastcontributorid
+    methods:  GET
+    
+app_last_Mineralid:
+    path:     /get_lastmineralid/
+    defaults: 
+     _controller: AppBundle:Geo:LastMineralID
+    methods:  GET
+ 
+app_admin:
+    path:     /admin
+    defaults: 
+     _controller: AppBundle:Geo:admin
+     
+#security------------------------------------------------------------
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+app_last_Userid:
+    path:     /get_lastuserid/
+    defaults: 
+     _controller: AppBundle:User:lastuserid
+    methods:  GET
+     
+app_show_profile:
+    path:     /profile/{id}  
+    defaults: 
+     _controller: AppBundle:User:view
+     
+app_edit_profile:
+    path:     /editprofile/{id}  
+    defaults: 
+     _controller: AppBundle:User:edit
+     
+app_add_profile:
+    path:     /addprofile/
+    defaults: 
+     _controller: AppBundle:User:add
+     
+app_list_users:
+    path:     /users/list
+    defaults: 
+     _controller: AppBundle:User:index
+
+#search2---------------------------------------    
+app_add_collection:
+    path:     /collection/add
+    defaults: 
+     _controller: AppBundle:Geo:addcollection
+     
+app_list_collections:
+    path:     /collection/list
+    defaults: 
+     _controller: AppBundle:Geo:listcollection
+     
+app_edit_collection:
+    path:     /collection/edit/{id}
+    defaults: 
+     _controller: AppBundle:Geo:editcollection
+
+app_err_access:
+    path:     /error
+    defaults: 
+     _controller: AppBundle:Geo:errorcollection
+     
+search_all_object_categories:
+    path:     /all_object_categories
+    defaults: 
+     _controller: AppBundle:Geo:all_object_categories
+
+search_all_document_categories:
+    path:     /all_document_categories
+    defaults: 
+     _controller: AppBundle:Geo:all_documents_categories 
+     
+search_all_collections:
+    path:     /all_collections
+    defaults: 
+     _controller: AppBundle:Geo:all_collections
+     
+
+search_main:
+    path:    /main_search
+    defaults: 
+     _controller: AppBundle:Search:main_search
+
+search_contributor:
+    path:    /contributor_search
+    defaults: 
+     _controller: AppBundle:Search:contributor_search
+
+search_contribution:
+    path:    /contribution_search
+    defaults: 
+     _controller: AppBundle:Search:contribution_search
+
+search_satellite:
+    path:    /satellite_search
+    defaults: 
+     _controller: AppBundle:Search:satellite_search
+
+
+app_search_keywords:
+    path: /keywords
+    defaults: 
+     _controller: AppBundle:Keyword:main_search  
+
+
+app_search_raw_keywords:
+    path: /keywords_logic
+    defaults: 
+     _controller: AppBundle:Keyword:raw_search  
+     
+app_refresh_mv:
+    path:    /init_portal
+    defaults: 
+     _controller: AppBundle:Search:refresh_views
+     
+app_search_keywords_fancytreejs:
+    path: /get_keywordjs
+    defaults: 
+     _controller: AppBundle:Keyword:get_fancytree
+     
+app_search_keywords_pathjs:
+    path: /get_keywordpath
+    defaults: 
+     _controller: AppBundle:Keyword:get_keywordpath
+     
+search_all_keywords_full_autocomplete:
+    path:     /get_keywords_all
+    defaults: 
+     _controller: AppBundle:Keyword:allkeywords_autocomplete
+    methods:  GET
+    
+app_get_next_id:
+    path:    /get_next_id
+    defaults: 
+     _controller: AppBundle:Abstract:get_next_id
+  

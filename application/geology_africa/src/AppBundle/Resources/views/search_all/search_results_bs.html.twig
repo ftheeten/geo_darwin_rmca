@@ -1,0 +1,103 @@
+{# src/AppBundle/Resources/views/search_all/search_results_bs.html.twig #}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+
+<div class="col-sm-1">
+	<a id="sort_main_type" href="#">main type</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_idobject" href="#"  >idobject</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_idcollection" href="#"  >idcollection</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_col_1_value" href="#">{{ headers1 }}</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_col_2_value" href="#">{{ headers2 }}</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_col_3_value" href="#">{{ headers3 }}</a>
+</div>
+<div class="col-sm-1" >
+<a id="sort_col_4_value" href="#">{{ headers4 }}</a>
+</div>
+<div class="col-sm-2" >
+contributors
+</div>
+<div class="col-sm-3" >
+institutions
+</div>
+{% for doc in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+   <div class="col-sm-1">
+	{{ doc["main_type"]}}
+   </div>
+   <div class="col-sm-1">
+    {% if doc["main_type"]=="sample" %}
+		<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+	{% elseif doc["main_type"]=="georef" %}
+		<a  href="{{ path('app_edit_point', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+	{% else %}
+		<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
+	{% endif %}
+   </div>
+   <div class="col-sm-1">
+	{{ doc["idcollection"]}}
+   </div>
+    <div class="col-sm-1">
+	{{ doc["col_1_value"]}}
+   </div>
+    <div class="col-sm-1">
+	{{ doc["col_2_value"]}}
+   </div>
+    <div class="col-sm-1">
+	{{ doc["col_3_value"]}}
+   </div>
+    <div class="col-sm-1">
+	{{ doc["col_4_value"]}}
+   </div>
+   <div class="col-sm-2">
+	{{ doc["contributors"]}}
+   </div>
+   <div class="col-sm-3">
+	{{ doc["institutions"]}}
+   </div>
+</div>
+{%  endfor %}
+
+<script type="text/javascript">
+	$(document).ready(
+
+		function()
+		{	
+
+			
+			
+			$("#sort_idcollection").click(
+			
+				function()
+				{
+					sort("idcollection, iddoc");
+				}
+				
+			);
+			
+			$("#sort_idobject").click(
+				function()
+				{
+					sort("idobject");
+				}
+			);
+            
+            {% if geojson is defined and geojson is not null %}
+            console.log('{{ geojson | raw }}');
+            getFeaturesRow('{{ geojson | raw }}')
+            console.log("done")
+            {% endif %}
+		}	
+	);
+</script>
+

@@ -1,0 +1,48 @@
+get_widget_keyword:
+    path:     /get_widget_keyword
+    defaults: 
+     _controller: AppBundle:Widget:widget_keyword
+    methods:  GET
+
+get_widget_title:
+    path:     /get_widget_title
+    defaults: 
+     _controller: AppBundle:Widget:widget_title
+    methods:  GET
+
+get_widget_satellite:
+    path:     /get_widget_satellite
+    defaults: 
+     _controller: AppBundle:Widget:widget_satellite
+    methods:  GET
+
+get_widget_doc_to_contrib:
+    path:     /get_widget_doc_to_contrib
+    defaults: 
+     _controller: AppBundle:Widget:widget_doc_to_contrib
+    methods:  GET
+    
+get_widget_contrib_to_doc:
+    path:     /get_widget_contrib_to_doc
+    defaults: 
+     _controller: AppBundle:Widget:widget_contrib_to_doc
+    methods:  GET
+    
+get_widget_point_to_stratum:
+    path:     /get_widget_point_to_stratum
+    defaults: 
+     _controller: AppBundle:Widget:widget_point_to_stratum
+    methods:  GET
+    
+get_widget_point_to_stratum_description:
+    path:     /get_widget_point_to_stratum_description
+    defaults: 
+     _controller: AppBundle:Widget:widget_point_to_stratum_description
+    methods:  GET
+
+
+get_widget_contribdetail:
+    path:     /get_widget_contribdetail
+    defaults: 
+     _controller: AppBundle:Widget:widget_contributordetail
+    methods:  GET

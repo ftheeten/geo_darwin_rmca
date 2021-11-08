@@ -26,12 +26,29 @@ class PointEditType extends AbstractType {
 	
     public function buildForm(FormBuilderInterface $builder, array $options)  {
 		$em = $options['entity_manager'];
+		
+		/* list for collections---------*/
+        $RAW_QUERYcoll = "SELECT codecollection, collection FROM codecollection where zoneutilisation LIKE 'localisation%';";
+        $statementcoll = $em->getConnection()->prepare($RAW_QUERYcoll);
+        $statementcoll->execute();
+        $codescollection = $statementcoll->fetchAll();
+		
+		$elemcoll =array();
+		foreach($codescollection as $e) {
+			//foreach($e as $ee) {
+				//$elemcoll[$ee]=$ee;
+				$elemcoll[$e['collection']]=$e['codecollection'];
+			//} 
+		} 
+		
 
 		/* builder---------*/
         $builder
+			->add('idcollection', ChoiceType::class, array('choices'  => $elemcoll))
+			->add('idpt', TextType::class, array('required' => true))
 			->add('fieldnum', TextType::class, array('required' => false))
-			->add('coordlat', NumberType::class, array( 'scale' => 4,'required' => true))
-			->add('coordlong', NumberType::class, array('scale' => 4,'required' => true))
+			->add('coordlat', NumberType::class, array( 'scale' => 4,'required' => false))
+			->add('coordlong', NumberType::class, array('scale' => 4,'required' => false))
 			->add('altitude', NumberType::class, array('required' => false))
 			->add('date', DateType::class, array('widget' => 'single_text', 'required' => false))
 			->add('place', TextType::class, array('required' => false))
@@ -42,12 +59,22 @@ class PointEditType extends AbstractType {
 			->add('docref', TextType::class, array('required' => false))
 			->add('epsg', TextType::class, array('required' => false))
 			->add('wkt', TextType::class, array('required' => false))
-			//->add('originalcoord', TextType::class, array('required' => false))
+			->add('latitude_degrees', NumberType::class, array('required' => false) )
+			->add('latitude_minutes', NumberType::class, array('required' => false, 'scale'=>8) )
+			->add('latitude_seconds', NumberType::class, array('required' => false, 'scale'=>8) )
+			->add('latitude_direction', ChoiceType::class, array('choices'  => ['N'=>'N', 'S'=>'S']))
+			->add('original_latitude', TextType::class, array('required' => false))
+			->add('longitude_degrees', NumberType::class, array('required' => false) )
+			->add('longitude_minutes', NumberType::class, array('required' => false, 'scale'=>8) )
+			->add('longitude_seconds', NumberType::class, array('required' => false, 'scale'=>8) )
+			->add('longitude_direction', ChoiceType::class, array('choices'  => ['W'=>'W', 'E'=>'E']))
+			->add('original_longitude', TextType::class, array('required' => false))
 			->add('idprecision', EntityType::class, array(
                'class' => Lprecision::class,
                'choice_label' => 'precision',
                'label' => 'precision'
             ))
+			->add('coordinate_format', ChoiceType::class, array('choices'  => [ "Decimal degrees"=> "dd", "Degrees Minutes Seconds"=>"dms"]))
 		;
 		
 		$builder->addEventListener(

@@ -21,6 +21,7 @@ use AppBundle\Entity\LMedium;
 use AppBundle\Entity\DLoccenter;
 use AppBundle\Entity\Ddocument;
 use AppBundle\Entity\Ddoctitle;
+use AppBundle\Entity\Ddocsatellite;
 use AppBundle\Entity\Dsamheavymin;
 use AppBundle\Entity\Dsamheavymin2;
 use AppBundle\Entity\Dcontribution;
@@ -31,6 +32,9 @@ use AppBundle\Entity\Dlinkcontloc;
 use AppBundle\Entity\Dlinkcontdoc;
 use AppBundle\Entity\Dlocdrilling; 
 use AppBundle\Entity\DLoclitho;
+use AppBundle\Entity\Dlocstratumdesc;
+use AppBundle\Entity\Dkeyword;
+
 use AppBundle\Form\DsampleType;
 use AppBundle\Form\DsampleEditType;
 use AppBundle\Form\LmineralsType;
@@ -48,40 +52,14 @@ use AppBundle\Form\CollectionType;
 use AppBundle\Form\EntityManager;
 use AppBundle\Form\SearchAllForm;
 
-use AppBundle\Entity\Dkeyword;
 
 use Symfony\Component\Form\FormError;
 
 //debug 
 use Symfony\Component\HttpFoundation\Response;
 
-class GeoController extends Controller
-{
-	
-	protected $page_size=20;
-    protected $limit_autocomplete=30;
-	
-    public function indexAction(Request $request){		
-		return $this->render('@App/home.html.twig');
-		$this->set_sql_session();
-    }
-	
-	
-
-	protected function set_sql_session()
-	{
-		$em = $this->getDoctrine()->getManager();		
-		$uk=$this->getUser()->getId();
-		$RAW_QUERY = "SET  session.geo_darwin_user TO ".$uk.";";
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		$statement->execute(); 
-	}
-	
-	protected function check_collection_rights_general()
-	{
-		return $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']);
-	}
-	
+class GeoController extends AbstractController
+{	
 	public function add_general($class_name, $form_class,Request $request,$redirect_add, $redirect_edit, $field_to_remove=null )
 	{
 		$collection_rights=$this->check_collection_rights_general();
@@ -204,142 +182,7 @@ class GeoController extends Controller
 		}
 	}	
 	
-	public function delete_general($obj, $form,  $name_twig_class, Request $request, $twig)
-	{	
-		$collection_rights=$this->check_collection_rights_general();
-		if ($collection_rights == true)
-		{		
-			$em = $this->getDoctrine()->getManager();	
-			$this->set_sql_session();
-			if (!$obj) {
-				throw $this->createNotFoundException('No document found' );
-			}
-			elseif($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-			{
-				
-				if ($request->isMethod('POST')) 
-				{				
-					
-					$form->handleRequest($request);
-					if ($form->isSubmitted() && $form->isValid()) 
-					{					
-						try 
-						{						
-							$em = $this->getDoctrine()->getManager();
-							$em->remove($obj);
-							$em->flush();
-							$this->addFlash('success','DATA DELETED!');  
-							
-							return $this->redirectToRoute('app_home');
-							
-						}catch(\Doctrine\DBAL\DBALException $e ) {
-							
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
-						}
-						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
-							$form->addError(new FormError($e->getMessage()));	
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
-						}
-						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
-						}
-						catch(Exception $e ) {
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
-						}
-						finally
-						{
-							
-						}
-						
-					}
-					elseif ($form->isSubmitted() && !$form->isValid() )
-					{
-						$form->addError(new FormError("Other validation error"));
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
-					}
-					elseif (!$form->isSubmitted())
-					{					
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
-					}
-				}
-				else
-				{
-					print("issue");
-				}
-				
-				
-			}
-			return $this->redirectToRoute('app_home');
-		}
-		else
-		{
-			return $this->render('@App/collnoaccess.html.twig');
-		}
-    }
-
-public function handle_many_to_many_detail_general(Request $request, $index, $target_class_name, $field_target_id, $id_target_obj, $link_class_name, $fk_mapping=Array(), $http_mapping=Array(), $direct_mapping = Array())
-	{
 		
-		$target_obj=$this->getDoctrine()
-			->getRepository($target_class_name)
-			 ->findOneBy(array($field_target_id => $id_target_obj));
-			 
-			 
-		$reflect  = new \ReflectionClass($link_class_name);
-		$dlink_obj=$reflect->newInstance(); 	 
-		foreach($fk_mapping as $get_method=>$set_method)
-		{
-			$src_val=call_user_func(array($target_obj,$get_method));
-			call_user_func_array(array($dlink_obj, $set_method), array($src_val));
-		}
-		foreach($http_mapping as $prefix=>$method)
-		{
-			$val=$request->request->get($prefix.$index);
-			call_user_func_array(array($dlink_obj, $method), array($val));
-		}
-		foreach($direct_mapping as $method=>$val)
-		{
-			call_user_func_array(array($dlink_obj, $method), array($val));
-		}
-		return $dlink_obj;
-		
-	}
-	
-
-	
-	public function handle_many_to_many_relation_general(Request $request, $obj, $prefix_pk_url, $target_class_name, $field_target_id, $link_class_name, $fk_mapping=Array(), $http_mapping=Array(), $direct_mapping = Array())
-	{		
-		
-		if ($request->isMethod('POST'))
-		{		
-			
-			$params=$request->request->all();
-		}
-		else
-		{
-		
-			$params=$request->query->all();
-		}
-		$tmp_array=Array();
-		foreach($params as $key=>$val)
-		{			
-			
-			if(strpos($key, $prefix_pk_url )===0)
-			{					
-				$tmp_idx=preg_replace('/^(.+?)(\d+)$/i', '${2}', $key);	
-				$id_obj=$request->request->get($prefix_pk_url.$tmp_idx);						
-				$tmp_obj=$this->handle_many_to_many_detail_general($request, $tmp_idx, $target_class_name, $field_target_id,$id_obj , $link_class_name, $fk_mapping, $http_mapping, $direct_mapping);
-				$tmp_array[]=$tmp_obj;
-				//$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
-			}
-		}
-		return $tmp_array;
-	}	
-	
-	
 	
 	
 	public function addsampleAction(Request $request){
@@ -397,110 +240,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			return $this->render('@App/collnoaccess.html.twig');
 		}
     }
-	
 
-	public function savecontributors($idcontrib,$actionscontribstr,$request){
-		//return new Response('<html><body>'.print_r($actionscontribstr).print_r($actionscontribstr).'</body></html>' );
-		$actionscontrib[] = null;
-		$idcontribs[] = null;
-		$idcontributors[]= null;
-		$origin_error = "In contributors, ";
-		$em = $this->getDoctrine()->getManager();				
-						
-		if ($actionscontribstr != ""){
-			
-			$arrayid_contrids =  explode(",", $actionscontribstr); 
-			$elem =array();
-			$i=0;
-			foreach($arrayid_contrids as $e) {
-				if ($e != ""){
-					$elem = explode("-", $e);
-					$idline[$i] = $elem[0];
-					$idcontribs[$i] = $elem[1];
-					$actionscontrib[$i] = $elem[2];
-					$i++;
-				}
-			} 
-		}
-		
-		$RAW_QUERYcontributors = "SELECT * FROM dlinkcontribute where idcontribution = '".$idcontrib."';";
-		$statement = $em->getConnection()->prepare($RAW_QUERYcontributors);
-		$statement->execute();
-		$linkcontribs = $statement->fetchAll();
-		foreach($linkcontribs as $linkcontrib_obj){
-			$idcontributors[]=$linkcontrib_obj['idcontributor'];
-		}
-		
-		$RAW_QUERYcontributors = "SELECT idcontributor FROM dcontributor;";
-		$statement = $em->getConnection()->prepare($RAW_QUERYcontributors);
-		$statement->execute();
-		$contributors = $statement->fetchAll();
-		foreach($contributors as $contributors_obj){
-			$idallcontributors[]=$contributors_obj['idcontributor'];
-		}
-		
-		for ($y = 0; $y < sizeof($actionscontrib); $y++) {
-			if ($idcontribs[$y]!= ""){
-				if ($actionscontrib[$y] != "D"){
-					$actionscontrib[$y] = "I";
-					$role = $request->get('inp_addnewcontributorRole'.$idline[$y]);
-					$order = $request->get('inp_addnewcontributorOrder'.$idline[$y]);
-					if ($order == ""){
-						$order = "0";
-					}
-					$people = $request->get('inp_addnewcontributorName'.$idline[$y]);
-					$function = $request->get('inp_addnewcontributorFunction'.$idline[$y]);
-					$title = $request->get('inp_addnewcontributorTitle'.$idline[$y]);
-					$statut = $request->get('inp_addnewcontributorStatus'.$idline[$y]);
-					$institut = $request->get('inp_addnewcontributorInstitut'.$idline[$y]);
-					for ($z = 0; $z < count($idcontributors); $z++) {
-						if($idcontributors[$z] == $idcontribs[$y]){
-								$actionscontrib[$y] = "U";
-								break;
-						}
-					}
-					
-					$actionscontributor[$y] = "I";
-					for ($z = 0; $z < count($idallcontributors); $z++) {
-						if($idallcontributors[$z] == $idcontribs[$y]){
-								$actionscontributor[$y] = "U";
-								break;
-						}
-					}
-				}
-				
-				if ($actionscontributor[$y] == "U"){
-					$RAW_QUERYdcontributor = "UPDATE dcontributor SET people = '".$people."',peoplefonction = '".$function."',peopletitre = '".$title."',peoplestatut = '".$statut."',institut = '".$institut."' WHERE idcontributor = ".$idcontribs[$y].";";
-					
-				}   
-				if ($actionscontributor[$y] == "I"){
-					$RAW_QUERYdcontributor = "INSERT INTO dcontributor (idcontributor, people, peoplefonction, peopletitre, peoplestatut, institut) VALUES (".$idcontribs[$y].",'".$people."','".$function."','".$title."','".$statut."','".$institut."');";
-				}
-
-				if ($actionscontributor[$y] == "I" | $actionscontributor[$y] == "U"){
-					//echo "<script type='text/javascript'>alert('RAW_QUERYdcontributor= $RAW_QUERYdcontributor');</script>";
-					$statement = $em->getConnection()->prepare($RAW_QUERYdcontributor);
-					$statement->execute();
-				}
-//return new Response('<html><body>'.print_r($RAW_QUERYdcontributor).'</body></html>' );
-				
-				if ($actionscontrib[$y] == "U"){
-					$RAW_QUERY = "UPDATE dlinkcontribute SET contributorrole = '".$role."',contributororder = ".$order." WHERE idcontribution = ".$idcontrib." AND idcontributor = ".$idcontribs[$y].";";
-				}
-				if ($actionscontrib[$y] == "I"){
-					$RAW_QUERY = "INSERT INTO dlinkcontribute (idcontribution, idcontributor, contributorrole, contributororder) VALUES (".$idcontrib.",".$idcontribs[$y].",'".$role."',".$order.");";
-				}
-				if ($actionscontrib[$y] == "D"){
-					$RAW_QUERY = "DELETE FROM dlinkcontribute WHERE idcontribution = '".$idcontrib."' and idcontributor = ".$idcontribs[$y]." ;";
-				}
-				if ($actionscontrib[$y] == "I" | $actionscontrib[$y] == "U" | $actionscontrib[$y] == "D"){
-					//echo "<script type='text/javascript'>alert('RAW_QUERY= $RAW_QUERY');</script>";
-					$statement = $em->getConnection()->prepare($RAW_QUERY);
-					$statement->execute();
-				}
-			}
-		}
-	}
 	
 	public function saveusers($idcoll,$actionsusersstr,$request){
 		$actionscollusers[] = null;
@@ -566,10 +306,6 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		}
 	}
 	
-
-	
-	
-	
 	public function addContributionAction(Request $request)
 	{
 	    $this->set_sql_session();
@@ -588,9 +324,17 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 					try 
 					{					
 						$em->persist($dcontribution);
+						if(strlen($form->get("date_year")->getData())>0)
+						{
+						$dcontribution->setDateByElementsForm(
+							$form,
+							$form->get("date_year")->getData(),
+							$form->get("date_month")->getData(),
+							$form->get("date_day")->getData());
+						}
 						$em->flush();					
-						//$link_array=$this->handle_contribution_relations($request, $dcontribution);
-						$link_array=$this->handle_many_to_many_relation_general(
+						
+						$link_array_contribs=$this->handle_many_to_many_relation_general(
 							$request,
 							$dcontribution,
 							"contribdetail_id_contrib_",
@@ -601,7 +345,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 							Array("contribdetail_role_contrib_"=>"setContributorrole", "contribdetail_order_contrib_"=>"setContributororder"),
 							Array("setIdContribution"=>$dcontribution->getIdContribution())							
 						);
-						foreach($link_array as $dlink_obj)
+						foreach($link_array_contribs as $dlink_obj)
 						{
 							$em->persist($dlink_obj);
 						}
@@ -620,6 +364,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 					
 				}
 			}
+			//Doctrine query seems asynchronous so need to pass the method to get fk directly to the template
 			return $this->render('@App/contributions/contributionform.html.twig', array(
 					'form' => $form->createView(),
 					'dcontribution' => $dcontribution,
@@ -633,6 +378,8 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		}
 	}
 	
+
+	
 	public function editContributionAction(Dcontribution $dcontribution, Request $request)
 	{			
 		$em = $this->getDoctrine()->getManager();	
@@ -641,11 +388,11 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			throw $this->createNotFoundException('No document found' );
 		}
 		else
-		{		
-			$dlinkcontribute=$dcontribution->initDlinkcontribute($em);	
+		{	
+			
 			
 			$form = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
-
+			$this->set_date_ctrl_general($form, $dcontribution->getDate(),  $dcontribution->getDateformat(),"date_year","date_month","date_day");
 			
 			if ($request->isMethod('POST')) 
 			{
@@ -676,16 +423,39 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 							
 							$dcontribution->initNewDlinkcontribute($em, $dlinkcontribute);
 							//reattach after update
-							$dlinkcontribute=$dcontribution->initDlinkcontribute($em);	
-							//throw new UndefinedOptionsException();
+							
 						}
 						
+						$dlinkdocument=$this->handle_many_to_many_relation_general(
+							$request,
+							$dcontribution,
+							"contrib_to_doc_id_doc_",
+							Ddocument::class,
+							"pk",
+							Dlinkcontdoc::class,
+							Array("getIddoc"=>"setId", "getIdcollection"=>"setIdCollection"),
+							//important map PK of link, that must be on the HTML FORM
+							Array("contrib_to_doc_id_link_"=>"setPk"),	
+							array("setIdcontribution"=>$dcontribution->getIdContribution())
+							);
+						if($dlinkdocument!==null)
+						{
+							$dcontribution->initNewDlinkdocument($em, $dlinkdocument);
+						}
+						if(strlen($form->get("date_year")->getData())>0)
+						{
+							$dcontribution->setDateByElementsForm(
+								$form,
+								$form->get("date_year")->getData(),
+								$form->get("date_month")->getData(),
+								$form->get("date_day")->getData());
+						}
 						$em->flush();
 						//print("DONE");
 						
 						$this->addFlash('success','DATA RECORDED IN DATABASE!');  
 						
-						return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
+						//
 						
 					}
 					catch(\Doctrine\DBAL\DBALException $e ) 
@@ -701,6 +471,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 					catch(Exception $e ) {
 						$form->addError(new FormError($e->getMessage()));
 					}
+					//return $this->redirectToRoute('app_edit_contribution', array('pk' => $dcontribution->getPk()));
 					
 				}elseif ($form->isSubmitted() && !$form->isValid() )
 				{
@@ -713,14 +484,21 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			$rightoncollection3 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('3',['Curator','Validator','Collection_manager']);
 			$rightoncollection4 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('7',['Curator','Validator','Collection_manager']);
 			$rightoncollection5 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('9',['Curator','Validator','Collection_manager']);
-			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true){
-				
+			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true)
+			{
+			
+				$search_form=$this->createForm(SearchAllForm::class, null);		
+				//Doctrine query seems asynchronous so need to pass the method to get fk directly to the template
+				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
 				return $this->render('@App/contributions/contributionform.html.twig', array(
 					'dcontribution' => $dcontribution,
 					'form' => $form->createView(),
+					'search_form'=>$search_form->createView(),
 					'origin'=>'edit',
 					'originaction'=>'edit',
-					'dlinkcontribute'=>$dlinkcontribute
+					'dlinkcontribute'=>$dcontribution->initDlinkcontribute($em),
+					'dlinkcontdoc'=>$dcontribution->initDlinkcontdoc($em),
+					'current_tab'=>$current_tab
 				));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -876,8 +654,8 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 						}
 						$em->persist($ddocument);
 						
-						//$link_array=$this->handle_document_to_contrib($request,$ddocument);
-						$link_array=$this->handle_many_to_many_relation_general(
+						
+						$link_array_contribs=$this->handle_many_to_many_relation_general(
 							$request,
 							$ddocument,
 							"doc_to_contrib_id_contrib_",
@@ -888,7 +666,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 							Array(),
 							array("setrelationidcollection"=>$ddocument)
 							);
-						foreach($link_array as $dlink_obj)
+						foreach($link_array_contribs as $dlink_obj)
 						{
 							$em->persist($dlink_obj);
 						}
@@ -910,7 +688,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 				}
 			}
 			
-			return $this->render('@App/adddocument.html.twig', array(
+			return $this->render('@App/documents/adddocument.html.twig', array(
 				'ddocument' => $ddocument,
 				'form' => $form->createView(),
 				'originaction'=>'add_beforecommit'
@@ -922,6 +700,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
     }
 	
 	public function addpointsAction(Request $request){
+		$this->set_sql_session();
 		$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('4,15,26',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
 		if ($rightoncollection == true){
 			$dloccenter = new DLoccenter();
@@ -929,28 +708,31 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			
 			//$editvals = "";
 			$em = $this->getDoctrine()->getManager();
-			$form = $this->createForm(PointType::class, $dloccenter, array('entity_manager' => $em,));
+			$form = $this->createForm(PointEditType::class, $dloccenter, array('entity_manager' => $em,));
 			$form2 = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
 			
 			if ($request->isMethod('POST')) {
 				$form->handleRequest($request);
 				if ($form->isSubmitted() && $form->isValid()) {
-					try {
+					try 
+					{
 						$em->persist($dloccenter);
 						$em->flush();
 						$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
 						return $this->redirectToRoute('app_edit_point', array('pk' => $dloccenter->getPk()));
 						//return $this->redirectToRoute('app_edit_point', array('editvals' => $editvals,'pk' => $dloccenter->getPk()));
-					} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-						echo "<script type='text/javascript'>alert('Record already exists with these values !');</script>";
-					} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-						echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-					} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-						echo "<script type='text/javascript'>alert('Table not found !');</script>";
-					} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-						echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-					} catch(\Doctrine\DBAL\Exception\DriverException $e ) {
-						echo "<script type='text/javascript'>alert('There is a syntax error with one field !');</script>";
+					}
+					catch(\Doctrine\DBAL\DBALException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) {
+						$form->addError(new FormError($e->getMessage()));
 					}
 				}elseif ($form->isSubmitted() && !$form->isValid() ){
 					$dloccenter->setPk(0);
@@ -958,7 +740,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 				}
 			}
 
-			return $this->render('@App/addpoints.html.twig', array(
+			return $this->render('@App/dloccenter/addpoints.html.twig', array(
 				'dloccenter' => $dloccenter,
 				'point_form' => $form->createView(),
 				'form2' => $form2->createView(),
@@ -1581,253 +1363,98 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		}
     }
 	
-	public function editpointAction(Dloccenter $dloccenter, Request $request){  
+	public function editpointAction(Dloccenter $dloccenter, Request $request)
+	{  
+		$this->set_sql_session();
 		if (!$dloccenter) {
 			throw $this->createNotFoundException('No location found' );
 		}else{
-			$actionscontributions[] = null;
-			$arraydcontributors[]=null;
+			
 			$em = $this->getDoctrine()->getManager();
+			$this->set_sql_session();
 			$idcol = $dloccenter->getIdcollection();
-			$idloc = $dloccenter->getIdpt();
+			$idloc = $dloccenter->getIdpt();		
 			
-			//drilling
-			$sql = '
-					SELECT d.idcollection, d.idpt, drilling, diameter, unitdiameter, waterflow, restingwater, depthwatertable, infowater, infodrilling, d.pk
-					FROM dlocdrilling d
-					INNER JOIN dloccenter c ON c.idcollection = d.idcollection and c.idpt = d.idpt
-					WHERE c.idcollection = :col and c.idpt = :pt
-					';
-			$statement = $em->getConnection()->prepare($sql);
-			$statement->execute(array('col' => $idcol,'pt' => $idloc ));
-			$drillings = $statement->fetchAll();
-			//print_r($drillings);
-			if ($drillings != null){
-				$actiondrilling = "U";
-			}else{
-				$actiondrilling = "I";
-			}
-			
-			//drilling type
-			$sqldt = '
-					SELECT pk,drillingtype
-					FROM dlocdrillingtype 
-					WHERE idcollection = :col and idpt = :pt
-					';
-			$statement = $em->getConnection()->prepare($sqldt);
-			$statement->execute(array('col' => $idcol,'pt' => $idloc ));
-			$drillingttypes = $statement->fetchAll();
-			//print_r($drillingttypes);
-			if ($drillingttypes != null){
-				$actiondrillingtype = "U";
-			}else{
-				$actiondrillingtype = "I";
-			}
-			
-			//Contributions
-			/*$loccontribution = $this->getDoctrine()
-			->getRepository(DLinkContLoc::class)
-			 ->findBy(array('idcollection' => $idcol, 
-							'id' => $idloc
-						   ));*/
-			$RAW_QUERYDLinkContLoc = "SELECT idcontribution
-						FROM dlinkcontloc 
-						WHERE idcollection = '".$idcol."' AND id = ".$idloc.";";
-			$statement = $em->getConnection()->prepare($RAW_QUERYDLinkContLoc);
-			$statement->execute();
-			$loccontribution = $statement->fetchAll();
 
-			foreach($loccontribution as $loccontribution_obj){
-				$idcontrib = $loccontribution_obj['idcontribution'];
-				
-				$idscontr_originals[]=$loccontribution_obj['idcontribution'];
-				$RAW_QUERYdcontributions = "SELECT c.pk as pkcontribution,
-							c.idcontribution as idcontribution,
-							datetype,
-							year, 
-							date,			
-							o.pk as pkcontributor,
-							o.idcontributor as idcontributor,
-							people,
-							peoplefonction,
-							peopletitre,
-							peoplestatut,
-							institut,
-							contributorrole,
-							contributororder
-						FROM dcontribution c
-						LEFT JOIN dlinkcontribute l ON l.idcontribution = c.idcontribution
-						LEFT JOIN dcontributor o ON l.idcontributor = o.idcontributor
-						WHERE c.idcontribution = ".$idcontrib."
-						ORDER by idcontribution;";
-				$statement = $em->getConnection()->prepare($RAW_QUERYdcontributions);
-				$statement->execute();
-				$arraydcontributors1 = $statement->fetchAll();
-				
-				if ($arraydcontributors != null){
-					array_push($arraydcontributors,$arraydcontributors1);
-				}else{
-					$arraydcontributors = $arraydcontributors1;
-				}
-			}
-			
-			$arraydloclitho[]=null;
-			//precision
-			/*if (!is_null($dloccenter->getIdprecision())){
-				$idprecision = $dloccenter->getIdprecision()->getIdprecision();
-
-				$lprecision = $this->getDoctrine()
-					->getRepository(LPrecision::class)
-					->findBy(array('idprecision' => $idprecision));
-			}
-			 $lprecisionList = $this->getDoctrine()
-				->getRepository(LPrecision::class)
-				->findAll();*/
-			
-			$dcontribution = new Dcontribution();
 			$form = $this->createForm(PointEditType::class, $dloccenter, array('entity_manager' => $em,));
-			$form2 = $this->createForm(DcontributionType::class, $dcontribution, array('entity_manager' => $em,));
-			//echo "<script>console.log('avant post1' );</script>";
 			
-			if ($request->isMethod('POST')) {
+			
+			if ($request->isMethod('POST')) 
+			{
 				$form->handleRequest($request);
 
-				if ($form->isSubmitted() && $form->isValid()) {
-					try {
+				if ($form->isSubmitted() && $form->isValid()) 
+				{
+					try 
+					{
+						$dloclitho_http=$this->get_request_var($request,"point_to_stratum_lithostratum",null);
+						if($dloclitho_http!==null)
+						{
+							//print("save_sat");
+							//date not handled
+							$dloclitho=$this->getHTTPOneToManyByIndex($request, "point_to_stratum_lithostratum",DLoclitho::class,
+								[
+									"point_to_stratum_pk"=>"setPk",
+									"point_to_stratum_lithostratum"=>"setLithostratum",
+									"point_to_stratum_orderstratum"=>"setIdstratum",
+									"point_to_stratum_alternance"=>"setAlternance",
+									"point_to_stratum_topstratum"=>"setTopstratum"
+									,
+									"point_to_stratum_bottomstratum"=>"setBottomstratum"
+									
+								],
+								["setIdcollection"=>$dloccenter->getIdcollection(), "setIdpt"=>$dloccenter->getIdpt(),]
+								
+								);
+							//print_r($satellites);
+							if(count($dloclitho)>0)
+							{	
+								//attach description
+								foreach($dloclitho as $key=>$obj)
+								{
+									//print_r($key);
+									//print_r($obj);
+									$desc_prefix="point_to_stratum_description_".$key."_description";
+									print($desc_prefix);
+									$desc_http=$this->get_request_var($request,$desc_prefix,null);
+									if($desc_http!==null)
+									{
+										$array_desc=Array();
+										foreach($desc_http as $desc)
+										{
+											//print_r($obj);
+											$tmp_desc=new Dlocstratumdesc();
+											$tmp_desc->setDescript($desc);
+											$tmp_desc->setIdcollection($obj->getIdcollection());
+											$tmp_desc->setIdpt($obj->getIdpt());
+											$tmp_desc->setIdstratum($obj->getIdstratum());
+											$array_desc[]=$tmp_desc;
+										}
+										$obj->initNewDlocstratumdesc($em, $array_desc);
+									}
+								}
+								$dloccenter->initNewDloclitho($em, $dloclitho);
+							}
+						}
 						$em->flush();
 						//drilling
-						$txtdiameter = "";
-						if ($request->get('inp_drill-drilling') <> ""){	
-							$origin_error = "In drilling, ";						
-							$drilling = $request->get('inp_drill-drilling');
-							$drilldiameter = $request->get('inp_drill-diameter');
-							if ($drilldiameter > 0) {
-								$txtdiameter = ",diameter = ".$drilldiameter;
-							}else{
-								$txtdiameter = ",diameter = 0";
-							}
-							$unitdiameter = $request->get('inp_drill-unitdiameter');
-							$waterflow = $request->get('inp_drill-waterflow');
-							if ($waterflow > 0) {
-								$txtwaterflow = ",waterflow = ".$waterflow;
-							}else{
-								$txtwaterflow = ",waterflow = 0";
-							}
-							$restingwater = $request->get('inp_drill-restingwater');
-							if ($restingwater == 0) {
-								$txtrestingwater = ",restingwater = 'f'";
-							}
-							if ($restingwater == 1) {
-								$txtrestingwater = ",restingwater = 't'";
-							}
-							$depthwatertable = $request->get('inp_drill-depthwatertable');
-							if ($depthwatertable > 0) {
-								$txtdepthwatertable = ",depthwatertable = ".$depthwatertable;
-							}else{
-								$txtdepthwatertable = ",depthwatertable = 0";
-							}
-							$infowater = $request->get('inp_drill-infowater');
-							$infodrilling = $request->get('inp_drill-infodrilling');
-														
-							if ($actiondrilling == "U"){
-								$RAW_QUERY = "UPDATE dlocdrilling SET drilling = '".$drilling."'".$txtdiameter.",unitdiameter = '".$unitdiameter."'".$txtrestingwater.$txtwaterflow.$txtdepthwatertable.",infowater = '".$infowater."',infodrilling = '".$infodrilling."' WHERE idcollection = '".$idcol."' AND idpt = ".$idloc.';';
-							}
-							if ($actiondrilling == "I"){
-								$RAW_QUERY = "INSERT INTO dlocdrilling (idcollection,idpt,drilling, diameter, unitdiameter, waterflow, restingwater, depthwatertable, infowater, infodrilling) VALUES ('".$idcol."',".$idloc.",'".$drilling."',".$drilldiameter.",'".$unitdiameter."',".$waterflow.",".$restingwater.",".$depthwatertable.",'".$infowater."','".$infodrilling."');";
-							}
-							if ($actiondrilling == "I" | $actiondrilling == "U" ){ 
-								//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-								$statement = $em->getConnection()->prepare($RAW_QUERY);
-								$statement->execute();
-							}
-						}
-						
-						//drilling type
-						if ($request->get('newdrilltypes') <> ""){	
-							$origin_error = "In drilling type, ";		
-							$drillingtypechanges =  explode(",", $request->get('newdrilltypes')); 
-							$elem =array();
-							
-							$i=0;
-							foreach($drillingtypechanges as $e) {
-								if ($e != ""){
-									$elem = explode("-", $e); // $drilltype_pk[0] +"-"+$(this).val()+"-U"
-									$pks[$i] = $elem[0];
-									$types[$i] = $elem[1];
-									$actions[$i] = $elem[2];
-									$i++;
-								}
-							} 
-							for ($y = 0; $y < sizeof($pks); $y++) {
-								if ($actions[$y] == "U"){
-									$RAW_QUERY_DT = "UPDATE dlocdrillingtype SET drillingtype = '".$types[$y]."' WHERE pk = ".$pks[$y]." AND idcollection = '".$idcol."' AND idpt = ".$idloc.';';
-								}
-								if ($actions[$y] == "I"){
-									$RAW_QUERY_DT = "INSERT INTO dlocdrillingtype (idcollection,idpt,drillingtype) VALUES ('".$idcol."',".$idloc.",'".$types[$y]."');";
-								}
-								if ($actions[$y] == "D"){
-									$RAW_QUERY_DT = "DELETE FROM dlocdrillingtype WHERE idcollection = '".$idcol."' and idpt = ".$idloc." and pk = ".$pks[$y]." ;";
-								}
-								if ($actions[$y] == "I" | $actions[$y] == "U" | $actions[$y] == "D"){
-									$statement = $em->getConnection()->prepare($RAW_QUERY_DT);
-									$statement->execute();
-								}
-							}
-							//return new Response('<html><body>'.print_r($RAW_QUERY_DT).'</body></html>' );
-						}
-			
-						//contributions
-						if ($request->get('newcontributions') != ""){	
-							$id_contributions = $request->get('newcontributions');
-							$arrayid_contributions =  explode(",", $id_contributions); 
-							$elem =array();
-							$i=0;
-							foreach($arrayid_contributions as $e) {
-								if ($e != ""){
-									$elem = explode("-", $e);
-									$ids[$i] = $elem[1];
-									$actionscontributions[$i] = $elem[2];
-									$i++; 
-								}
-							} 
-							$sumy = "";
-							for ($y = 0; $y < sizeof($ids); $y++) {
-								$sumy = $sumy." ".$ids[$y];
-							}
-	
-							for ($y = 0; $y < sizeof($ids); $y++) {
-								if ($actionscontributions[$y] == "I"){
-									$RAW_QUERY = "INSERT INTO dlinkcontloc (idcollection,id,idcontribution) VALUES ('".$idcol."',".$idloc.",".$ids[$y].');';
-								}
-								if ($actionscontributions[$y] == "D"){
-									$RAW_QUERY = "DELETE FROM dlinkcontloc WHERE idcollection = '".$idcol."' and id = ".$idloc." and idcontribution = ".$ids[$y]." ;";
-								}
-								if ($actionscontributions[$y] == "I" |$actionscontributions[$y] == "D"){
-									//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-									$statement = $em->getConnection()->prepare($RAW_QUERY);
-									$statement->execute();
-								}
-							}
-						}
-						
+						$txtdiameter = "";					
 						$this->addFlash('success','DATA RECORDED IN DATABASE!');   //$dloccenter->getCoordLong()
 						
-						return $this->redirectToRoute('app_edit_point', array('pk' => $dloccenter->getPk()));
-					} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-						echo "<script type='text/javascript'>alert('Record already exists with these values of collection and ID !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction already exist" );
-					} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-						echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-						throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Bad request on Transaction" );
-					} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-						echo "<script type='text/javascript'>alert('Table not found !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
-					} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-						echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
+						//return $this->redirectToRoute('app_edit_point', array('pk' => $dloccenter->getPk()));
 					}
-				}elseif ($form->isSubmitted() && !$form->isValid() ){
-					echo "<script type='text/javascript'>alert('error in form');</script>";
+					catch(\Doctrine\DBAL\DBALException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+                    catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) {
+						$form->addError(new FormError($e->getMessage()));
+					}
 				}
 			}
 			
@@ -1841,34 +1468,17 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 				$latarr =array();
 				$latarr[0]=$dloccenter->getCoordLat();
 
-				if (isset($arraydcontributors[1])){
-					return $this->render('@App/editpoint.html.twig', array(
+				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
+				return $this->render('@App/dloccenter/editpoint.html.twig', array(
 						'latcoord' => $latarr,
 						'longcoord' => $longarr,
 						'dloccenter' => $dloccenter,
 						'point_form' => $form->createView(),
-						'form2' => $form2->createView(),
-						'drillings' => $drillings,
-						'drillingttypes' => $drillingttypes,
-						'arraydloclitho' => $arraydloclitho,
-						'arrayLinkcontributions' => $arraydcontributors,
+						'dloclitho'	=>	$dloccenter->initDloclitho($em),					
 						'origin'=>'edit',
-						'originaction'=>'edit'
+						'originaction'=>'edit',
+						'current_tab'=>$current_tab
 					));
-				}else{
-					return $this->render('@App/editpoint.html.twig', array(
-						'latcoord' => $latarr,
-						'longcoord' => $longarr,
-						'dloccenter' => $dloccenter,
-						'point_form' => $form->createView(),
-						'form2' => $form2->createView(),
-						'drillings' => $drillings,
-						'drillingttypes' => $drillingttypes,
-						'arraydloclitho' => $arraydloclitho,
-						'origin'=>'edit',
-						'originaction'=>'edit'
-					));
-				}
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
 			}
@@ -1880,14 +1490,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 
 	public function editdocAction(Ddocument $ddocument, Request $request)
 	{
-		//print("EDIT");
-			/*	$arrayeditvals =  explode(",,", $editvals); 
-		$elem =array();
-		foreach($arrayeditvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-			echo "<script>console.log('".$elem1[0]."   ".$elem1[1]."' );</script>";
-        } */
+		
 		$em = $this->getDoctrine()->getManager();	
 		$this->set_sql_session();
 		if (!$ddocument) {
@@ -1909,8 +1512,9 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			
 			$keywords=$ddocument->initDkeywords($em);
 			$titles=$ddocument->initDdoctitles($em);
-			$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
-	
+			$dlinkcontribute=$ddocument->initDLinkcontdoc($em);
+			$satellites=$ddocument->initDdocsatellite($em);
+
 			
 			$form = $this->createForm(DdocumentEditType::class, $ddocument, array('entity_manager' => $em,));
 
@@ -1925,33 +1529,63 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 
 				if ($form->isSubmitted() && $form->isValid()) {
 					try {
-					print("SUBMIT");
 						//echo "<script>console.log('dans valid' );</script>";
+						$keywords_pk=$request->get("widget_keywords_pk",null);
 						$keywords=$request->get("widget_keywords",null);
 						if($keywords!==null)
 						{
+							$array_keywords=[];
+							$i=0;
+							foreach($keywords as $keyw)
+							{
+								$keyobj=new Dkeyword();
+								$keyobj->setKeyword($keyw);
+								$keyobj->setKeywordlevel($i+1);
+								$keyobj->setIdcollection($ddocument->getIdCollection());
+								$keyobj->setId($ddocument->getIddoc());
+								if(array_key_exists($i,$keywords_pk ))
+								{
+									if(is_numeric($keywords_pk[$i]))
+									{
+										$keyobj->setPk($keywords_pk[$i]);
+									}
+								}
+								$i++;
+								$array_keywords[]= $keyobj;
+								
+							}
 							
-							$ddocument->initNewDkeywords($em, $keywords);
+							$keywords=$ddocument->initNewDkeywords($em, $array_keywords);
 							//throw new UndefinedOptionsException();
 						}
 						
 						
 						$titles=$request->get("widget_titles",null);
+						$titles_pk=$request->get("widget_titles_pk",null);
+						//print_r($titles_pk);
 						if($titles!==null)
 						{
 							$array_titles=Array();
-							$i=1;
+							$i=0;
 							foreach($titles as $title)
 							{
 								$titleobj=new Ddoctitle();
 								$titleobj->setTitle($title);
-								$titleobj->setTitlelevel($i);
+								$titleobj->setTitlelevel($i+1);
 								$titleobj->setIdcollection($ddocument->getIdCollection());
 								$titleobj->setIddoc($ddocument->getIddoc());
+								if(array_key_exists($i,$titles_pk ))
+								{
+									if(is_numeric($titles_pk[$i]))
+									{
+										$titleobj->setPk($titles_pk[$i]);
+									}
+								}
 								$i++;
-								$array_titles[]= $title;
+								$array_titles[]= $titleobj;
 							}
-							//$ddocument->initNewDdoctitles($em, $titles);
+							$titles=$ddocument->initNewDdoctitles($em, $array_titles);
+							
 							//throw new UndefinedOptionsException();
 						}
 						$dlinkcontribute=$this->handle_many_to_many_relation_general(
@@ -1976,23 +1610,38 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 							//throw new UndefinedOptionsException();
 							}
 						}
-						$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
+						$satellite_http=$request->get("sat_satnum",null);
+						if($satellite_http!==null)
+						{
+							print("save_sat");
+							//date not handled
+							$satellites=$this->getHTTPOneToManyByIndex($request, "sat_satnum",Ddocsatellite::class,
+								[
+									"sat_satpk"=>"setPk",
+									"sat_satnum"=>"setSatnum",
+									"sat_sattype"=>"setSattype",
+									"sat_sensor"=>"setSensor",
+									"sat_moderadar"=>"setModeradar",
+									"sat_orbit"=>"setOrbit",
+									"sat_pathtrack"=>"setPathtrack",
+									"sat_rowframe"=>"setRowframe",
+								],
+								["setIdcollection"=>$ddocument->getIdcollection(), "setIddoc"=>$ddocument->getIddoc(),]
+								
+								);
+							//print_r($satellites);
+							if(count($satellites)>0)
+							{
+								$ddocument->initNewDdocsatellite($em, $satellites);
+							}
+						}
+						//$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
 						$em->flush();
 						//print("DONE");
 						
 						$this->addFlash('success','DATA RECORDED IN DATABASE!');  
 						
-						$current_tab=$request->request->get("current_tab","main-tab");
-			
-						/*return $this->render('@App/editdoc.html.twig', array(
-							'ddocument' => $ddocument,
-							'form' => $form->createView(),
-							'origin'=>'edit',
-							'originaction'=>'edit',
-							'current_tab'=> $current_tab,
-							'keywords'=>$keywords,
-							'dlinkcontribute'=>$dlinkcontribute
-						));*/
+						
 						
 					}catch(\Doctrine\DBAL\DBALException $e ) {
 						$form->addError(new FormError($e->getMessage()));
@@ -2006,41 +1655,32 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 					catch(Exception $e ) {
 						$form->addError(new FormError($e->getMessage()));
 					}
-					/*} catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-						echo "<script type='text/javascript'>alert('Record already exists with these values of collection and ID !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction already exist" );
-					} catch(\Doctrine\DBAL\Exception\ConstraintViolationException $e ) {
-						echo "<script type='text/javascript'>alert('There is a constraint violation with that transaction !');</script>";
-						throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Bad request on Transaction" );
-					} catch(\Doctrine\DBAL\Exception\TableNotFoundException $e ) {
-						echo "<script type='text/javascript'>alert('Table not found !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
-					} catch(\Doctrine\DBAL\Exception\ConnectionException $e ) {
-						echo "<script type='text/javascript'>alert('Problem of connection with database !');</script>";
-						//throw new \Symfony\Component\HttpKernel\Exception\HttpException(409, "Transaction Table not found" );
-					}*/
+					
 				}elseif ($form->isSubmitted() && !$form->isValid() ){
 					//echo "<script type='text/javascript'>alert('error in form');</script>";
 				}
 			}
-			print("SENT");
+			
 			$rightoncollection1 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1',['Curator','Validator','Collection_manager']); //'Viewer'
 			$rightoncollection2 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('2',['Curator','Validator','Collection_manager']);
 			$rightoncollection3 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('3',['Curator','Validator','Collection_manager']);
 			$rightoncollection4 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('7',['Curator','Validator','Collection_manager']);
 			$rightoncollection5 = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('9',['Curator','Validator','Collection_manager']);
-			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true){
-			$current_tab=$request->request->get("current_tab","main-tab");
-			
-				return $this->render('@App/editdoc.html.twig', array(
+			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true)
+			{				
+				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
+				print("saved");	
+				
+				return $this->render('@App/documents/editdoc.html.twig', array(
 					'ddocument' => $ddocument,
 					'form' => $form->createView(),
 					'origin'=>'edit',
 					'originaction'=>'edit',
 					'current_tab'=> $current_tab,
 					'keywords'=>$keywords,
-					'titles'=>$titles,
-					'dlinkcontribute'=>$ddocument->initDLinkcontdoc($em)
+					'titles'=>$ddocument->initDdoctitles($em),
+					'dlinkcontdoc'=>$ddocument->initDLinkcontdoc($em),
+					'satellites'=>$ddocument->initDdocsatellite($em)
 				));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -2233,43 +1873,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		return $dsamminerals;
 	}
 	
-	public function searchallAction(Request $request){
-		return $this->render('@App/searchall.html.twig');  
-	}
-    
-    
 	
-	public function searchsampleAction(Request $request){
-		return $this->render('@App/searchsample.html.twig');  
-	}
-	
-	public function searchmineralAction(Request $request){
-		return $this->render('@App/searchmineral.html.twig');  
-	}
-	
-	public function searchcontributionAction(Request $request){
-		return $this->render('@App/searchcontribution.html.twig');  
-	}
-	
-	public function searchcontributorAction(Request $request){
-		return $this->render('@App/searchcontributor.html.twig');  
-	}
-	
-	public function searchpointsAction(Request $request){
-		return $this->render('@App/searchpoints.html.twig');
-    }
-	
-	public function searchdocumentAction(Request $request){
-		return $this->render('@App/searchdocument.html.twig');
-    }
-	
-	public function searchstratumAction(Request $request){
-		return $this->render('@App/searchstratum.html.twig');
-    }
-	
-	public function searchdrillingAction(Request $request){
-		return $this->render('@App/searchdrilling.html.twig');
-    }
 	
 	public function listcodecollectionAction($querygroup,Request $request){
 		$em = $this->getDoctrine()->getManager();
@@ -2671,1700 +2275,17 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		return new JsonResponse($id);
 	}
 	
-	public function results_searchsampleAction($queryvals,Request $request){
-		/*//require_once("@App/debug/PHPDebug.php");
-		//$debug = new PHPDebug();
-		//$debug->debug("A very simple message");
-		 */
-		 
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-		
-		$querymagnet = "";
-								
-		switch($elem["lithomagnet"]) {
-			 case -3:
-				$querymagnet = "m.mesure1 < -10";
-				break;
-			 case -2:
-				$querymagnet = "m.mesure1 < -5.001 AND m.mesure1 > -10";
-				break;
-			 case -1:
-				$querymagnet = "m.mesure1 < -0.001 AND m.mesure1 > -5";
-				break;
-			case 1:
-				$querymagnet = "m.mesure1 > 0 AND m.mesure1 < 50";
-				break;
-			case 2:
-				$querymagnet = "m.mesure1 > 50.001 AND m.mesure1 < 100";
-				break;
-			case 3:
-				$querymagnet = "m.mesure1 > 100.001 AND m.mesure1 < 250";
-				break;
-			case 4:
-				$querymagnet = "m.mesure1 > 250";
-				break;
-		} 
-
-		$data_array = array(
-			array(":collection",	"'%".strtolower($elem["collection"])."%'",	"LOWER(d.idcollection) LIKE ",		"",0),
-			array(":searchnum",		$elem["searchnum"],							"d.idsample = ",					"",0),
-			array(":code",			"'%".strtolower($elem["code"])."%'",			"LOWER(d.fieldnum) LIKE ",			"",0),
-			array(":museumnr",		$elem["museumnr"],							"d.museumnum = ",					"",0),
-			array(":museumloc",		"'%".strtolower($elem["museumloc"])."%'",		"LOWER(d.museumlocation) LIKE ",	"",0),
-			array(":boxnbr",		"'%".strtolower($elem["boxnbr"])."%'",		"LOWER(d.boxnumber) LIKE ",			"",0),
-			array(":descr",			"'%".strtolower($elem["descr"])."%'",			"LOWER(d.sampledescription) LIKE ",	"",0),
-			array(":weight",		$elem["weight"],							"d.weight = ",						"",0),
-			array(":size",			"'%".strtolower($elem["size"])."%'",			"LOWER(d.size) LIKE ",				"",0),
-			array(":dimension",		$elem["dimension"],							"d.dimentioncode = ",				"",0),
-			array(":quality",		$elem["quality"],							"d.quality =  ",					"",0),
-			array(":radioactivity",	$elem["radioactivity"],						"d.radioactivity = ",				"1",0),
-			array(":slimplate",		$elem["slimplate"],							"d.slimplate = ",					"TRUE",0),
-			array(":chemanalysis",	$elem["chemanalysis"],						"d.chemicalanalysis = ",			"TRUE",0),
-			array(":holotype",		$elem["holotype"],							"d.holotype = ",					"TRUE",0),
-			array(":paratype",		$elem["paratype"],							"d.paratype = ",					"TRUE",0),
-			array(":loaninfo",		"'%".strtolower($elem["loaninfo"])."%'",		"LOWER(d.loaninformation) LIKE ",	"",0),
-			array(":securitylevel",	$elem["securitylevel"],						"d.securitylevel = ",				"",0),
-			array(":variousinfo",	strtolower($elem["variousinfo"]),			"LOWER(d.varioussampleinfo) LIKE ",	"",0),
-			
-			array(":idmineral",		$elem["idmineral"],							"s.idmineral = ",					"",1),
-			array(":grademineral",	$elem["grademineral"],						"s.grade = ",						"",1),
-			
-
-
-			array(":classmineral",	"'%".strtolower($elem["classmineral"])."%'",	"(l.rank = 'class' AND  l.fmname LIKE ",											") OR LOWER(l.fmparent) LIKE ",1),
-			array(":groupmineral",	"'%".strtolower($elem["groupmineral"])."%'",	"(l.rank = 'group' AND  l.fmname LIKE ",											") OR LOWER(l.fmparent) LIKE ",1),
-			array(":mineral",		"'%".strtolower($elem["mineral"])."%'",		"LOWER(l.fmname) LIKE ",															" OR LOWER(l.mname) LIKE ",1),
-
-			array(":formulamineral","'%".strtolower($elem["formulamineral"])."%'","LOWER(l.mformula) LIKE ",			"",1),
-			
-			array(":lithomineral",	"'%".strtolower($elem["lithomineral"])."%'",	"LOWER(h2.mineral) LIKE ",			"",2),
-			array(":lithominnum_from",$elem["lithominnum_from"],				"h2.minnum >= ",					"",2),
-			array(":lithominnum_to",$elem["lithominnum_to"],					"h2.minnum <= ",					"",2),
-			array(":lithoweight_from",$elem["lithoweight_from"],				"h1.weightsample >= ",				"",2),
-			array(":lithoweight_to",$elem["lithoweight_to"],					"h1.weightsample <= ",				"",2),
-			array(":lithoobserv",	"'%".strtolower($elem["lithoobserv"])."%'",	"LOWER(h2.observationhm) LIKE ",	"",2),
-			
-			array(":lithogranulo",	$elem["lithogranulo"],						"g.weighttot != ",					"0",3),
-			array(":lithomagnet",	$elem["lithomagnet"],						$querymagnet,						";",3)
-		);
-		
-		/*$RAW_QUERY = "SELECT * FROM dsample d ";
-		$mineralsearch = 0;
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if ($data_array[$x][4] == 1 AND ((	(substr($data_array[$x][1],-1) != "%" AND strlen($data_array[$x][1]) != 0) OR 
-												(substr($data_array[$x][1],-1) == "%" AND strlen($data_array[$x][1]) != 2)) AND
-												($data_array[$x][1] != '%all%'))){
-				$mineralsearch = 1;
-			}
-		}
-		if ($mineralsearch == 1){
-			$RAW_QUERY = $RAW_QUERY."LEFT JOIN DSamMinerals s ON s.IDCollection = d.IDCollection AND s.IDSample = d.IDSample LEFT JOIN lminerals l ON l.IDMineral = s.IDMineral";
-		}*/
-		
-		$RAW_QUERY = "SELECT d.pk as pk,
-							d.idcollection as idcollection, 
-							d.idsample as idsample, 
-							d.fieldnum as fieldnum, 
-							d.museumnum as museumnum, 
-							d.museumlocation as museumlocation, 
-							d.boxnumber as boxnumber, 
-							d.sampledescription as sampledescription,              
-							d.weight as weight, 
-							d.quantity as quantity, 
-							d.size as size, 
-							d.dimentioncode as dimentioncode, 
-							d.quality::integer as quality, 
-							d.slimplate as slimplate, 
-							d.chemicalanalysis as chemicalanalysis,
-							CASE WHEN d.holotype = TRUE THEN 'H' ELSE '' END	||	CASE WHEN d.paratype = TRUE THEN 'P' ELSE '' END AS type,
-							d.holotype as holotype, 
-							d.paratype as paratype, 
-							d.radioactivity as radioactivity, 
-							d.loaninformation as loaninformation, 
-							d.securitylevel as securitylevel, 
-							d.varioussampleinfo as varioussampleinfo,
-							string_agg(distinct l.mname,',') as mname, 
-							string_agg(distinct l.mformula,' -- ') as mformula, 
-							string_agg(distinct l.fmparent,',') as fmparent, 
-							string_agg(distinct l.mparent,',') as mparent,
-							string_agg(distinct l.fmname,',') as fmname, 
-							string_agg(to_char(h1.weightsample, '999.99') ,',') as weightsample,
-							string_agg(distinct (h2.mineral || '(' || h2.minnum::varchar || ')'),', ' ) as mineral2,
-							string_agg(h2.minnum::varchar,',') as minnum ,
-							string_agg(distinct h1.observationhm,',') as observationhm,
-							string_agg(distinct to_char(g.weighttot, '999.99'),',') as weighttot,
-							string_agg(to_char(m.weight, '999.99'),',') as mweight,
-							string_agg(distinct to_char(m.mesure1, '9999.999'),',')::double precision as mesure1
-						FROM dsample d 
-						LEFT JOIN DSamMinerals 	s 	ON s.IDCollection = d.IDCollection AND s.IDSample = d.IDSample 
-						LEFT JOIN lminerals 	l 	ON l.IDMineral = s.IDMineral 
-						LEFT JOIN dsamheavymin 	h1 	ON h1.IDCollection = d.IDCollection AND h1.IDSample = d.IDSample 
-						LEFT JOIN dsamheavymin2 h2 	ON h2.IDCollection = d.IDCollection AND h2.IDSample = d.IDSample 
-						LEFT JOIN dsamgranulo 	g 	ON g.IDCollection = d.IDCollection AND g.IDSample = d.IDSample
-						LEFT JOIN dsammagsusc 	m 	ON m.IDCollection = d.IDCollection AND m.IDSample = d.IDSample";
-	   
-		$RAW_QUERY = $RAW_QUERY." WHERE";
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-				/*	if (((substr($data_array[$x][1],-1) != "%" AND strlen($data_array[$x][1]) != 0) OR 
-						(substr($data_array[$x][1],-1) == "%" AND strlen($data_array[$x][1]) != 2)) AND
-						($data_array[$x][1] != '%all%') AND	($data_array[$x][1] != 'all')){
-						
-						$andq = " AND ".$data_array[$x][2].$data_array[$x][0].$data_array[$x][3];
-						if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][0].$data_array[$x][3].$data_array[$x][0];
-						}
-					}ELSE{
-						$andq = '';
-					}*/
-
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-		$RAW_QUERY = $RAW_QUERY." GROUP BY d.pk, d.idcollection, d.idsample, d.fieldnum, d.museumnum, d.museumlocation, d.boxnumber, d.sampledescription, d.weight, d.quantity, d.size, d.dimentioncode, 
-		d.quality, d.slimplate, d.chemicalanalysis, d.holotype, d.paratype, d.radioactivity, d.loaninformation, d.securitylevel, d.varioussampleinfo";
-		
-		$orderfield = $elem["sortDirection"]; 
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY = str_replace("WHERE AND", "WHERE", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE ORDER", " ORDER", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE GROUP", "GROUP", $RAW_QUERY);
-
-		echo "<script type='text/javascript'>alert('".$RAW_QUERY."');</script>";
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-        $statement->execute();
-        $Arrayresult = $statement->fetchAll();
-		//return new Response('<html><body>'.print_r($Arrayresult).'</body></html>' );
-		
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-	/*	$pagination->setParam('sort','type');
-		$pagination->setParam('direction', 'desc');
-
-		$sortParams = array("sort"=>"fieldnum", "direction"=>"asc");
-		$v = $sortParams['sort'];
-		echo "<script type='text/javascript'>alert('$v');</script>";
-		if(!$request->query->get('sort') && !$request->query->get('direction')) {
-			$pagination->setParam('sort', $sortParams['sort']);
-			$pagination->setParam('direction', $sortParams['direction']);
-		}*/
-
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-		//$queryvals = $queryvals.",NbrResByPage:".$elem["NbrResByPage"];
-
-		return $this->render('@App/results_searchsample.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  
-	}
-	
-	public function results_searchmineralAction($queryvals,Request $request){
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-		
-		$data_array = array(			
-			array(":idmineral",		$elem["idmineral"],							"idmineral = ",																	"",1),
-			array(":classmineral",	"'%".strtolower($elem["classmineral"])."%'",	"(rank = 'class' AND  fmname LIKE ",											") OR LOWER(fmparent) LIKE ",1),
-			array(":groupmineral",	"'%".strtolower($elem["groupmineral"])."%'",	"(rank = 'group' AND  fmname LIKE ",											") OR LOWER(fmparent) LIKE ",1),
-			array(":mineral",		"'%".strtolower($elem["mineral"])."%'",		"LOWER(fmname) LIKE ",															" OR LOWER(mname) LIKE ",1),
-			array(":formulamineral","'%".strtolower($elem["formulamineral"])."%'","LOWER(mformula) LIKE ",														"",1),
-			array(":parentmineral",	"'%".strtolower($elem["parentmineral"])."%'","LOWER(mparent) LIKE ",															" OR LOWER(fmparent) LIKE ",1)
-		);
-		
-		$RAW_QUERY = "SELECT pk,
-							idmineral,
-							rank,
-							mname, 
-							fmname,
-							mformula, 
-							fmparent, 
-							mparent						
-						FROM lminerals";
-	   
-		$RAW_QUERY = $RAW_QUERY." WHERE";
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-		
-		$orderfield = $elem["sortDirection"]; 
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY = str_replace("WHERE AND", "WHERE", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE ORDER", "ORDER", $RAW_QUERY);
-		
-		echo "<script type='text/javascript'>alert('$RAW_QUERY');</script>";
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		
-        $statement->execute();
-        $Arrayresult = $statement->fetchAll();
-		
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-		
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-		
-		return $this->render('@App/results_searchmineral.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  
-	}
-	
-	public function results_searchcontributionAction($queryvals,Request $request){
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-		
-		$data_array = array(			
-			array(":idcontribution",	$elem["idcontribution"],				"c.idcontribution = ",		"",1),
-			array(":type",				"'%".strtolower($elem["type"])."%'",		"LOWER(datetype) LIKE ",	"",1),
-			array(":year",				$elem["year"],							"year = ",					"",1),
-			array(":date_from",			date('m-d-Y', strtotime($elem["date_from"])),"date >= ",					"",2),
-			array(":date_to",			date('m-d-Y', strtotime($elem["date_to"])),	"date <= ",					"",2),
-			array(":idcontributor",		$elem["idcontributor"],					"o.idcontributor = ",		"",1),
-			array(":people",			"'%".strtolower($elem["people"])."%'",	"LOWER(people) LIKE ",		"",1),
-			array(":function",			"'%".strtolower($elem["function"])."%'",	"LOWER(peoplefonction) LIKE ",		"",1),
-			array(":title",				"'%".strtolower($elem["title"])."%'",		"LOWER(peopletitre) LIKE ",		"",1),
-			array(":status",			"'%".strtolower($elem["status"])."%'",	"LOWER(peoplestatut) LIKE ",		"",1),
-			array(":institute",			"'%".strtolower($elem["institute"])."%'",	"LOWER(institut) LIKE ",		"",1),
-			array(":role",				"'%".strtolower($elem["role"])."%'",		"LOWER(contributorrole) LIKE ",		"",1),
-			array(":order",				$elem["order"],							"contributororder = ",					"",1)
-		);
-				
-		$RAW_QUERY = "SELECT c.pk as pkcontribution,
-							c.idcontribution,
-							datetype,
-							year, 
-							date,			
-							o.pk as pkcontributor,
-							o.idcontributor,
-							people,
-							peoplefonction,
-							peopletitre,
-							peoplestatut,
-							institut,
-							contributorrole,
-							contributororder
-						FROM dcontribution c
-						LEFT JOIN dlinkcontribute l ON l.idcontribution = c.idcontribution
-						LEFT JOIN dcontributor o ON l.idcontributor = o.idcontributor";
-	   
-		$RAW_QUERY = $RAW_QUERY." WHERE";
-		/*for ($x = 0; $x < sizeof($data_array); $x++) {
-			if (((substr($data_array[$x][1],-1) != "%" AND strlen($data_array[$x][1]) != 0) OR 
-				(substr($data_array[$x][1],-1) == "%" AND strlen($data_array[$x][1]) != 2)) AND
-				($data_array[$x][1] != '%all%') AND	($data_array[$x][1] != 'all') AND ($data_array[$x][1] != '01-01-1970')){
-			
-				$andq = " AND ".$data_array[$x][2].$data_array[$x][0].$data_array[$x][3];
-		   
-				if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][0].$data_array[$x][3].$data_array[$x][0];
-				}
-			}ELSE{
-				$andq = '';
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} */
-
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-	
-		$orderfield = $elem["sortDirection"]; 
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY = str_replace("WHERE AND", "WHERE", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE ORDER", "ORDER", $RAW_QUERY);
-		//print_r($RAW_QUERY);
-		//echo "<script type='text/javascript'>alert('$RAW_QUERY');</script>";
-		//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		
-        $statement->execute();
-        $Arrayresult = $statement->fetchAll();
-	//	return new Response('<html><body>'.print_r($Arrayresult).'</body></html>' );
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-		
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-		
-		return $this->render('@App/results_searchcontribution.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  
-	}
-		
-	public function results_searchpointsAction($queryvals,Request $request){
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-
-		$data_array = array(		
-			array(":collection",			"'%".strtolower($elem["collection"])."%'",			"LOWER(dlc.idcollection) LIKE ",	"",	0),	
-			array(":searchnum",				$elem["searchnum"],									"idpt = ",							"",	0),		
-			array(":altitude_from",			$elem["altitude_from"],								"altitude >= ",						"",	2),
-			array(":altitude_to",			$elem["altitude_to"],								"altitude <= ",						"",	2),			
-			array(":date_from",				date('m-d-Y', strtotime($elem["date_from"])),		"date >= ",							"",	2),
-			array(":date_to",				date('m-d-Y', strtotime($elem["date_to"])),			"date <= ",							"",	2),
-			array(":fieldnum",				"'%".strtolower($elem["fieldnum"])."%'",			"LOWER(fieldnum) LIKE ",			"",	1),
-			array(":place",					"'%".strtolower($elem["place"])."%'",				"LOWER(place) LIKE ",				"",	1),
-			array(":country",				"'%".strtolower($elem["country"])."%'",				"LOWER(country) LIKE ",				"",	1),
-			array(":geodescription",		"'%".strtolower($elem["geodescription"])."%'",		"LOWER(geodescription) LIKE ",		"",	1),
-			array(":positiondescription",	"'%".strtolower($elem["positiondescription"])."%'",	"LOWER(positiondescription) LIKE ",	"",	1),
-			array(":variousinfo",			"'%".strtolower($elem["variousinfo"])."%'",			"LOWER(variousinfo) LIKE ",			"",	1) //,
-			//array(":docref",				"'%".strtolower($elem["docref"])."%'",				"LOWER(docref) LIKE ",				"",	1)
-		);
-				
-		$RAW_QUERY = "SELECT 	dlc.pk as pkloccenter,
-								idcollection,
-								coord_lat, 
-								coord_long,
-								idpt,  
-								altitude, 
-								date, 
-								fieldnum, 
-								place, 
-								country,
-								geodescription, 
-								positiondescription, 
-								variousinfo, 
-								docref, 
-								idprecision
-						FROM dloccenter dlc";
-						
-		if ($elem["wkt"] == "n"){
-		   $initialWhere = " WHERE ";  
-		}else{
-		   $initialWhere = " WHERE ST_Intersects(ST_MakePoint(dlc.coord_long, dlc.coord_lat)::geometry,'".$elem["wkt"]."'::geometry)";
-		}
-		$RAW_QUERY = $RAW_QUERY.$initialWhere;
-	
-
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-		
-		$orderfield = $elem["sortDirection"]; 
-
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY= preg_replace ( '/WHERE\s+AND/i', 'WHERE' , $RAW_QUERY );
-		$RAW_QUERY= preg_replace ( '/WHERE\s+ORDER/i', 'ORDER' , $RAW_QUERY );
-		//echo "<script type='text/javascript'>alert('$RAW_QUERY');</script>";
-		//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		
-        $statement->execute();
-        $Arrayresult = $statement->fetchAll();
-
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-		
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-
-		return $this->render('@App/results_searchpoint.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  		
-	}
-	
-	public function results_searchdocsAction($queryvals,Request $request){
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-		
-		$data_array = array(		
-			array(":iddoccollection",	"'%".strtolower($elem["iddoccollection"])."%'",		"LOWER(idcollection) LIKE ",		"",	0),	
-			array(":iddoc",				$elem["iddoc"],										"iddoc = ",							"",	0),		
-			array(":numarchive",		"'%".strtolower($elem["numarchive"])."%'",			"LOWER(numarchive) LIKE ",			"",	1),
-			array(":caption",			"'%".strtolower($elem["caption"])."%'",				"LOWER(caption) LIKE ",				"",	1),	
-			array(":centralnum",		"'%".strtolower($elem["centralnum"])."%'",			"LOWER(centralnum) LIKE ",			"",	1),
-			array(":medium",			"'%".strtolower($elem["medium"])."%'",				"LOWER(medium) LIKE ",				"",	1),
-			array(":doclocation",		"'%".strtolower($elem["doclocation"])."%'",			"LOWER(location) LIKE ",			"",	1),
-			array(":numericallocation",	"'%".strtolower($elem["numericallocation"])."%'",	"LOWER(numericallocation) LIKE ",	"",	1),
-			array(":filename",			"'%".strtolower($elem["filename"])."%'",			"LOWER(filename) LIKE ",			"",	1),
-			array(":docinfo",			"'%".strtolower($elem["docinfo"])."%'",				"LOWER(docinfo) LIKE ",				"",	1),
-			array(":edition",			"'%".strtolower($elem["edition"])."%'",				"LOWER(edition) LIKE ",				"",	1),
-			array(":pubplace",			"'%".strtolower($elem["pubplace"])."%'",			"LOWER(pubplace) LIKE ",			"",	1),
-			array(":doccartotype",		"'%".strtolower($elem["doccartotype"])."%'",		"LOWER(doccartotype) LIKE ",		"",	1)
-		);
-				
-		$RAW_QUERY = "SELECT 	pk,
-								idcollection,
-								iddoc, 
-								numarchive,
-								caption,  
-								centralnum, 
-								medium, 
-								location, 
-								numericallocation, 
-								filename,
-								docinfo, 
-								edition, 
-								pubplace, 
-								doccartotype
-						FROM ddocument";
-						
-		$RAW_QUERY = $RAW_QUERY." WHERE ";
-
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-		
-		$orderfield = $elem["sortDirection"]; 
-
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY= preg_replace ( '/WHERE\s+AND/i', 'WHERE' , $RAW_QUERY );
-		$RAW_QUERY= preg_replace ( '/WHERE\s+ORDER/i', 'ORDER' , $RAW_QUERY );
-		echo "<script type='text/javascript'>alert('$RAW_QUERY');</script>";
-		//return new Response('<html><body>'.print_r($RAW_QUERY).'</body></html>' );
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		
-        $statement->execute();
-        $Arrayresult = $statement->fetchAll();
-
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-		
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-
-		return $this->render('@App/results_searchdocument.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  		
-	}
-	
-	public function results_searchallAction($queryvals,Request $request){
-		$arrayqueryvals =  explode(",,", $queryvals); 
-		$elem =array();
-		foreach($arrayqueryvals as $e) {
-            $elem1 = explode(":", $e);
-			$elem[$elem1[0]]=$elem1[1];
-        } 
-
-		$querymagnet = "";
-								
-		switch($elem["lithomagnet"]) {
-			 case -3:
-				$querymagnet = "sms.mesure1 < -10";
-				break;
-			 case -2:
-				$querymagnet = "sms.mesure1 < -5.001 AND sms.mesure1 > -10";
-				break;
-			 case -1:
-				$querymagnet = "sms.mesure1 < -0.001 AND sms.mesure1 > -5";
-				break;
-			case 1:
-				$querymagnet = "sms.mesure1 > 0 AND sms.mesure1 < 50";
-				break;
-			case 2:
-				$querymagnet = "sms.mesure1 > 50.001 AND sms.mesure1 < 100";
-				break;
-			case 3:
-				$querymagnet = "sms.mesure1 > 100.001 AND sms.mesure1 < 250";
-				break;
-			case 4:
-				$querymagnet = "sms.mesure1 > 250";
-				break;
-		} 
-//inp_searchcoll -- inp_searchsamplecoll   et inp_searchcode  inp_searchfieldnum
-		$data_array = array(
-			array(":samplecollection",	"'%".strtolower($elem["samplecollection"])."%'","LOWER(ds.idcollection) LIKE ",									"",									0),
-			array(":searchnum_sample",	$elem["searchnum_sample"],						"ds.idsample = ",												"",									0),
-			array(":fieldnum_sample",	"'%".strtolower($elem["fieldnum_sample"])."%'",	"LOWER(ds.fieldnum) LIKE ",										"",									0),
-			array(":museumnr",			$elem["museumnr"],								"ds.museumnum = ",												"",									0),
-			array(":museumloc",			"'%".strtolower($elem["museumloc"])."%'",		"LOWER(ds.museumlocation) LIKE ",								"",									0),
-			array(":boxnbr",			"'%".strtolower($elem["boxnbr"])."%'",			"LOWER(ds.boxnumber) LIKE ",									"",									0),
-			array(":descr",				"'%".strtolower($elem["descr"])."%'",			"LOWER(ds.sampledescription) LIKE ",							"",									0),
-			array(":weight",			$elem["weight"],								"ds.weight = ",													"",									0),
-			array(":size",				"'%".strtolower($elem["size"])."%'",			"LOWER(ds.size) LIKE ",											"",									0),
-			array(":dimension",			$elem["dimension"],								"ds.dimentioncode = ",											"",									0),
-			array(":quality",			$elem["quality"],								"ds.quality =  ",												"",									0),
-			array(":radioactivity",		$elem["radioactivity"],							"ds.radioactivity = ",											"1",								0),
-			array(":slimplate",			$elem["slimplate"],								"ds.slimplate = ",												"TRUE",								0),
-			array(":chemanalysis",		$elem["chemanalysis"],							"ds.chemicalanalysis = ",										"TRUE",								0),
-			array(":holotype",			$elem["holotype"],								"ds.holotype = ",												"TRUE",								0),
-			array(":paratype",			$elem["paratype"],								"ds.paratype = ",												"TRUE",								0),
-			array(":loaninfo",			"'%".strtolower($elem["loaninfo"])."%'",		"LOWER(ds.loaninformation) LIKE ",								"",									0),
-			array(":securitylevel",		$elem["securitylevel"],							"ds.securitylevel = ",											"",									0),
-			array(":variousinfo",		strtolower($elem["variousinfo"]),				"LOWER(ds.varioussampleinfo) LIKE ",							"",									0),
-			
-			array(":idmineral",			$elem["idmineral"],								"dsm.idmineral = ",												"",									1),
-			array(":grademineral",		$elem["grademineral"],							"dsm.grade = ",													"",									1),
-			
-
-
-			array(":classmineral",		"'%".strtolower($elem["classmineral"])."%'",	"(lm.rank = 'class' AND  lm.fmname LIKE ",						") OR LOWER(lm.fmparent) LIKE ",	1),
-			array(":groupmineral",		"'%".strtolower($elem["groupmineral"])."%'",	"(lm.rank = 'group' AND  lm.fmname LIKE ",						") OR LOWER(lm.fmparent) LIKE ",	1),
-			array(":mineral",			"'%".strtolower($elem["mineral"])."%'",			"LOWER(lm.fmname) LIKE ",										" OR LOWER(lm.mname) LIKE ",		1),
-
-			array(":formulamineral",	"'%".strtolower($elem["formulamineral"])."%'",	"LOWER(lm.mformula) LIKE ",										"",									1),
-			
-			array(":lithomineral",		"'%".strtolower($elem["lithomineral"])."%'",	"LOWER(shm2.mineral) LIKE ",									"",									2),
-			array(":lithominnum_from",	$elem["lithominnum_from"],						"shm2.minnum >= ",												"",									2),
-			array(":lithominnum_to",	$elem["lithominnum_to"],						"shm2.minnum <= ",												"",									2),
-			array(":lithoweight_from",	$elem["lithoweight_from"],						"shm1.weightsample >= ",										"",									2),
-			array(":lithoweight_to",	$elem["lithoweight_to"],						"shm1.weightsample <= ",										"",									2),
-			array(":lithoobserv",		"'%".strtolower($elem["lithoobserv"])."%'",		"LOWER(shm2.observationhm) LIKE ",								"",									2),
-			
-			array(":lithogranulo",		$elem["lithogranulo"],							"sg.weighttot != ",												"0",								3),
-			array(":lithomagnet",		$elem["lithomagnet"],							$querymagnet,													";",								3),
-			//contributions
-			array(":idcontribution",	$elem["idcontribution"],						"dc.idcontribution = ",											"",									1),
-			array(":type",				"'%".strtolower($elem["type"])."%'",			"LOWER(dc.datetype) LIKE ",										"",									1),
-			array(":year",				$elem["year"],									"dc.year = ",													"",									1),
-			array(":date_from",			date('m-d-Y', strtotime($elem["date_from"])),	"dc.date >= ",													"",									2),
-			array(":date_to",			date('m-d-Y', strtotime($elem["date_to"])),		"dc.date <= ",													"",									2),
-			array(":idcontributor",		$elem["idcontributor"],							"dcr.idcontributor = ",											"",									1),
-			array(":people",			"'%".strtolower($elem["people"])."%'",			"LOWER(dcr.people) LIKE ",										"",									1),
-			array(":function",			"'%".strtolower($elem["function"])."%'",		"LOWER(dcr.peoplefonction) LIKE ",								"",									1),
-			array(":title",				"'%".strtolower($elem["title"])."%'",			"LOWER(dcr.peopletitre) LIKE ",									"",									1),
-			array(":status",			"'%".strtolower($elem["status"])."%'",			"LOWER(dcr.peoplestatut) LIKE ",								"",									1),
-			array(":institute",			"'%".strtolower($elem["institute"])."%'",		"LOWER(dcr.institut) LIKE ",									"",									1),
-			array(":role",				"'%".strtolower($elem["role"])."%'",			"LOWER(contributorrole) LIKE ",									"",									1),
-			array(":order",				$elem["order"],									"contributororder = ",											"",									1),
-	
-			array(":loccollection",		"'%".strtolower($elem["loccollection"])."%'",	"LOWER(dlocc.idcollection) LIKE ",								"",									0),			
-			array(":searchidpoint",		$elem["searchidpoint"],							"dlocc.idpt = ",												"",									0),					
-			array(":date_from",			date('m-d-Y', strtotime($elem["date_from"])),	"dlocc.date >= ",												"",									2),
-			array(":date_to",			date('m-d-Y', strtotime($elem["date_to"])),		"dlocc.date <= ",												"",									2),
-			array(":fieldnum",			"'%".strtolower($elem["fieldnum"])."%'",		"LOWER(dlocc.fieldnum) LIKE ",									"",									1),
-			array(":place",				"'%".strtolower($elem["place"])."%'",			"LOWER(dlocc.place) LIKE ",										"",									1),
-			array(":geodescription",	"'%".strtolower($elem["geodescription"])."%'",	"LOWER(dlocc.geodescription) LIKE ",							"",									1),
-			array(":positiondescription","'%".strtolower($elem["positiondescription"])."%'","LOWER(dlocc.positiondescription) LIKE ",					"",									1),
-			array(":docref",			"'%".strtolower($elem["docref"])."%'",			"LOWER(dlocc.docref) LIKE ",									"",									1)
-		);
-		
-		$RAW_QUERY = "  SELECT  
-    string_agg(distinct dcr.people,',') as people, 
-    string_agg(distinct dcr.institut,',') as institut, 
-    dc.idcontribution,
-	dc.pk AS pk_contribution,
-    dc.datetype,
-    dc.date AS contribution_date,
-    ds.pk AS pk_sample,
-    ds.idsample,
-    ds.fieldnum,
-    ds.museumnum,
-    ds.museumlocation,
-    ds.boxnumber,
-    ds.sampledescription,
-    ds.weight,
-    ds.quantity,
-    ds.size,
-    ds.dimentioncode,
-    ds.quality::integer AS quality,
-    ds.slimplate,
-    ds.chemicalanalysis,
-        CASE
-            WHEN ds.holotype = true THEN 'H'::text
-            ELSE ''::text
-        END ||
-        CASE
-            WHEN ds.paratype = true THEN 'P'::text
-            ELSE ''::text
-        END AS type,
-    ds.holotype,
-    ds.paratype,
-    ds.radioactivity,
-    ds.loaninformation,
-    ds.securitylevel,
-    ds.varioussampleinfo,
-    string_agg(distinct lm.mname,',') as mname, 
-    string_agg(distinct lm.mformula,' -- ') as mformula, 
-    lm.fmname,
-	dlocc.idpt,
-	dlocc.pk AS pk_point,
-    dlocc.coord_lat,
-    dlocc.coord_long,
-    dlocc.date AS loc_date,
-    dlocc.place,
-    dlocc.geodescription,
-    dlocc.positiondescription,
-    dlocsd.descript,
-    dlocsd.idstratum,
-    dlocl.descriptionstratum,
-    dlocl.bottomstratum,
-    dlocl.topstratum,
-    dlocl.lithostratum,
-    string_agg(distinct ddocut.title,',') as title, 
-    ddocu.iddoc,
-	ddocu.pk AS pk_doc,
-    ddocu.medium,
-    ddocu.docinfo,
-    ddocu.doccartotype,
-	s.token
-   FROM dcontribution dc
-     full outer JOIN dlinkcontribute dlc ON dc.idcontribution = dlc.idcontribution
-     full outer JOIN dcontributor dcr ON dcr.idcontributor = dlc.idcontributor
-     full outer JOIN dlinkcontsam dlcs ON dc.idcontribution = dlcs.idcontribution
-     full outer JOIN dsample ds ON ds.idcollection::text = dlcs.idcollection::text AND ds.idsample = dlcs.id
-     full outer JOIN dsamminerals dsm ON dsm.idcollection::text = ds.idcollection::text AND dsm.idsample = ds.idsample
-     full outer JOIN lminerals lm ON dsm.idmineral = lm.idmineral
-     full outer JOIN dsamheavymin shm1 ON shm1.idcollection::text = ds.idcollection::text AND shm1.idsample = ds.idsample
-     full outer JOIN dsamheavymin2 shm2 ON shm2.idcollection::text = ds.idcollection::text AND shm2.idsample = ds.idsample
-     full outer JOIN dsamgranulo sg ON sg.idcollection::text = ds.idcollection::text AND sg.idsample = ds.idsample
-     full outer JOIN dsammagsusc sms ON sms.idcollection::text = ds.idcollection::text AND sms.idsample = ds.idsample
-     full outer JOIN dlinkcontloc dlcloc ON dlcloc.idcontribution = dc.idcontribution
-     full outer JOIN dloccenter dlocc ON dlcloc.idcollection::text = dlocc.idcollection::text AND dlcloc.id = dlocc.idpt
-     full outer JOIN dloclitho dlocl ON dlocl.idcollection::text = dlocc.idcollection::text AND dlocl.idpt = dlocc.idpt
-     full outer JOIN dlinklocsam dllocs ON dlocl.idcollection::text = dllocs.idcollectionloc::text AND dlocl.idpt = dllocs.idpt AND dlocl.idstratum = dllocs.idstratum AND ds.idcollection::text = dllocs.idcollecsample::text AND ds.idsample = dllocs.idsample
-     full outer JOIN dlocstatumdesc dlocsd ON dlocl.idcollection::text = dlocsd.idcollection::text AND dlocl.idpt = dlocsd.idpt AND dlocl.idstratum = dlocsd.idstratum
-     full outer JOIN dlinkcontdoc dlcd ON dc.idcontribution = dlcd.idcontribution
-     full outer JOIN ddocument ddocu ON dlcd.idcollection::text = ddocu.idcollection::text AND dlcd.id = ddocu.iddoc
-     full outer JOIN ddoctitle ddocut ON ddocu.idcollection::text = ddocut.idcollection::text AND ddocu.iddoc = ddocut.iddoc
-     full outer JOIN dlinkdocloc dldocloc ON dldocloc.idcollecdoc::text = ddocu.idcollection::text AND dldocloc.iddoc = ddocu.iddoc AND dldocloc.idcollecloc::text = dlocc.idcollection::text AND dldocloc.idpt = dlocc.idpt
-     full outer JOIN dlinkdocsam dldocs ON dldocs.idcollectiondoc::text = ddocu.idcollection::text AND dldocs.iddoc = ddocu.iddoc AND dldocs.idcollectionsample::text = ds.idcollection::text AND dldocs.idsample = ds.idsample, 
-	 unnest(string_to_array(concat(ddocu.idcollection, ' ', dlcloc.idcollection, ' ', ds.idcollection), ' ')) s(token)";
-	
-	   if ($elem["wkt"] == "n"){
-		   $initialWhere = " WHERE s.token <> ''"; // AND (ST_Intersects(ST_MakePoint(dlocc.coord_long, dlocc.coord_lat)::geometry,ST_MakePolygon( ST_GeomFromText('LINESTRING(-180 90,180 90,180 -90,-180 -90,-180 90)'))::geometry) OR coord_lat is null)";  
-	   }else{
-		   $initialWhere = " WHERE s.token <> '' AND ST_Intersects(ST_MakePoint(dlocc.coord_long, dlocc.coord_lat)::geometry,'".$elem["wkt"]."'::geometry)";
-	   }
-		$RAW_QUERY = $RAW_QUERY.$initialWhere;
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if($data_array[$x][3] == "1" OR $data_array[$x][3] == "TRUE" OR $data_array[$x][3] == "0"){  //Case  of checkboxes with value 1 if chosen --> add only =TRUE
-				if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] == "1"){
-					$andq = " AND ".$data_array[$x][2].$data_array[$x][3];
-				}ELSE{
-					$andq = '';
-				}
-			}ELSE{ 
-				if($data_array[$x][3] == ";"){  //Case  of combobox with ranges of values --> add only part 1
-					if (strlen($data_array[$x][1]) != 0 AND $data_array[$x][1] != 'all'){
-						$andq = " AND ".$data_array[$x][2];
-					}ELSE{
-						$andq = '';
-					}
-				}ELSE{ 
-					//Case  of integers or strings
-					if (
-						(
-						  (substr($data_array[$x][1],-2) != "%'" AND strlen($data_array[$x][1]) != 0) OR 
-						  (substr($data_array[$x][1],-2) == "%'" AND strlen($data_array[$x][1]) != 4)
-						) AND
-						($data_array[$x][1] != "'%all%'") AND	
-						($data_array[$x][1] != 'all') AND 
-						($data_array[$x][1] != '01-01-1970')
-					   ){
-							$andq = " AND ".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3];
-
-							if (strpos($data_array[$x][3],"OR") == 1 | strpos($data_array[$x][3],"OR") == 2){
-								$andq = " AND (".$data_array[$x][2].$data_array[$x][1].$data_array[$x][3].$data_array[$x][1].")";
-							}
-					}ELSE{
-						$andq = '';
-					}
-				}
-			}
-			$RAW_QUERY = $RAW_QUERY.$andq;
-		} 
-		
-		$RAW_QUERY = $RAW_QUERY." GROUP BY dc.idcontribution, dc.datetype, contribution_date, dc.pk, ds.pk, ddocu.pk,dlocc.pk, ds.idsample, ds.fieldnum, ds.museumnum, ds.museumlocation, ds.boxnumber, ds.sampledescription, ds.weight, ds.quantity, ds.size, ds.dimentioncode, quality, ds.slimplate, ds.chemicalanalysis, type, ds.holotype, ds.paratype, ds.radioactivity, ds.loaninformation, ds.securitylevel, ds.varioussampleinfo, lm.fmname, dlocc.coord_lat, dlocc.coord_long, loc_date, dlocc.place, dlocc.geodescription, dlocc.positiondescription, dlocsd.descript,  dlocsd.idpt, dlocsd.idstratum, dlocl.descriptionstratum, dlocl.bottomstratum, dlocl.topstratum, dlocl.lithostratum, ddocu.iddoc, ddocu.medium, ddocu.docinfo, ddocu.doccartotype,s.token";
-		echo "<script type='text/javascript'>alert('$RAW_QUERY');</script>";
-		$orderfield = $elem["sortDirection"]; 
-		$RAW_QUERY = $RAW_QUERY." ORDER BY ".$orderfield;    
-		$RAW_QUERY = str_replace("WHERE AND", "WHERE", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE ORDER", " ORDER", $RAW_QUERY);
-		$RAW_QUERY = str_replace("WHERE GROUP", "GROUP", $RAW_QUERY);
-
-		$em = $this->getDoctrine()->getManager();
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		
-		for ($x = 0; $x < sizeof($data_array); $x++) {
-			if(strpos($RAW_QUERY, $data_array[$x][0]) !== false){
-				$statement->bindValue($data_array[$x][0], $data_array[$x][1]);
-			}
-		}
-		//print_r($RAW_QUERY);
-        $statement->execute(); 
-		$Arrayresult = $statement->fetchAll();
-		
-		//paginator++++++++++++++++++++++++++++++++++
-		$paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $Arrayresult,
-            $request->query->getInt('page', 1), 	/*current page number*/ 
-			$elem["NbrResByPage"] 					/*images per page*/
-        );
-
-		$queryvals = $queryvals.",,nbrres:".sizeof($Arrayresult);
-		//$request->getSession()->getFlashBag('parameters')->add('P', $queryvals);
-	/*	$session = $this->get('session');
-		$session->set('p', array(
-			'queryvals' => $queryvals,
-		));*/
-		return $this->render('@App/results_searchall.html.twig', array('queryvals' => $queryvals,'results' => $pagination));  		
-	}
-	
-	public function adminAction(Request $request){
-		return $this->render('@App/admin.html.twig');
-    }
-    
-    //
-    
-    public function searchallbsAction(Request $request){
-    
-        $form=$this->createForm(SearchAllForm::class, null);
-		return $this->render('@App/searchallbs.html.twig',array('form' => $form->createView()));  
-	}
-    
-    public function all_object_categoriesAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		
-	   $RAW_QUERY = "select distinct main_type from mv_rmca_main_objects_description order by main_type;"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-
-        $codes = $statement->fetchAll();
-        
-        return new JsonResponse($codes);
-    }
-	
-	public function all_collectionsAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		
-	   $RAW_QUERY = "select distinct idcollection from mv_rmca_merge_all_objects_vertical_expand order by idcollection;"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-
-        $codes = $statement->fetchAll();
-        
-        return new JsonResponse($codes);
-    }
-	
-	public function refresh_viewsAction(Request $request){
-		$em = $this->getDoctrine()->getManager();
-		
-	   $RAW_QUERY = "select rmca_refresh_materialized_view_auto as init_portal FROM rmca_refresh_materialized_view_auto();"; 
-		
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        $statement->execute();
-
-        $codes = $statement->fetchAll();
-        
-        return new JsonResponse($codes);
-    }
-	
-	protected function gen_pdo_name($idx)
-	{
-		return ":pgeol".(string)$idx;
-	}
-	
-    protected function init_map_json($results)
-    {
-			$returned=Array();
-			$returned["type"]="FeatureCollection";
-			$returned["crs"]["type"]="name";
-			$returned["crs"]["properties"]["name"]=["EPSG:4326"];
-			
-			$points=Array();
-			foreach($results as $row)
-			{
-				
-				if(is_numeric($row["coord_long"])&&is_numeric($row["coord_lat"]))
-				{
-					$has_coordinates=true;
-					$obj=Array();
-					$obj["type"]="Feature";
-					$obj["geometry"]["type"]="Point";
-					$obj["geometry"]["coordinates"]=[(float)$row["coord_long"], (float)$row["coord_lat"]];
-					$obj["properties"]["dw_type"]=$row["main_type"];
-					$obj["properties"]["dw_idobject"]=$row["idobject"];
-					$obj["properties"]["dw_idcollection"]=$row["idcollection"];
-					$obj["properties"]["dw_pk"]=$row["pk"];
-					
-					$points[]=$obj;
-				}		
-			}
-			$returned["features"]=$points;
-			return $returned;
-		}
-    
-    public function main_searchAction(Request $request)
-    {
-	
-		$order=$request->get("order","idcollection, idobject");
-
-		$order_dir=$request->get("order_dir","ASC");
-
-		$doc_type=$request->get("doc_type");
-		
-		$current_page=$request->get("current_page",1);
-        $page_size=$request->get("page_size",$this->page_size);
-		$offset=(((int)$current_page)-1)* (int)$page_size;
-		
-		$contributor=$request->get("contributor");
-		$results=Array();
-		$pagination=Array();
-		$order_inj=Array("idcollection, idobject", "iddoc", "idobject", "idcollection" , "col_1_value","col_2_value", "col_3_value","col_4_value" );
-		
-		if(!in_array($order, $order_inj))
-		{
-			$order=$order_inj[0];
-		}
-		if(($order_dir=="ASC"||$order_dir=="DESC")&& in_array($order, $order_inj))
-		{
-			
-			$params_sql=Array();
-			$params_sql_or=Array();
-			$params_sql_or_group=Array();
-			$params_pdo=Array();
-			$idx_param=1;
-			
-			$display_csv=false;
-			if(strtolower($request->get("csv","false"))=="true")
-			{
-				$display_csv=true;
-			}
-			
-			if($request->request->has("doc_type"))
-			{
-				
-				$types=$request->get("doc_type");
-				$params_sql_or=Array();
-				foreach($types as $type)
-				{
-					$params_sql_or[]="main_type= ".$this->gen_pdo_name($idx_param);
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$type;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-					$idx_param++;
-				}
-				$params_sql_or_group["main_type"]=$params_sql_or;
-				
-			}
-			
-			if($request->request->has("collections"))
-			{
-				$collections=$request->get("collections");
-				$params_sql_or=Array();
-				foreach($collections as $collection)
-				{
-					$params_sql_or[]="idcollection= ".$this->gen_pdo_name($idx_param);
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$collection;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-					$idx_param++;
-				}
-				$params_sql_or_group["collections"]=$params_sql_or;
-				
-			}
-			
-			if($request->request->has("contributor"))
-			{
-				$contribs=$request->get("contributor");
-				$params_sql_or=Array();
-				foreach($contribs as $contrib)
-				{
-					
-					$params_sql_or[]="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE contr.idcontributor=".$this->gen_pdo_name($idx_param)." AND a.pk=contr.pk)                                                
-                    "
-                    ;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
-					$idx_param++;
-				}
-				$params_sql_or_group["contributor"]=$params_sql_or;
-				
-			}
-			
-			if($request->request->has("idobject"))
-			{
-				$idobjects=$request->get("idobject");
-				$params_sql_or=Array();
-				foreach($idobjects as $idobject)
-				{
-					
-					$params_sql_or[]="idobject= ".$this->gen_pdo_name($idx_param);                                          
-                   
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$idobject;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
-					$idx_param++;
-				}
-				$params_sql_or_group["idobject"]=$params_sql_or;
-				
-			}
-            
-            if($request->request->has("keywords"))
-			{
-				$keywords=$request->get("keywords");
-				$params_sql_or=Array();
-				foreach($keywords as $keyword)
-				{
-					$keyword=strtolower($keyword);
-					$params_sql_or[]="EXISTS (SELECT keyw.main_pk FROM tv_keyword_hierarchy_to_object keyw WHERE path_word  ~* ".$this->gen_pdo_name($idx_param."reg")." AND a.pk=keyw.main_pk)
-                     OR col_1_value ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
-                    OR col_2_value  ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
-                    OR col_3_value  ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
-                    OR col_4_value ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'    
-                    ";
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$keyword;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-                    $params_pdo[$this->gen_pdo_name($idx_param)."reg"]["value"]=".*/".$keyword."/.*";
-					$params_pdo[$this->gen_pdo_name($idx_param)."reg"]["type"]=\PDO::PARAM_STR;
-					$idx_param++;
-				}
-				$params_sql_or_group["keywords"]=$params_sql_or;
-				
-			}
-			
-			if($request->request->has("wkt_search"))
-			{
-				$params_sql_or=Array();
-				$wkt_search=$request->get("wkt_search");
-                if(strlen(trim($wkt_search)))
-                {
-                    $params_sql_or[]="ST_INTERSECTS(ST_SETSRID(ST_Point(coord_long, coord_lat),4326), ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326))";
-                    $params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$wkt_search;
-                    $params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-                   
-					$params_sql_or_group["wkt_search"]=$params_sql_or;
-                }			
-            }
-			
-			if($request->request->has("date_from"))
-			{
-				$params_sql_or=Array();
-				$date_from=$request->get("date_from","");
-                if(strlen(trim($date_from)))
-                {
-                   $date_type=$request->get("date_type","ALL");
-				  
-				   $year_from=substr($date_from, 0,4);
-				  
-				   $date_point="EXISTS(SELECT idpt FROM dloccenter loc WHERE date>=:datefrom AND loc.pk=b.fk_localitie)";
-				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year>=:year_from AND a.pk=contr.pk)";
-				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date>=:datefrom AND a.pk=contr.pk)";
-				   if($date_type=="ALL")
-				   {
-						$params_sql_or[]=$date_point;
-						$params_sql_or[]=$contribution_day;
-						$params_pdo[":datefrom"]["value"]=$date_from;
-						$params_pdo[":datefrom"]["type"]=\PDO::PARAM_STR;
-						$params_sql_or[]=$contribution_year;
-						$params_pdo[":year_from"]["value"]=$year_from;
-						$params_pdo[":year_from"]["type"]=\PDO::PARAM_STR;
-						
-				   }
-				   elseif($date_type=="contribution_year")
-				   {
-						$params_sql_or[]=$contribution_year;
-						$params_pdo[":year_from"]["value"]=$year_from;
-						$params_pdo[":year_from"]["type"]=\PDO::PARAM_STR;
-				   }
-				   elseif($date_type=="contribution_day")
-				   {	
-						$params_sql_or[]=$contribution_day;
-						$params_pdo[":datefrom"]["value"]=$date_from;
-						$params_pdo[":datefrom"]["type"]=\PDO::PARAM_STR;
-				   }
-				   elseif($date_type=="locality")
-				   {
-					   $params_sql_or[]=$date_point;
-					   $params_pdo[":datefrom"]["value"]=$date_from;
-					   $params_pdo[":datefrom"]["type"]=\PDO::PARAM_STR;
-					   
-				   }
-				   $params_sql_or_group["date_from"]=$params_sql_or;
-                }			
-            }
-			if($request->request->has("date_to"))
-			{
-				$params_sql_or=Array();
-				$date_to=$request->get("date_to","");
-                if(strlen(trim($date_to)))
-                {
-                   $date_type=$request->get("date_type","ALL");
-				  
-				   $year_to=substr($date_to, 0,4);
-				  
-				   $date_point="EXISTS(SELECT idpt FROM dloccenter loc WHERE date<=:dateto AND loc.pk=b.fk_localitie)";
-				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year<=:year_to AND a.pk=contr.pk)";
-				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date<=:dateto AND a.pk=contr.pk)";
-				   if($date_type=="ALL")
-				   {
-						$params_sql_or[]=$date_point;
-						$params_sql_or[]=$contribution_day;
-						$params_pdo[":dateto"]["value"]=$date_to;
-						$params_pdo[":dateto"]["type"]=\PDO::PARAM_STR;
-						$params_sql_or[]=$contribution_year;
-						$params_pdo[":year_to"]["value"]=$year_to;
-						$params_pdo[":year_to"]["type"]=\PDO::PARAM_STR;
-						
-				   }
-				   elseif($date_type=="contribution_year")
-				   {
-						$params_sql_or[]=$contribution_year;
-						$params_pdo[":year_to"]["value"]=$year_to;
-						$params_pdo[":year_to"]["type"]=\PDO::PARAM_STR;
-				   }
-				   elseif($date_type=="contribution_day")
-				   {	
-						$params_sql_or[]=$contribution_day;
-						$params_pdo[":dateto"]["value"]=$date_to;
-						$params_pdo[":dateto"]["type"]=\PDO::PARAM_STR;
-				   }
-				   elseif($date_type=="locality")
-				   {
-					   $params_sql_or[]=$date_point;
-					   $params_pdo[":dateto"]["value"]=$date_to;
-					   $params_pdo[":dateto"]["type"]=\PDO::PARAM_STR;
-					   
-				   }
-				   $params_sql_or_group["date_to"]=$params_sql_or;
-                }			
-            }
-			
-			$query_or_builder=Array();
-			
-			foreach($params_sql_or_group as $key=>$params_sql_or)
-			{
-				//print_r($params_sql_or);
-					$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
-			}
-			
-			if(count($params_sql)>0)
-			{
-				$query_where=" WHERE ".implode(" AND ", $params_sql );				
-			}
-			else
-			{
-				$query_where="";				
-			}
-			
-			$em = $this->container->get('doctrine')->getEntityManager();
-			
-								
-		    $RAW_QUERY='WITH main_q AS (SELECT DISTINCT a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, contributors, institutions, coord_long, coord_lat 
-			FROM public.mv_rmca_main_objects_description a
-			LEFT JOIN public.mv_rmca_merge_all_objects_vertical_expand b
-			ON a.pk=b.main_pk
-			LEFT JOIN mv_all_contributions_to_object_agg_merge c
-			ON a.pk=c.pk
-			'.$query_where.'
-			
-			)
-            SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY '.$order.' '.$order_dir;
-			if(!$display_csv)
-			{
-				$RAW_QUERY.=' OFFSET :offset LIMIT :limit';
-			}
-			$RAW_QUERY.=';';
-			$statement = $em->getConnection()->prepare($RAW_QUERY);
-			$order=3;
-			
-			foreach($params_pdo as $key=>$val)
-			{
-				$statement->bindParam($key, $val["value"],  $val["type"]); 
-			}
-			if(!$display_csv)
-			{
-				$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
-				$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
-			}
-			$statement->execute(); 
-			if(!$display_csv)
-			{
-				$results = $statement->fetchAll();
-				
-				
-				$geojson=null;
-				$geojson_tmp=$this->init_map_json($results);
-				if(count($geojson_tmp["features"])>0)
-				{
-					$geojson=json_encode($geojson_tmp);
-				}
-            }
-			else
-			{
-				$results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-			}
-			if(count($results)>0)
-			{
-				$headers1=Array();
-				$headers2=Array();
-				$headers3=Array();
-				$headers4=Array();
-				foreach($results as $row)
-				{
-					$headers1[$row["col_1_name"]]=$row["col_1_name"];
-					$headers2[$row["col_2_name"]]=$row["col_2_name"];
-					$headers3[$row["col_3_name"]]=$row["col_3_name"];
-					$headers4[$row["col_4_name"]]=$row["col_4_name"];
-				}
-				ksort($headers1);
-				ksort($headers2);
-				ksort($headers3);
-				ksort($headers4);
-				
-				$count_all=$results[0]["full_count"];
-				$pagination = array(
-				'page' => $current_page,
-				'route' => 'search_main',
-				'pages_count' => ceil($count_all / $page_size)
-				);
-				if(!$display_csv)
-				{
-					return $this->render('@App/search_results_bs.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all, "geojson"=>$geojson, "headers1"=>implode("\r\n", $headers1),"headers2"=>implode("\r\n", $headers2),"headers3"=>implode("\r\n", $headers3), "headers4"=>implode("\r\n", $headers4) ));
-				}
-				else
-				{
-					$returned=Array();
-					//print_r($results);
-					$returned_str="";
-					$new_str=Array();
-					$i=0;
-					$func=function($l)
-					{
-						
-						return str_replace("\n", " _NEWLINE_ ",str_replace("\r", " _NEWLINE_ ", $l));
-					};
-					foreach($results as $row)
-					{
-						if($i==0)
-						{
-							
-							$new_str[]=implode("\t",array_keys($row));
-						}
-						$row=array_map($func, $row);	
-						$new_str[]=implode("\t",$row);
-						$i++;
-						
-					}
-					$response = new Response(implode("\r\n", $new_str));
-					$response->headers->set('Content-Type', 'text/csv');       
-					$response->headers->set('Content-Disposition', 'attachment; filename="testing.csv"');
-					return $response;
-				}
-			}
-			else
-			{
-				return $this->render('@App/no_results_bs.html.twig');
-			}
-		}
-		else
-		{
-			return $this->render('@App/no_results_bs.html.twig');
-		}
-		
-    }
-	
-	public function contribution_searchAction(Request $request)
-	{
-		$current_page=$request->get("current_page",1);
-        $page_size=$request->get("page_size",$this->page_size);
-		$offset=(((int)$current_page)-1)* (int)$page_size;
-		
-		$namecontrib=$request->get("namecontrib");
-		$institute=$request->get("institute");
-		$results=Array();
-		$pagination=Array();
-		
-		$params_sql=Array();
-		$params_sql_or=Array();
-		$params_sql_or_group=Array();
-		$params_pdo=Array();
-		$idx_param=1;
-		
-		if($request->request->has("namecontrib"))
-		{
-			$contribs=$request->get("namecontrib");
-			$params_sql_or=Array();
-			foreach($contribs as $contrib)
-			{
-			
-				$params_sql_or[]="LOWER(people) LIKE LOWER(".$this->gen_pdo_name($idx_param).")||'%'";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["contributor"]=$params_sql_or;
-		}
-		if($request->request->has("institute"))
-		{
-			$institutes=$request->get("institute");
-			$params_sql_or=Array();
-			foreach($institutes as $institute)
-			{
-				$params_sql_or[]="LOWER(institut) = LOWER(".$this->gen_pdo_name($idx_param).")";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$institute;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["institute"]=$params_sql_or;
-		}
-		
-		if($request->request->has("rolecontrib"))
-		{
-			$roles=$request->get("rolecontrib");
-			
-			$params_sql_or=Array();
-			foreach($roles as $role)
-			{
-				$params_sql_or[]="LOWER(contributorrole) = LOWER(".$this->gen_pdo_name($idx_param).")";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$role;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["role"]=$params_sql_or;
-		}
-		
-		if($request->request->has("typecontrib"))
-		{
-			$types=$request->get("typecontrib");
-			
-			$params_sql_or=Array();
-			foreach($types as $type)
-			{
-				$params_sql_or[]="LOWER(datetype) = LOWER(".$this->gen_pdo_name($idx_param).")";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$type;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["typecontrib"]=$params_sql_or;
-		}
-		
-		if($request->request->has("contrib_year_from"))
-		{
-			$year_from=$request->get("contrib_year_from");
-			if(strlen($year_from)>0)
-			{
-				$params_sql_or=Array();
-				
-				$params_sql_or[]="year >= ".$this->gen_pdo_name($idx_param);
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$year_from;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
-				$idx_param++;
-				
-				$params_sql_or_group["year_from"]=$params_sql_or;
-			}
-		}
-		
-		if($request->request->has("contrib_year_to"))
-		{
-			$year_to=$request->get("contrib_year_to");
-			$year_from=$request->get("contrib_year_from");
-			if(strlen($year_to)>0)
-			{
-				$params_sql_or=Array();
-				
-				$params_sql_or[]="year <= ".$this->gen_pdo_name($idx_param);
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$year_to;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
-				$idx_param++;
-				
-				$params_sql_or_group["year_to"]=$params_sql_or;
-			}
-		}
-		
-		$query_or_builder=Array();
-			
-		foreach($params_sql_or_group as $key=>$params_sql_or)
-		{
-			$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
-		}
-		
-		if(count($params_sql)>0)
-		{
-			$query_where=" WHERE ".implode(" AND ", $params_sql );				
-		}
-		else
-		{
-			$query_where="";				
-		}
-		
-		$RAW_QUERY="
-			WITH main_q AS (SELECT dcontribution.pk, 
-				dcontribution.idcontribution ,
-				datetype, date, year
-			
-FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dlinkcontribute.idcontribution 
-				INNER JOIN dcontributor ON dlinkcontribute.idcontributor=dcontributor.idcontributor ".$query_where."  GROUP BY dcontribution.pk, dcontribution.idcontribution ,
-				datetype, date, year),
-		    desc_q AS
-			(SELECT dcontribution.pk ,	string_agg(
-					COALESCE(contributorrole||':','')||
-					COALESCE(' '||people||' '||institut,'')
-				,';' order by contributororder) as people_desc
-				FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dlinkcontribute.idcontribution 
-				INNER JOIN dcontributor ON dlinkcontribute.idcontributor=dcontributor.idcontributor
-				GROUP BY dcontribution.pk, dcontribution.idcontribution ,
-				datetype, date, year				
-				)		
-			SELECT main_q.* ,desc_q.people_desc, count(main_q.*) OVER() AS full_count
-			FROM main_q LEFT JOIN desc_q ON main_q.pk=desc_q.pk  ORDER BY main_q.idcontribution OFFSET :offset LIMIT :limit;";
-		$em = $this->container->get('doctrine')->getEntityManager();	
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		foreach($params_pdo as $key=>$val)
-		{
-			$statement->bindParam($key, $val["value"],  $val["type"]);				
-		}
-		$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
-		$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
-		$statement->execute();
-		$results = $statement->fetchAll(\PDO::FETCH_ASSOC);	
-		if(count($results)>0)
-		{
-			$count_all=$results[0]["full_count"];
-			$pagination = array(
-				'page' => $current_page,
-				'route' => 'search_main',
-				'pages_count' => ceil($count_all / $page_size)
-			);
-			
-			return $this->render('@App/search_results_contributions.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
-		}
-		else
-		{
-			return $this->render('@App/no_results_bs.html.twig');
-		}
-		return $this->render('@App/no_results_bs.html.twig');
-	}
 	
 	
-	public function contributor_searchAction(Request $request)
-	{
-		$current_page=$request->get("current_page",1);
-        $page_size=$request->get("page_size",$this->page_size);
-		$offset=(((int)$current_page)-1)* (int)$page_size;
-		
-		$namecontrib=$request->get("namecontrib");
-		$institute=$request->get("institute");
-		$results=Array();
-		$pagination=Array();
-		
-		$params_sql=Array();
-		$params_sql_or=Array();
-		$params_sql_or_group=Array();
-		$params_pdo=Array();
-		$idx_param=1;
-		
-		if($request->request->has("namecontrib"))
-		{
-			$contribs=$request->get("namecontrib");
-			$params_sql_or=Array();
-			foreach($contribs as $contrib)
-			{
-			
-				$params_sql_or[]="LOWER(people) LIKE LOWER(".$this->gen_pdo_name($idx_param).")||'%'";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["contributor"]=$params_sql_or;
-		}
-		if($request->request->has("institute"))
-		{
-			$institutes=$request->get("institute");
-			$params_sql_or=Array();
-			foreach($institutes as $institute)
-			{
-				$params_sql_or[]="LOWER(institut) = LOWER(".$this->gen_pdo_name($idx_param).")";
-				$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$institute;
-				$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-				$idx_param++;
-			}
-			$params_sql_or_group["institute"]=$params_sql_or;
-		}
-		
-		$query_or_builder=Array();
-			
-		foreach($params_sql_or_group as $key=>$params_sql_or)
-		{
-			$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
-		}
-		
-		if(count($params_sql)>0)
-		{
-			$query_where=" WHERE ".implode(" AND ", $params_sql );				
-		}
-		else
-		{
-			$query_where="";				
-		}
-		
-		$RAW_QUERY='
-			WITH main_q AS (SELECT * FROM dcontributor '.$query_where.')
-			SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY people, institut, peoplefonction OFFSET :offset LIMIT :limit;';
-		$em = $this->container->get('doctrine')->getEntityManager();	
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		foreach($params_pdo as $key=>$val)
-		{
-			$statement->bindParam($key, $val["value"],  $val["type"]);				
-		}
-		$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
-		$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
-		$statement->execute();
-		$results = $statement->fetchAll(\PDO::FETCH_ASSOC);	
-		if(count($results)>0)
-		{
-			$count_all=$results[0]["full_count"];
-			$pagination = array(
-				'page' => $current_page,
-				'route' => 'search_main',
-				'pages_count' => ceil($count_all / $page_size)
-			);
-			
-			return $this->render('@App/search_results_contrib.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
-		}
-		else
-		{
-			return $this->render('@App/no_results_bs.html.twig');
-		}
-		return $this->render('@App/no_results_bs.html.twig');
-	}
 	
 	
-	public function widget_keywordAction(Request $request)
-	{
-		$index=$request->get("index","1");
-		$default_val=$request->query->get("default_val","");		
-		return $this->render('@App/foreignkeys/dkeyword.html.twig', array("index"=>$index, "default_val"=>$default_val));
-	}
+
 	
-	public function widget_titleAction(Request $request)
-	{
-		$index=$request->get("index","1");
-		$default_val=$request->query->get("default_val","");		
-		return $this->render('@App/foreignkeys/ddoctitle.html.twig', array("index"=>$index, "default_val"=>$default_val));
-	}
 	
-    public function widget_doc_to_contribAction(Request $request)
+	
+	
+	
+    /*public function widget_doc_to_contribAction(Request $request)
 	{
 		$index=$request->get("index","1");
 		$ctrl_prefix=$request->get("ctrl_prefix","doc_to_contrib");
@@ -4387,9 +2308,49 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 		return $this->render('@App/contributions/detail_doc_to_contribution.html.twig', array("index"=>$index, 
 			"default_val"=>$default_val,
 			"ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontdoc"=>$tmp_contriblink, "Dcontribution"=>$tmp_contribution));		
-	}
+	}*/
 	
-	public function widget_contribdetailAction(Request $request)
+	
+    /*public function widget_contrib_to_docAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","contrib_to_doc");
+		$default_val=$request->query->get("default_val","");
+		$tmp_contriblink=NULL;
+		$tmp_document=NULL;
+		$tmp_titles=NULL;
+		$form=$this->createForm(SearchAllForm::class, null);
+		if(is_numeric($default_val))
+		{
+			$tmp_contriblink=$this->getDoctrine()
+			->getRepository(Dlinkcontdoc::class)
+			 ->findOneBy(array('pk' => $default_val));
+			 if($tmp_contriblink!==null)
+			 {
+					
+				$tmp_document=$this->getDoctrine()
+				->getRepository(Ddocument::class)
+				 ->findOneBy(array('iddoc' => $tmp_contriblink->getId(),
+				"idcollection"=> $tmp_contriblink->getIdcollection()
+					)
+				 );
+				
+				//$tmp_contribution->setDescriptionDB($this->getDoctrine());
+				
+			}
+		}
+		
+		return $this->render('@App/contributions/detail_contribution_to_doc.html.twig', array("index"=>$index, 
+			"default_val"=>$default_val,
+			"ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontdoc"=>$tmp_contriblink, "Ddocument"=>$tmp_document'form'=> $form->createView()));		
+	}*/
+	
+	
+	
+	
+
+	
+	/*public function widget_contribdetailAction(Request $request)
 	{
 		
 		$index=$request->get("index","1");
@@ -4408,66 +2369,13 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			 ->findOneBy(array('idcontributor' => $tmp_contriblink->getIdContributor()));
 		}
 		return $this->render('@App/contributions/detail_contributor.html.twig', array("index"=>$index, "ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontribute"=>$tmp_contriblink, "Dcontributor"=>$tmp_contributor));		
-	}
+	}*/
 	
 	
 	
-	public function get_next_idAction(Request $request)
-	{
-		$val="";
-		$collection=$request->get("collection","");
-		$table=$request->get("table","document");
-		if($collection!="")
-		{
-			if($table=="document")
-			{
-				$sql_table="ddocument";
-				$field="iddoc";
-			}
-			elseif($table=="sample")
-			{
-				$sql_table="dsample";
-				$field="idsample";
-			}
-			elseif($table=="locality")
-			{
-				$sql_table="dloccenter";
-				$field="idpt";
-			}
-			
-			else
-			{
-				return new JsonResponse(Array("id"=>""));
-			}
-			$em = $this->container->get('doctrine')->getEntityManager();
-			$RAW_QUERY="SELECT MAX(COALESCE(".$field.",0))+ 1 as next_id FROM ".$sql_table." WHERE LOWER(idcollection)=LOWER(:idcollection);";
-			$statement = $em->getConnection()->prepare($RAW_QUERY);
-			$statement->bindParam(":idcollection", $collection, \PDO::PARAM_STR);
-			$statement->execute();
-			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-			$val=$result[0]["next_id"];
-		}
-		else
-		{
-			if($table=="contributor")
-			{
-				$sql_table="dcontributor";
-				$field="idcontributor";
-			}
-			elseif($table=="dcontribution")
-			{
-				$sql_table="dcontribution";
-				$field="idcontribution";
-			}
-			$em = $this->container->get('doctrine')->getEntityManager();
-			$RAW_QUERY="SELECT MAX(COALESCE(".$field.",0))+ 1 as next_id FROM ".$sql_table." ;";
-			$statement = $em->getConnection()->prepare($RAW_QUERY);
-			$statement->execute();
-			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-			$val=$result[0]["next_id"];
-		}
-		return new JsonResponse(Array("id"=>$val));
-	}
+	
+	
+	
 	
 	// note
 	//sudo "php bin/console doctrine:generate:form AppBundle:Dcontributor"
@@ -4487,11 +2395,8 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 		return $this->edit_general($dcontributor, $form,"Dcontributor", $request, '@App/addcontributor.html.twig', 'dcontributor',$dcontributor->getIdContributor() );
     }
 	
-	public function deletecontributorAction(Dcontributor $dcontributor, Request $request)
-	{
-		$em = $this->getDoctrine()->getManager();
-		$form = $this->createForm(DcontributorType::class, $dcontributor, array('entity_manager' => $em,));		
-		return $this->delete_general($dcontributor, $form, DcontributorType::class, $request, '@App/addcontributor.html.twig', 'dcontributor' );
-	}
+	
+	
+	
 	
 }

@@ -1,8 +1,9 @@
 {# src/AppBundle/Resources/views/foreignkeys/dkeyword.html.twig #}
 
-{% set default_val = default_val|default(null) %}
+{% set val_to_display = default_val.keyword|default(null) %}
+{% set val_pk = default_val.pk|default(null) %}
 
-
+<input type="hidden" name="widget_keywords_pk[]" id="keywords_pk_{{ index }}" >
 <select name="widget_keywords[]" id="keywords_{{ index }}" style="width:200px" ></select>
 
 
@@ -15,9 +16,16 @@ $(document).ready(
 	{
 		$("#keywords_{{ index }}").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
 		{% if not default_val is null %}
-		var newOption = new Option("{{ default_val }}", "{{ default_val }}", true, true);
+		var newOption = new Option("{{ val_to_display }}", "{{ val_to_display }}", true, true);
 		$('#keywords_{{ index }}').append(newOption).trigger('change');
+		
+		$('#keywords_pk_{{ index }}').val('{{ val_pk }}');
 		{% endif %}
+		
+	 
 	}
+	
+	
+	
 );
 </script>						

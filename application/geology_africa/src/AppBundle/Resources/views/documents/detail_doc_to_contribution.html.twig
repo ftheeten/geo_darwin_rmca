@@ -1,0 +1,19 @@
+{% set default_val = default_val|default(null) %}
+<input type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" />
+<input type="text" id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" />
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{	
+		{% if not default_val is null %}
+			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ default_val.contribution.pk }}");
+			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ default_val.contribution.getDescription() }}");
+			
+			
+		{% endif %}
+	});
+	
+</script>
+
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontribution_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index }%}

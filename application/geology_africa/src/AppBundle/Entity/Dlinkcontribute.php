@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="dlinkcontribute", uniqueConstraints={@ORM\UniqueConstraint(name="dlinkcontribute_unique", columns={"idcontribution", "idcontributor"})}, indexes={@ORM\Index(name="IDX_8153F1E8AC9A611C", columns={"idcontribution"}), @ORM\Index(name="IDX_8153F1E81CAEE73C", columns={"idcontributor"})})
  * @ORM\Entity
  */
-class Dlinkcontribute
+class Dlinkcontribute 
 {
     /**
      * @var integer
@@ -169,5 +169,25 @@ class Dlinkcontribute
 	{
 		//order is important when rattaching
 		return str_pad($this->contributororder,3,0,STR_PAD_LEFT)."_".$this->idcontributor."_".$this->idcontribution."_".$this->contributorrole;
+		
+	}
+	
+	//contributor
+	public $dcontributor;
+	
+	public function getContributor()
+	{
+		return $this->dcontributor;
+	}
+	
+	public function setContributor_db($em)
+	{
+		$tmp_contributor=$em->getRepository(Dcontributor::class)
+						 ->findOneBy(array('idcontributor' => $this->getIdcontributor()));
+		/*if($tmp_doc !==null)
+		{
+			$tmp_contributor->setName_db($em);
+		}*/
+		$this->dcontributor=$tmp_contributor;
 	}
 }

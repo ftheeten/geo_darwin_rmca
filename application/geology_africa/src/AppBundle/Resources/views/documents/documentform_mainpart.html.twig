@@ -1,0 +1,125 @@
+<div>
+<table class="ui-front table_edit">
+		<tr>
+			<TH class="title_table_edit" width="100%" colspan = "8">
+				Documents
+			</TH>
+		</tr>
+
+		<tr>
+			<th width = "8%"  style="text-align:right">
+				Collection:
+			</th>
+			<td width = "8%">
+				{% if ddocument.pk != "" %}
+					{{ddocument.idcollection}}
+				{% else %}
+					{{ form_widget(form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
+					
+				{% endif %}
+			</td>
+			<th width = "8%" style="text-align:right">
+				ID :
+			</th>
+			<td  width = "8%">
+				{% if ddocument.pk != "" %}
+					{{ddocument.iddoc}}
+				{% else %}
+					{{ form_widget(form.iddoc, {'attr': {'class': 'form-control inp_DocID vshortlength', 'style': 'width: 200px'}}) }}
+					{{ form_errors(form.iddoc) }}
+					<input type='button' id="get_idcollection" value="Get next ID"></input>
+				{% endif %}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Archive mumber:
+			</th>
+			<td  width = "8%">
+				{{ form_widget(form.numarchive, {'attr': {'class': 'form-control inp_Numarchive'}}) }}
+			</td>
+			<th width = "8%" style="text-align:right">
+				Central mumber:
+			</th>
+			<td  width = "45%">
+				{{ form_widget(form.centralnum, {'attr': {'class': 'form-control inp_Centralnum'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Filename:
+			</th>
+			<td >
+				{{ form_widget(form.filename, {'attr': {'class': 'form-control inp_Filename'}}) }}
+			</td>
+			<th style="text-align:right">
+				Caption:
+			</th>
+			<td >
+				{{ form_widget(form.caption, {'attr': {'class': 'form-control inp_Caption'}}) }}
+			</td>
+			<th style="text-align:right">
+				Medium:
+			</th>
+			<td  colspan = "3">
+				{{ form_widget(form.medium, {'attr': {'class': 'form-control'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Location:
+			</th>
+			<td >
+				{{ form_widget(form.location, {'attr': {'class': 'form-control inp_Location'}}) }}
+			</td>
+			<th style="text-align:right">
+				Numerical location:
+			</th>
+			<td  colspan = "5">
+				{{ form_widget(form.numericallocation, {'attr': {'class': 'form-control inp_Numericallocation'}}) }}
+			</td>
+		</tr>
+
+		<tr>
+			<th style="text-align:right">
+				Document information:
+			</th>
+			<td  colspan = "4">
+				{{ form_widget(form.docinfo, {'attr': {'class': 'form-control inp_Docinfo'}}) }}
+			</td>
+			<td  colspan = "3">
+				
+			</td>
+		</tr>
+		<tr>
+			<th style="text-align:right">
+				Edition:
+			</th>
+			<td >
+				{{ form_widget(form.edition, {'attr': {'class': 'form-control inp_Edition'}}) }}
+			</td>
+			<th style="text-align:right">
+				Publication place:
+			</th>
+			<td >
+				{{ form_widget(form.pubplace, {'attr': {'class': 'form-control inp_Pubplace'}}) }}
+			</td>
+			<th style="text-align:right">
+				Document type:
+			</th>
+			<td  colspan = "3">
+				{{ form_widget(form.doccartotype, {'attr': {'class': 'form-control inp_Doccartotype'}}) }}
+			</td>
+		</tr>
+		
+	  
+		<tr>
+			<TD> .</TD>
+		</tr>
+		<TR>
+			<TD>
+			</BR></div>
+			</TD>
+		</TR>
+	</table>
+</div>

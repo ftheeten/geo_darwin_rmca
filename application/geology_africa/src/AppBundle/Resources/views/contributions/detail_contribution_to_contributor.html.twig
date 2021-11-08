@@ -1,0 +1,42 @@
+{% set default_val=default_val|default(null) %}
+<div class="row">
+<input class="col-sm-2" type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" readonly/>
+</div>
+<div class="row">
+<div class="col-sm-1">Name</div>
+<div class="col-sm-2"> 
+<textarea id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" style="width:100%" readonly></textarea>
+</div>
+<div class="col-sm-1">Role</div>
+<div class="col-sm-2"> 
+<select style="width:100%" class="select2" id="{{ ctrl_prefix }}_role_contrib_{{ index }}"  name="{{ ctrl_prefix }}_role_contrib_{{ index }}"></select>
+</div>
+<div class="col-sm-1">order</div>
+<div class="col-sm-2">
+<input type="text" class="order_contributor" id="{{ ctrl_prefix }}_order_contrib_{{ index }}" name="{{ ctrl_prefix }}_order_contrib_{{ index }}" style="width:100%" />
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		
+		
+		$("#{{ ctrl_prefix }}_role_contrib_{{ index }}").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);
+		
+		$("#{{ ctrl_prefix }}_order_contrib_{{ index }}").val("{{ index }}");
+		
+		{% if not default_val is null %}
+			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ default_val.dcontributor.pk }}");
+			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ default_val.dcontributor.people  ~" " ~ (default_val.dcontributor.institut??"") }}");
+			
+			var newOption = new Option("{{ default_val.contributorrole }}", "{{ default_val.contributorrole }}", true, true);
+			$('#{{ ctrl_prefix }}_role_contrib_{{ index }}').append(newOption).trigger('change');
+			
+			
+			
+		{% endif %}
+	});
+	
+</script>
+
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontributor_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index, "ctrl_suffix": "contrib_to_person" }%}
