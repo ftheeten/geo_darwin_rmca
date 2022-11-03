@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.24
--- Dumped by pg_dump version 14.0
+-- Dumped from database version 14.5 (Ubuntu 14.5-1.pgdg20.04+1)
+-- Dumped by pg_dump version 14.4
 
--- Started on 2021-11-08 16:17:03
+-- Started on 2022-11-03 18:26:54
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,7 +19,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 2 (class 3079 OID 484979)
+-- TOC entry 2 (class 3079 OID 16385)
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -27,7 +27,7 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- TOC entry 4423 (class 0 OID 0)
+-- TOC entry 5032 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
@@ -36,7 +36,7 @@ COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial
 
 
 --
--- TOC entry 1508 (class 1255 OID 487322)
+-- TOC entry 1106 (class 1255 OID 17437)
 -- Name: fct_rmca_disable_foreign_keys(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -64,7 +64,7 @@ END;
 ALTER FUNCTION public.fct_rmca_disable_foreign_keys() OWNER TO postgres;
 
 --
--- TOC entry 1509 (class 1255 OID 487323)
+-- TOC entry 1107 (class 1255 OID 17438)
 -- Name: fct_rmca_enable_foreign_keys(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -92,7 +92,7 @@ END;
 ALTER FUNCTION public.fct_rmca_enable_foreign_keys() OWNER TO postgres;
 
 --
--- TOC entry 1510 (class 1255 OID 487324)
+-- TOC entry 1108 (class 1255 OID 17439)
 -- Name: fct_rmca_truncate_tables(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -120,7 +120,7 @@ END;
 ALTER FUNCTION public.fct_rmca_truncate_tables() OWNER TO postgres;
 
 --
--- TOC entry 1520 (class 1255 OID 522260)
+-- TOC entry 1109 (class 1255 OID 17440)
 -- Name: fct_trg_rmca_control_keyword(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -202,7 +202,7 @@ $$;
 ALTER FUNCTION public.fct_trg_rmca_control_keyword() OWNER TO postgres;
 
 --
--- TOC entry 1518 (class 1255 OID 535932)
+-- TOC entry 1110 (class 1255 OID 17441)
 -- Name: fct_trg_rmca_control_upd_keyword(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -224,7 +224,7 @@ $$;
 ALTER FUNCTION public.fct_trg_rmca_control_upd_keyword() OWNER TO postgres;
 
 --
--- TOC entry 1519 (class 1255 OID 593094)
+-- TOC entry 1111 (class 1255 OID 17442)
 -- Name: fct_trg_rmca_coordinates(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -258,8 +258,8 @@ $$;
 ALTER FUNCTION public.fct_trg_rmca_coordinates() OWNER TO postgres;
 
 --
--- TOC entry 1515 (class 1255 OID 514529)
--- Name: fct_trk_log_table(); Type: FUNCTION; Schema: public; Owner: darwin2
+-- TOC entry 1112 (class 1255 OID 17443)
+-- Name: fct_trk_log_table(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
 CREATE FUNCTION public.fct_trk_log_table() RETURNS trigger
@@ -285,10 +285,10 @@ BEGIN
   IF track_level = 0 THEN --NO Tracking
     RETURN NEW;
   ELSIF track_level = 1 THEN -- Track Only Main tables
-    IF TG_TABLE_NAME::text NOT IN ('specimens', 'taxonomy', 'chronostratigraphy', 'lithostratigraphy',
-      'mineralogy', 'lithology', 'people') THEN
+   -- IF TG_TABLE_NAME::text NOT IN ('specimens', 'taxonomy', 'chronostratigraphy', 'lithostratigraphy',
+    --  'mineralogy', 'lithology', 'people') THEN
       RETURN NEW;
-    END IF;
+   -- END IF;
   END IF;
  BEGIN
   SELECT coalesce(current_setting('session.geo_darwin_user'),'1')::integer INTO user_id;
@@ -331,10 +331,38 @@ END;
 $$;
 
 
-ALTER FUNCTION public.fct_trk_log_table() OWNER TO darwin2;
+ALTER FUNCTION public.fct_trk_log_table() OWNER TO postgres;
 
 --
--- TOC entry 1511 (class 1255 OID 509331)
+-- TOC entry 1113 (class 1255 OID 17444)
+-- Name: jsonb_diff_val(jsonb, jsonb); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.jsonb_diff_val(val1 jsonb, val2 jsonb) RETURNS jsonb
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  result JSONB;
+  v RECORD;
+BEGIN
+   result = val1;
+   FOR v IN SELECT * FROM jsonb_each(val2) LOOP
+     IF result @> jsonb_build_object(v.key,v.value)
+        THEN result = result - v.key;
+     ELSIF result ? v.key THEN CONTINUE;
+     ELSE
+        result = result || jsonb_build_object(v.key,'null');
+     END IF;
+   END LOOP;
+   RETURN result;
+END;
+$$;
+
+
+ALTER FUNCTION public.jsonb_diff_val(val1 jsonb, val2 jsonb) OWNER TO postgres;
+
+--
+-- TOC entry 1114 (class 1255 OID 17445)
 -- Name: pk_collid(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -351,8 +379,8 @@ CREATE FUNCTION public.pk_collid() RETURNS trigger
 ALTER FUNCTION public.pk_collid() OWNER TO postgres;
 
 --
--- TOC entry 1512 (class 1255 OID 511773)
--- Name: rmca_align_seq(); Type: FUNCTION; Schema: public; Owner: darwin2
+-- TOC entry 1115 (class 1255 OID 17446)
+-- Name: rmca_align_seq(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
 CREATE FUNCTION public.rmca_align_seq() RETURNS integer
@@ -390,10 +418,10 @@ CREATE FUNCTION public.rmca_align_seq() RETURNS integer
    $$;
 
 
-ALTER FUNCTION public.rmca_align_seq() OWNER TO darwin2;
+ALTER FUNCTION public.rmca_align_seq() OWNER TO postgres;
 
 --
--- TOC entry 1513 (class 1255 OID 511775)
+-- TOC entry 1116 (class 1255 OID 17447)
 -- Name: rmca_check_seq(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -435,7 +463,7 @@ CREATE FUNCTION public.rmca_check_seq() RETURNS integer
 ALTER FUNCTION public.rmca_check_seq() OWNER TO postgres;
 
 --
--- TOC entry 1514 (class 1255 OID 512404)
+-- TOC entry 1117 (class 1255 OID 17448)
 -- Name: rmca_get_keywords_hierarchy(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -499,7 +527,7 @@ $$;
 ALTER FUNCTION public.rmca_get_keywords_hierarchy() OWNER TO postgres;
 
 --
--- TOC entry 1516 (class 1255 OID 514399)
+-- TOC entry 1118 (class 1255 OID 17449)
 -- Name: rmca_refresh_materialized_view(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -533,7 +561,7 @@ $$;
 ALTER FUNCTION public.rmca_refresh_materialized_view() OWNER TO postgres;
 
 --
--- TOC entry 1517 (class 1255 OID 514652)
+-- TOC entry 1119 (class 1255 OID 17450)
 -- Name: rmca_refresh_materialized_view_auto(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -569,8 +597,10 @@ ALTER FUNCTION public.rmca_refresh_materialized_view_auto() OWNER TO postgres;
 
 SET default_tablespace = '';
 
+SET default_table_access_method = heap;
+
 --
--- TOC entry 352 (class 1259 OID 511782)
+-- TOC entry 223 (class 1259 OID 17451)
 -- Name: alldata; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -641,7 +671,7 @@ CREATE TABLE public.alldata (
 ALTER TABLE public.alldata OWNER TO postgres;
 
 --
--- TOC entry 240 (class 1259 OID 486347)
+-- TOC entry 224 (class 1259 OID 17456)
 -- Name: codecollection; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -658,7 +688,7 @@ CREATE TABLE public.codecollection (
 ALTER TABLE public.codecollection OWNER TO postgres;
 
 --
--- TOC entry 239 (class 1259 OID 486345)
+-- TOC entry 225 (class 1259 OID 17462)
 -- Name: codecollection_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -673,8 +703,8 @@ CREATE SEQUENCE public.codecollection_pk_seq
 ALTER TABLE public.codecollection_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4424 (class 0 OID 0)
--- Dependencies: 239
+-- TOC entry 5033 (class 0 OID 0)
+-- Dependencies: 225
 -- Name: codecollection_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -682,7 +712,7 @@ ALTER SEQUENCE public.codecollection_pk_seq OWNED BY public.codecollection.pk;
 
 
 --
--- TOC entry 382 (class 1259 OID 535906)
+-- TOC entry 226 (class 1259 OID 17463)
 -- Name: cpt_existing; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -694,7 +724,7 @@ CREATE TABLE public.cpt_existing (
 ALTER TABLE public.cpt_existing OWNER TO postgres;
 
 --
--- TOC entry 242 (class 1259 OID 486357)
+-- TOC entry 227 (class 1259 OID 17466)
 -- Name: dcontribution; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -712,7 +742,7 @@ CREATE TABLE public.dcontribution (
 ALTER TABLE public.dcontribution OWNER TO postgres;
 
 --
--- TOC entry 241 (class 1259 OID 486355)
+-- TOC entry 228 (class 1259 OID 17471)
 -- Name: dcontribution_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -727,8 +757,8 @@ CREATE SEQUENCE public.dcontribution_pk_seq
 ALTER TABLE public.dcontribution_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4425 (class 0 OID 0)
--- Dependencies: 241
+-- TOC entry 5034 (class 0 OID 0)
+-- Dependencies: 228
 -- Name: dcontribution_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -736,7 +766,7 @@ ALTER SEQUENCE public.dcontribution_pk_seq OWNED BY public.dcontribution.pk;
 
 
 --
--- TOC entry 383 (class 1259 OID 592675)
+-- TOC entry 229 (class 1259 OID 17472)
 -- Name: dcontributor_idcontributor_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -751,7 +781,7 @@ CREATE SEQUENCE public.dcontributor_idcontributor_seq
 ALTER TABLE public.dcontributor_idcontributor_seq OWNER TO postgres;
 
 --
--- TOC entry 244 (class 1259 OID 486367)
+-- TOC entry 230 (class 1259 OID 17473)
 -- Name: dcontributor; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -769,7 +799,7 @@ CREATE TABLE public.dcontributor (
 ALTER TABLE public.dcontributor OWNER TO postgres;
 
 --
--- TOC entry 243 (class 1259 OID 486365)
+-- TOC entry 231 (class 1259 OID 17479)
 -- Name: dcontributor_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -784,8 +814,8 @@ CREATE SEQUENCE public.dcontributor_pk_seq
 ALTER TABLE public.dcontributor_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4426 (class 0 OID 0)
--- Dependencies: 243
+-- TOC entry 5035 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: dcontributor_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -793,7 +823,7 @@ ALTER SEQUENCE public.dcontributor_pk_seq OWNED BY public.dcontributor.pk;
 
 
 --
--- TOC entry 246 (class 1259 OID 486377)
+-- TOC entry 232 (class 1259 OID 17480)
 -- Name: ddocaerphoto; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -809,7 +839,7 @@ CREATE TABLE public.ddocaerphoto (
 ALTER TABLE public.ddocaerphoto OWNER TO postgres;
 
 --
--- TOC entry 245 (class 1259 OID 486375)
+-- TOC entry 233 (class 1259 OID 17485)
 -- Name: ddocaerphoto_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -824,8 +854,8 @@ CREATE SEQUENCE public.ddocaerphoto_pk_seq
 ALTER TABLE public.ddocaerphoto_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4427 (class 0 OID 0)
--- Dependencies: 245
+-- TOC entry 5036 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: ddocaerphoto_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -833,7 +863,7 @@ ALTER SEQUENCE public.ddocaerphoto_pk_seq OWNED BY public.ddocaerphoto.pk;
 
 
 --
--- TOC entry 248 (class 1259 OID 486387)
+-- TOC entry 234 (class 1259 OID 17486)
 -- Name: ddocarchive; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -870,7 +900,7 @@ CREATE TABLE public.ddocarchive (
 ALTER TABLE public.ddocarchive OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1259 OID 486385)
+-- TOC entry 235 (class 1259 OID 17492)
 -- Name: ddocarchive_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -885,8 +915,8 @@ CREATE SEQUENCE public.ddocarchive_pk_seq
 ALTER TABLE public.ddocarchive_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4428 (class 0 OID 0)
--- Dependencies: 247
+-- TOC entry 5037 (class 0 OID 0)
+-- Dependencies: 235
 -- Name: ddocarchive_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -894,7 +924,7 @@ ALTER SEQUENCE public.ddocarchive_pk_seq OWNED BY public.ddocarchive.pk;
 
 
 --
--- TOC entry 250 (class 1259 OID 486397)
+-- TOC entry 236 (class 1259 OID 17493)
 -- Name: ddocfilm; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -909,7 +939,7 @@ CREATE TABLE public.ddocfilm (
 ALTER TABLE public.ddocfilm OWNER TO postgres;
 
 --
--- TOC entry 249 (class 1259 OID 486395)
+-- TOC entry 237 (class 1259 OID 17498)
 -- Name: ddocfilm_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -924,8 +954,8 @@ CREATE SEQUENCE public.ddocfilm_pk_seq
 ALTER TABLE public.ddocfilm_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4429 (class 0 OID 0)
--- Dependencies: 249
+-- TOC entry 5038 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: ddocfilm_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -933,7 +963,7 @@ ALTER SEQUENCE public.ddocfilm_pk_seq OWNED BY public.ddocfilm.pk;
 
 
 --
--- TOC entry 252 (class 1259 OID 486407)
+-- TOC entry 238 (class 1259 OID 17499)
 -- Name: ddoclinks; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -950,7 +980,7 @@ CREATE TABLE public.ddoclinks (
 ALTER TABLE public.ddoclinks OWNER TO postgres;
 
 --
--- TOC entry 251 (class 1259 OID 486405)
+-- TOC entry 239 (class 1259 OID 17504)
 -- Name: ddoclinks_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -965,8 +995,8 @@ CREATE SEQUENCE public.ddoclinks_pk_seq
 ALTER TABLE public.ddoclinks_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4430 (class 0 OID 0)
--- Dependencies: 251
+-- TOC entry 5039 (class 0 OID 0)
+-- Dependencies: 239
 -- Name: ddoclinks_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -974,7 +1004,7 @@ ALTER SEQUENCE public.ddoclinks_pk_seq OWNED BY public.ddoclinks.pk;
 
 
 --
--- TOC entry 254 (class 1259 OID 486416)
+-- TOC entry 240 (class 1259 OID 17505)
 -- Name: ddocmap; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -991,7 +1021,7 @@ CREATE TABLE public.ddocmap (
 ALTER TABLE public.ddocmap OWNER TO postgres;
 
 --
--- TOC entry 253 (class 1259 OID 486414)
+-- TOC entry 241 (class 1259 OID 17510)
 -- Name: ddocmap_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1006,8 +1036,8 @@ CREATE SEQUENCE public.ddocmap_pk_seq
 ALTER TABLE public.ddocmap_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4431 (class 0 OID 0)
--- Dependencies: 253
+-- TOC entry 5040 (class 0 OID 0)
+-- Dependencies: 241
 -- Name: ddocmap_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1015,7 +1045,7 @@ ALTER SEQUENCE public.ddocmap_pk_seq OWNED BY public.ddocmap.pk;
 
 
 --
--- TOC entry 256 (class 1259 OID 486427)
+-- TOC entry 242 (class 1259 OID 17511)
 -- Name: ddocsatellite; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1048,7 +1078,7 @@ CREATE TABLE public.ddocsatellite (
 ALTER TABLE public.ddocsatellite OWNER TO postgres;
 
 --
--- TOC entry 255 (class 1259 OID 486425)
+-- TOC entry 243 (class 1259 OID 17518)
 -- Name: ddocsatellite_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1063,8 +1093,8 @@ CREATE SEQUENCE public.ddocsatellite_pk_seq
 ALTER TABLE public.ddocsatellite_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4432 (class 0 OID 0)
--- Dependencies: 255
+-- TOC entry 5041 (class 0 OID 0)
+-- Dependencies: 243
 -- Name: ddocsatellite_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1072,7 +1102,7 @@ ALTER SEQUENCE public.ddocsatellite_pk_seq OWNED BY public.ddocsatellite.pk;
 
 
 --
--- TOC entry 258 (class 1259 OID 486438)
+-- TOC entry 244 (class 1259 OID 17519)
 -- Name: ddocscale; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1087,7 +1117,7 @@ CREATE TABLE public.ddocscale (
 ALTER TABLE public.ddocscale OWNER TO postgres;
 
 --
--- TOC entry 257 (class 1259 OID 486436)
+-- TOC entry 245 (class 1259 OID 17524)
 -- Name: ddocscale_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1102,8 +1132,8 @@ CREATE SEQUENCE public.ddocscale_pk_seq
 ALTER TABLE public.ddocscale_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4433 (class 0 OID 0)
--- Dependencies: 257
+-- TOC entry 5042 (class 0 OID 0)
+-- Dependencies: 245
 -- Name: ddocscale_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1111,7 +1141,7 @@ ALTER SEQUENCE public.ddocscale_pk_seq OWNED BY public.ddocscale.pk;
 
 
 --
--- TOC entry 260 (class 1259 OID 486447)
+-- TOC entry 246 (class 1259 OID 17525)
 -- Name: ddoctitle; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1127,7 +1157,7 @@ CREATE TABLE public.ddoctitle (
 ALTER TABLE public.ddoctitle OWNER TO postgres;
 
 --
--- TOC entry 259 (class 1259 OID 486445)
+-- TOC entry 247 (class 1259 OID 17531)
 -- Name: ddoctitle_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1142,8 +1172,8 @@ CREATE SEQUENCE public.ddoctitle_pk_seq
 ALTER TABLE public.ddoctitle_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4434 (class 0 OID 0)
--- Dependencies: 259
+-- TOC entry 5043 (class 0 OID 0)
+-- Dependencies: 247
 -- Name: ddoctitle_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1151,7 +1181,7 @@ ALTER SEQUENCE public.ddoctitle_pk_seq OWNED BY public.ddoctitle.pk;
 
 
 --
--- TOC entry 365 (class 1259 OID 512551)
+-- TOC entry 248 (class 1259 OID 17532)
 -- Name: seq_template_data_shared_pk; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1166,7 +1196,7 @@ CREATE SEQUENCE public.seq_template_data_shared_pk
 ALTER TABLE public.seq_template_data_shared_pk OWNER TO postgres;
 
 --
--- TOC entry 363 (class 1259 OID 512529)
+-- TOC entry 249 (class 1259 OID 17533)
 -- Name: template_data; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1178,11 +1208,12 @@ CREATE TABLE public.template_data (
 ALTER TABLE public.template_data OWNER TO postgres;
 
 --
--- TOC entry 262 (class 1259 OID 486457)
+-- TOC entry 250 (class 1259 OID 17537)
 -- Name: ddocument; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ddocument (
+    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass),
     idcollection character varying NOT NULL,
     iddoc integer NOT NULL,
     idpt integer DEFAULT 0,
@@ -1196,8 +1227,7 @@ CREATE TABLE public.ddocument (
     docinfo character varying,
     edition character varying,
     pubplace character varying,
-    doccartotype character varying,
-    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass)
+    doccartotype character varying
 )
 INHERITS (public.template_data);
 
@@ -1205,7 +1235,7 @@ INHERITS (public.template_data);
 ALTER TABLE public.ddocument OWNER TO postgres;
 
 --
--- TOC entry 261 (class 1259 OID 486455)
+-- TOC entry 251 (class 1259 OID 17544)
 -- Name: ddocument_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1220,8 +1250,8 @@ CREATE SEQUENCE public.ddocument_pk_seq
 ALTER TABLE public.ddocument_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4435 (class 0 OID 0)
--- Dependencies: 261
+-- TOC entry 5044 (class 0 OID 0)
+-- Dependencies: 251
 -- Name: ddocument_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1229,7 +1259,7 @@ ALTER SEQUENCE public.ddocument_pk_seq OWNED BY public.ddocument.pk;
 
 
 --
--- TOC entry 264 (class 1259 OID 486467)
+-- TOC entry 252 (class 1259 OID 17545)
 -- Name: dgestion; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1245,7 +1275,7 @@ CREATE TABLE public.dgestion (
 ALTER TABLE public.dgestion OWNER TO postgres;
 
 --
--- TOC entry 263 (class 1259 OID 486465)
+-- TOC entry 253 (class 1259 OID 17553)
 -- Name: dgestion_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1260,8 +1290,8 @@ CREATE SEQUENCE public.dgestion_pk_seq
 ALTER TABLE public.dgestion_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4436 (class 0 OID 0)
--- Dependencies: 263
+-- TOC entry 5045 (class 0 OID 0)
+-- Dependencies: 253
 -- Name: dgestion_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1269,7 +1299,7 @@ ALTER SEQUENCE public.dgestion_pk_seq OWNED BY public.dgestion.pk;
 
 
 --
--- TOC entry 266 (class 1259 OID 486479)
+-- TOC entry 254 (class 1259 OID 17554)
 -- Name: dgestionnaire; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1283,7 +1313,7 @@ CREATE TABLE public.dgestionnaire (
 ALTER TABLE public.dgestionnaire OWNER TO postgres;
 
 --
--- TOC entry 265 (class 1259 OID 486477)
+-- TOC entry 255 (class 1259 OID 17559)
 -- Name: dgestionnaire_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1298,8 +1328,8 @@ CREATE SEQUENCE public.dgestionnaire_pk_seq
 ALTER TABLE public.dgestionnaire_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4437 (class 0 OID 0)
--- Dependencies: 265
+-- TOC entry 5046 (class 0 OID 0)
+-- Dependencies: 255
 -- Name: dgestionnaire_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1307,7 +1337,7 @@ ALTER SEQUENCE public.dgestionnaire_pk_seq OWNED BY public.dgestionnaire.pk;
 
 
 --
--- TOC entry 268 (class 1259 OID 486489)
+-- TOC entry 256 (class 1259 OID 17560)
 -- Name: dinstitute; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1325,7 +1355,7 @@ CREATE TABLE public.dinstitute (
 ALTER TABLE public.dinstitute OWNER TO postgres;
 
 --
--- TOC entry 267 (class 1259 OID 486487)
+-- TOC entry 257 (class 1259 OID 17566)
 -- Name: dinstitute_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1340,8 +1370,8 @@ CREATE SEQUENCE public.dinstitute_pk_seq
 ALTER TABLE public.dinstitute_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4438 (class 0 OID 0)
--- Dependencies: 267
+-- TOC entry 5047 (class 0 OID 0)
+-- Dependencies: 257
 -- Name: dinstitute_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1349,7 +1379,7 @@ ALTER SEQUENCE public.dinstitute_pk_seq OWNED BY public.dinstitute.pk;
 
 
 --
--- TOC entry 270 (class 1259 OID 486499)
+-- TOC entry 258 (class 1259 OID 17567)
 -- Name: dkeyword; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1365,7 +1395,7 @@ CREATE TABLE public.dkeyword (
 ALTER TABLE public.dkeyword OWNER TO postgres;
 
 --
--- TOC entry 269 (class 1259 OID 486497)
+-- TOC entry 259 (class 1259 OID 17572)
 -- Name: dkeyword_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1380,8 +1410,8 @@ CREATE SEQUENCE public.dkeyword_pk_seq
 ALTER TABLE public.dkeyword_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4439 (class 0 OID 0)
--- Dependencies: 269
+-- TOC entry 5048 (class 0 OID 0)
+-- Dependencies: 259
 -- Name: dkeyword_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1389,7 +1419,7 @@ ALTER SEQUENCE public.dkeyword_pk_seq OWNED BY public.dkeyword.pk;
 
 
 --
--- TOC entry 272 (class 1259 OID 486508)
+-- TOC entry 260 (class 1259 OID 17573)
 -- Name: dlinkcontdoc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1404,7 +1434,7 @@ CREATE TABLE public.dlinkcontdoc (
 ALTER TABLE public.dlinkcontdoc OWNER TO postgres;
 
 --
--- TOC entry 271 (class 1259 OID 486506)
+-- TOC entry 261 (class 1259 OID 17579)
 -- Name: dlinkcontdoc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1419,8 +1449,8 @@ CREATE SEQUENCE public.dlinkcontdoc_pk_seq
 ALTER TABLE public.dlinkcontdoc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4440 (class 0 OID 0)
--- Dependencies: 271
+-- TOC entry 5049 (class 0 OID 0)
+-- Dependencies: 261
 -- Name: dlinkcontdoc_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1428,7 +1458,7 @@ ALTER SEQUENCE public.dlinkcontdoc_pk_seq OWNED BY public.dlinkcontdoc.pk;
 
 
 --
--- TOC entry 274 (class 1259 OID 486518)
+-- TOC entry 262 (class 1259 OID 17580)
 -- Name: dlinkcontloc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1443,7 +1473,7 @@ CREATE TABLE public.dlinkcontloc (
 ALTER TABLE public.dlinkcontloc OWNER TO postgres;
 
 --
--- TOC entry 273 (class 1259 OID 486516)
+-- TOC entry 263 (class 1259 OID 17585)
 -- Name: dlinkcontloc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1458,8 +1488,8 @@ CREATE SEQUENCE public.dlinkcontloc_pk_seq
 ALTER TABLE public.dlinkcontloc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4441 (class 0 OID 0)
--- Dependencies: 273
+-- TOC entry 5050 (class 0 OID 0)
+-- Dependencies: 263
 -- Name: dlinkcontloc_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1467,7 +1497,7 @@ ALTER SEQUENCE public.dlinkcontloc_pk_seq OWNED BY public.dlinkcontloc.pk;
 
 
 --
--- TOC entry 276 (class 1259 OID 486528)
+-- TOC entry 264 (class 1259 OID 17586)
 -- Name: dlinkcontribute; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1483,7 +1513,7 @@ CREATE TABLE public.dlinkcontribute (
 ALTER TABLE public.dlinkcontribute OWNER TO postgres;
 
 --
--- TOC entry 275 (class 1259 OID 486526)
+-- TOC entry 265 (class 1259 OID 17594)
 -- Name: dlinkcontribute_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1498,8 +1528,8 @@ CREATE SEQUENCE public.dlinkcontribute_pk_seq
 ALTER TABLE public.dlinkcontribute_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4442 (class 0 OID 0)
--- Dependencies: 275
+-- TOC entry 5051 (class 0 OID 0)
+-- Dependencies: 265
 -- Name: dlinkcontribute_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1507,7 +1537,7 @@ ALTER SEQUENCE public.dlinkcontribute_pk_seq OWNED BY public.dlinkcontribute.pk;
 
 
 --
--- TOC entry 278 (class 1259 OID 486540)
+-- TOC entry 266 (class 1259 OID 17595)
 -- Name: dlinkcontsam; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1522,7 +1552,7 @@ CREATE TABLE public.dlinkcontsam (
 ALTER TABLE public.dlinkcontsam OWNER TO postgres;
 
 --
--- TOC entry 277 (class 1259 OID 486538)
+-- TOC entry 267 (class 1259 OID 17600)
 -- Name: dlinkcontsam_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1537,8 +1567,8 @@ CREATE SEQUENCE public.dlinkcontsam_pk_seq
 ALTER TABLE public.dlinkcontsam_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4443 (class 0 OID 0)
--- Dependencies: 277
+-- TOC entry 5052 (class 0 OID 0)
+-- Dependencies: 267
 -- Name: dlinkcontsam_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1546,7 +1576,7 @@ ALTER SEQUENCE public.dlinkcontsam_pk_seq OWNED BY public.dlinkcontsam.pk;
 
 
 --
--- TOC entry 280 (class 1259 OID 486549)
+-- TOC entry 268 (class 1259 OID 17601)
 -- Name: dlinkdocloc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1562,7 +1592,7 @@ CREATE TABLE public.dlinkdocloc (
 ALTER TABLE public.dlinkdocloc OWNER TO postgres;
 
 --
--- TOC entry 279 (class 1259 OID 486547)
+-- TOC entry 269 (class 1259 OID 17606)
 -- Name: dlinkdocloc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1577,8 +1607,8 @@ CREATE SEQUENCE public.dlinkdocloc_pk_seq
 ALTER TABLE public.dlinkdocloc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4444 (class 0 OID 0)
--- Dependencies: 279
+-- TOC entry 5053 (class 0 OID 0)
+-- Dependencies: 269
 -- Name: dlinkdocloc_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1586,7 +1616,7 @@ ALTER SEQUENCE public.dlinkdocloc_pk_seq OWNED BY public.dlinkdocloc.pk;
 
 
 --
--- TOC entry 282 (class 1259 OID 486559)
+-- TOC entry 270 (class 1259 OID 17607)
 -- Name: dlinkdocsam; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1602,7 +1632,7 @@ CREATE TABLE public.dlinkdocsam (
 ALTER TABLE public.dlinkdocsam OWNER TO postgres;
 
 --
--- TOC entry 281 (class 1259 OID 486557)
+-- TOC entry 271 (class 1259 OID 17612)
 -- Name: dlinkdocsam_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1617,8 +1647,8 @@ CREATE SEQUENCE public.dlinkdocsam_pk_seq
 ALTER TABLE public.dlinkdocsam_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4445 (class 0 OID 0)
--- Dependencies: 281
+-- TOC entry 5054 (class 0 OID 0)
+-- Dependencies: 271
 -- Name: dlinkdocsam_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1626,7 +1656,7 @@ ALTER SEQUENCE public.dlinkdocsam_pk_seq OWNED BY public.dlinkdocsam.pk;
 
 
 --
--- TOC entry 284 (class 1259 OID 486568)
+-- TOC entry 272 (class 1259 OID 17613)
 -- Name: dlinkgestdoc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1641,7 +1671,7 @@ CREATE TABLE public.dlinkgestdoc (
 ALTER TABLE public.dlinkgestdoc OWNER TO postgres;
 
 --
--- TOC entry 283 (class 1259 OID 486566)
+-- TOC entry 273 (class 1259 OID 17618)
 -- Name: dlinkgestdoc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1656,8 +1686,8 @@ CREATE SEQUENCE public.dlinkgestdoc_pk_seq
 ALTER TABLE public.dlinkgestdoc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4446 (class 0 OID 0)
--- Dependencies: 283
+-- TOC entry 5055 (class 0 OID 0)
+-- Dependencies: 273
 -- Name: dlinkgestdoc_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1665,7 +1695,7 @@ ALTER SEQUENCE public.dlinkgestdoc_pk_seq OWNED BY public.dlinkgestdoc.pk;
 
 
 --
--- TOC entry 286 (class 1259 OID 486577)
+-- TOC entry 274 (class 1259 OID 17619)
 -- Name: dlinkgestloc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1680,7 +1710,7 @@ CREATE TABLE public.dlinkgestloc (
 ALTER TABLE public.dlinkgestloc OWNER TO postgres;
 
 --
--- TOC entry 285 (class 1259 OID 486575)
+-- TOC entry 275 (class 1259 OID 17624)
 -- Name: dlinkgestloc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1695,8 +1725,8 @@ CREATE SEQUENCE public.dlinkgestloc_pk_seq
 ALTER TABLE public.dlinkgestloc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4447 (class 0 OID 0)
--- Dependencies: 285
+-- TOC entry 5056 (class 0 OID 0)
+-- Dependencies: 275
 -- Name: dlinkgestloc_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1704,7 +1734,7 @@ ALTER SEQUENCE public.dlinkgestloc_pk_seq OWNED BY public.dlinkgestloc.pk;
 
 
 --
--- TOC entry 288 (class 1259 OID 486586)
+-- TOC entry 276 (class 1259 OID 17625)
 -- Name: dlinkgestsam; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1719,7 +1749,7 @@ CREATE TABLE public.dlinkgestsam (
 ALTER TABLE public.dlinkgestsam OWNER TO postgres;
 
 --
--- TOC entry 287 (class 1259 OID 486584)
+-- TOC entry 277 (class 1259 OID 17630)
 -- Name: dlinkgestsam_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1734,8 +1764,8 @@ CREATE SEQUENCE public.dlinkgestsam_pk_seq
 ALTER TABLE public.dlinkgestsam_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4448 (class 0 OID 0)
--- Dependencies: 287
+-- TOC entry 5057 (class 0 OID 0)
+-- Dependencies: 277
 -- Name: dlinkgestsam_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1743,7 +1773,7 @@ ALTER SEQUENCE public.dlinkgestsam_pk_seq OWNED BY public.dlinkgestsam.pk;
 
 
 --
--- TOC entry 290 (class 1259 OID 486595)
+-- TOC entry 278 (class 1259 OID 17631)
 -- Name: dlinklocsam; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1760,7 +1790,7 @@ CREATE TABLE public.dlinklocsam (
 ALTER TABLE public.dlinklocsam OWNER TO postgres;
 
 --
--- TOC entry 289 (class 1259 OID 486593)
+-- TOC entry 279 (class 1259 OID 17636)
 -- Name: dlinklocsam_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1775,8 +1805,8 @@ CREATE SEQUENCE public.dlinklocsam_pk_seq
 ALTER TABLE public.dlinklocsam_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4449 (class 0 OID 0)
--- Dependencies: 289
+-- TOC entry 5058 (class 0 OID 0)
+-- Dependencies: 279
 -- Name: dlinklocsam_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1784,7 +1814,7 @@ ALTER SEQUENCE public.dlinklocsam_pk_seq OWNED BY public.dlinklocsam.pk;
 
 
 --
--- TOC entry 292 (class 1259 OID 486604)
+-- TOC entry 280 (class 1259 OID 17637)
 -- Name: dloccarto; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1801,7 +1831,7 @@ CREATE TABLE public.dloccarto (
 ALTER TABLE public.dloccarto OWNER TO postgres;
 
 --
--- TOC entry 291 (class 1259 OID 486602)
+-- TOC entry 281 (class 1259 OID 17643)
 -- Name: dloccarto_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1816,8 +1846,8 @@ CREATE SEQUENCE public.dloccarto_pk_seq
 ALTER TABLE public.dloccarto_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4450 (class 0 OID 0)
--- Dependencies: 291
+-- TOC entry 5059 (class 0 OID 0)
+-- Dependencies: 281
 -- Name: dloccarto_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1825,11 +1855,12 @@ ALTER SEQUENCE public.dloccarto_pk_seq OWNED BY public.dloccarto.pk;
 
 
 --
--- TOC entry 294 (class 1259 OID 486614)
+-- TOC entry 282 (class 1259 OID 17644)
 -- Name: dloccenter; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.dloccenter (
+    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass),
     idcollection character varying NOT NULL,
     idpt integer NOT NULL,
     coord_lat numeric,
@@ -1843,7 +1874,6 @@ CREATE TABLE public.dloccenter (
     variousinfo character varying,
     docref character varying,
     idprecision integer,
-    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass),
     country text,
     epsg character varying DEFAULT 4326,
     wkt character varying,
@@ -1866,7 +1896,7 @@ INHERITS (public.template_data);
 ALTER TABLE public.dloccenter OWNER TO postgres;
 
 --
--- TOC entry 293 (class 1259 OID 486612)
+-- TOC entry 283 (class 1259 OID 17651)
 -- Name: dloccenter_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1881,8 +1911,8 @@ CREATE SEQUENCE public.dloccenter_pk_seq
 ALTER TABLE public.dloccenter_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4451 (class 0 OID 0)
--- Dependencies: 293
+-- TOC entry 5060 (class 0 OID 0)
+-- Dependencies: 283
 -- Name: dloccenter_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1890,7 +1920,7 @@ ALTER SEQUENCE public.dloccenter_pk_seq OWNED BY public.dloccenter.pk;
 
 
 --
--- TOC entry 296 (class 1259 OID 486626)
+-- TOC entry 284 (class 1259 OID 17652)
 -- Name: dlocdrilling; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1912,7 +1942,7 @@ CREATE TABLE public.dlocdrilling (
 ALTER TABLE public.dlocdrilling OWNER TO postgres;
 
 --
--- TOC entry 295 (class 1259 OID 486624)
+-- TOC entry 285 (class 1259 OID 17657)
 -- Name: dlocdrilling_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1927,8 +1957,8 @@ CREATE SEQUENCE public.dlocdrilling_pk_seq
 ALTER TABLE public.dlocdrilling_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4452 (class 0 OID 0)
--- Dependencies: 295
+-- TOC entry 5061 (class 0 OID 0)
+-- Dependencies: 285
 -- Name: dlocdrilling_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1936,7 +1966,7 @@ ALTER SEQUENCE public.dlocdrilling_pk_seq OWNED BY public.dlocdrilling.pk;
 
 
 --
--- TOC entry 298 (class 1259 OID 486640)
+-- TOC entry 286 (class 1259 OID 17658)
 -- Name: dlocdrillingtype; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1951,7 +1981,7 @@ CREATE TABLE public.dlocdrillingtype (
 ALTER TABLE public.dlocdrillingtype OWNER TO postgres;
 
 --
--- TOC entry 297 (class 1259 OID 486638)
+-- TOC entry 287 (class 1259 OID 17664)
 -- Name: dlocdrillingtype_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -1966,8 +1996,8 @@ CREATE SEQUENCE public.dlocdrillingtype_pk_seq
 ALTER TABLE public.dlocdrillingtype_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4453 (class 0 OID 0)
--- Dependencies: 297
+-- TOC entry 5062 (class 0 OID 0)
+-- Dependencies: 287
 -- Name: dlocdrillingtype_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -1975,7 +2005,7 @@ ALTER SEQUENCE public.dlocdrillingtype_pk_seq OWNED BY public.dlocdrillingtype.p
 
 
 --
--- TOC entry 300 (class 1259 OID 486650)
+-- TOC entry 288 (class 1259 OID 17665)
 -- Name: dlochydro; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1992,7 +2022,7 @@ CREATE TABLE public.dlochydro (
 ALTER TABLE public.dlochydro OWNER TO postgres;
 
 --
--- TOC entry 299 (class 1259 OID 486648)
+-- TOC entry 289 (class 1259 OID 17671)
 -- Name: dlochydro_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2007,8 +2037,8 @@ CREATE SEQUENCE public.dlochydro_pk_seq
 ALTER TABLE public.dlochydro_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4454 (class 0 OID 0)
--- Dependencies: 299
+-- TOC entry 5063 (class 0 OID 0)
+-- Dependencies: 289
 -- Name: dlochydro_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2016,7 +2046,7 @@ ALTER SEQUENCE public.dlochydro_pk_seq OWNED BY public.dlochydro.pk;
 
 
 --
--- TOC entry 302 (class 1259 OID 486660)
+-- TOC entry 290 (class 1259 OID 17672)
 -- Name: dloclitho; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2036,7 +2066,7 @@ CREATE TABLE public.dloclitho (
 ALTER TABLE public.dloclitho OWNER TO postgres;
 
 --
--- TOC entry 301 (class 1259 OID 486658)
+-- TOC entry 291 (class 1259 OID 17677)
 -- Name: dloclitho_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2051,8 +2081,8 @@ CREATE SEQUENCE public.dloclitho_pk_seq
 ALTER TABLE public.dloclitho_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4455 (class 0 OID 0)
--- Dependencies: 301
+-- TOC entry 5064 (class 0 OID 0)
+-- Dependencies: 291
 -- Name: dloclitho_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2060,7 +2090,7 @@ ALTER SEQUENCE public.dloclitho_pk_seq OWNED BY public.dloclitho.pk;
 
 
 --
--- TOC entry 304 (class 1259 OID 486669)
+-- TOC entry 292 (class 1259 OID 17678)
 -- Name: dlocpolygon; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2078,7 +2108,7 @@ CREATE TABLE public.dlocpolygon (
 ALTER TABLE public.dlocpolygon OWNER TO postgres;
 
 --
--- TOC entry 303 (class 1259 OID 486667)
+-- TOC entry 293 (class 1259 OID 17683)
 -- Name: dlocpolygon_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2093,8 +2123,8 @@ CREATE SEQUENCE public.dlocpolygon_pk_seq
 ALTER TABLE public.dlocpolygon_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4456 (class 0 OID 0)
--- Dependencies: 303
+-- TOC entry 5065 (class 0 OID 0)
+-- Dependencies: 293
 -- Name: dlocpolygon_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2102,7 +2132,7 @@ ALTER SEQUENCE public.dlocpolygon_pk_seq OWNED BY public.dlocpolygon.pk;
 
 
 --
--- TOC entry 306 (class 1259 OID 486680)
+-- TOC entry 294 (class 1259 OID 17684)
 -- Name: dlocquadril; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2124,7 +2154,7 @@ CREATE TABLE public.dlocquadril (
 ALTER TABLE public.dlocquadril OWNER TO postgres;
 
 --
--- TOC entry 305 (class 1259 OID 486678)
+-- TOC entry 295 (class 1259 OID 17689)
 -- Name: dlocquadril_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2139,8 +2169,8 @@ CREATE SEQUENCE public.dlocquadril_pk_seq
 ALTER TABLE public.dlocquadril_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4457 (class 0 OID 0)
--- Dependencies: 305
+-- TOC entry 5066 (class 0 OID 0)
+-- Dependencies: 295
 -- Name: dlocquadril_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2148,7 +2178,7 @@ ALTER SEQUENCE public.dlocquadril_pk_seq OWNED BY public.dlocquadril.pk;
 
 
 --
--- TOC entry 308 (class 1259 OID 486689)
+-- TOC entry 296 (class 1259 OID 17690)
 -- Name: dlocstratumdesc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2164,7 +2194,7 @@ CREATE TABLE public.dlocstratumdesc (
 ALTER TABLE public.dlocstratumdesc OWNER TO postgres;
 
 --
--- TOC entry 307 (class 1259 OID 486687)
+-- TOC entry 297 (class 1259 OID 17695)
 -- Name: dlocstratumdesc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2179,7 +2209,7 @@ CREATE SEQUENCE public.dlocstratumdesc_pk_seq
 ALTER TABLE public.dlocstratumdesc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 310 (class 1259 OID 486699)
+-- TOC entry 298 (class 1259 OID 17696)
 -- Name: dlocstructure; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2202,7 +2232,7 @@ CREATE TABLE public.dlocstructure (
 ALTER TABLE public.dlocstructure OWNER TO postgres;
 
 --
--- TOC entry 309 (class 1259 OID 486697)
+-- TOC entry 299 (class 1259 OID 17701)
 -- Name: dlocstructure_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2217,8 +2247,8 @@ CREATE SEQUENCE public.dlocstructure_pk_seq
 ALTER TABLE public.dlocstructure_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4458 (class 0 OID 0)
--- Dependencies: 309
+-- TOC entry 5067 (class 0 OID 0)
+-- Dependencies: 299
 -- Name: dlocstructure_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2226,7 +2256,7 @@ ALTER SEQUENCE public.dlocstructure_pk_seq OWNED BY public.dlocstructure.pk;
 
 
 --
--- TOC entry 312 (class 1259 OID 486708)
+-- TOC entry 300 (class 1259 OID 17702)
 -- Name: docplanvol; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2243,7 +2273,7 @@ CREATE TABLE public.docplanvol (
 ALTER TABLE public.docplanvol OWNER TO postgres;
 
 --
--- TOC entry 311 (class 1259 OID 486706)
+-- TOC entry 301 (class 1259 OID 17707)
 -- Name: docplanvol_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2258,8 +2288,8 @@ CREATE SEQUENCE public.docplanvol_pk_seq
 ALTER TABLE public.docplanvol_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4459 (class 0 OID 0)
--- Dependencies: 311
+-- TOC entry 5068 (class 0 OID 0)
+-- Dependencies: 301
 -- Name: docplanvol_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2267,7 +2297,7 @@ ALTER SEQUENCE public.docplanvol_pk_seq OWNED BY public.docplanvol.pk;
 
 
 --
--- TOC entry 314 (class 1259 OID 486717)
+-- TOC entry 302 (class 1259 OID 17708)
 -- Name: dsamarays; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2285,7 +2315,7 @@ CREATE TABLE public.dsamarays (
 ALTER TABLE public.dsamarays OWNER TO postgres;
 
 --
--- TOC entry 313 (class 1259 OID 486715)
+-- TOC entry 303 (class 1259 OID 17713)
 -- Name: dsamarays_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2300,8 +2330,8 @@ CREATE SEQUENCE public.dsamarays_pk_seq
 ALTER TABLE public.dsamarays_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4460 (class 0 OID 0)
--- Dependencies: 313
+-- TOC entry 5069 (class 0 OID 0)
+-- Dependencies: 303
 -- Name: dsamarays_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2309,7 +2339,7 @@ ALTER SEQUENCE public.dsamarays_pk_seq OWNED BY public.dsamarays.pk;
 
 
 --
--- TOC entry 316 (class 1259 OID 486726)
+-- TOC entry 304 (class 1259 OID 17714)
 -- Name: dsamgranulo; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2341,7 +2371,7 @@ CREATE TABLE public.dsamgranulo (
 ALTER TABLE public.dsamgranulo OWNER TO postgres;
 
 --
--- TOC entry 315 (class 1259 OID 486724)
+-- TOC entry 305 (class 1259 OID 17720)
 -- Name: dsamgranulo_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2356,8 +2386,8 @@ CREATE SEQUENCE public.dsamgranulo_pk_seq
 ALTER TABLE public.dsamgranulo_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4461 (class 0 OID 0)
--- Dependencies: 315
+-- TOC entry 5070 (class 0 OID 0)
+-- Dependencies: 305
 -- Name: dsamgranulo_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2365,7 +2395,7 @@ ALTER SEQUENCE public.dsamgranulo_pk_seq OWNED BY public.dsamgranulo.pk;
 
 
 --
--- TOC entry 318 (class 1259 OID 486736)
+-- TOC entry 306 (class 1259 OID 17721)
 -- Name: dsamheavymin; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2382,7 +2412,7 @@ CREATE TABLE public.dsamheavymin (
 ALTER TABLE public.dsamheavymin OWNER TO postgres;
 
 --
--- TOC entry 320 (class 1259 OID 486745)
+-- TOC entry 307 (class 1259 OID 17726)
 -- Name: dsamheavymin2; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2399,7 +2429,7 @@ CREATE TABLE public.dsamheavymin2 (
 ALTER TABLE public.dsamheavymin2 OWNER TO postgres;
 
 --
--- TOC entry 319 (class 1259 OID 486743)
+-- TOC entry 308 (class 1259 OID 17731)
 -- Name: dsamheavymin2_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2414,8 +2444,8 @@ CREATE SEQUENCE public.dsamheavymin2_pk_seq
 ALTER TABLE public.dsamheavymin2_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4462 (class 0 OID 0)
--- Dependencies: 319
+-- TOC entry 5071 (class 0 OID 0)
+-- Dependencies: 308
 -- Name: dsamheavymin2_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2423,7 +2453,7 @@ ALTER SEQUENCE public.dsamheavymin2_pk_seq OWNED BY public.dsamheavymin2.pk;
 
 
 --
--- TOC entry 317 (class 1259 OID 486734)
+-- TOC entry 309 (class 1259 OID 17732)
 -- Name: dsamheavymin_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2438,8 +2468,8 @@ CREATE SEQUENCE public.dsamheavymin_pk_seq
 ALTER TABLE public.dsamheavymin_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4463 (class 0 OID 0)
--- Dependencies: 317
+-- TOC entry 5072 (class 0 OID 0)
+-- Dependencies: 309
 -- Name: dsamheavymin_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2447,7 +2477,7 @@ ALTER SEQUENCE public.dsamheavymin_pk_seq OWNED BY public.dsamheavymin.pk;
 
 
 --
--- TOC entry 355 (class 1259 OID 511871)
+-- TOC entry 310 (class 1259 OID 17733)
 -- Name: dsammagsusc_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2462,7 +2492,7 @@ CREATE SEQUENCE public.dsammagsusc_pk_seq
 ALTER TABLE public.dsammagsusc_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 321 (class 1259 OID 486754)
+-- TOC entry 311 (class 1259 OID 17734)
 -- Name: dsammagsusc; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2484,7 +2514,7 @@ CREATE TABLE public.dsammagsusc (
 ALTER TABLE public.dsammagsusc OWNER TO postgres;
 
 --
--- TOC entry 323 (class 1259 OID 486764)
+-- TOC entry 312 (class 1259 OID 17740)
 -- Name: dsamminerals; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2500,7 +2530,7 @@ CREATE TABLE public.dsamminerals (
 ALTER TABLE public.dsamminerals OWNER TO postgres;
 
 --
--- TOC entry 322 (class 1259 OID 486762)
+-- TOC entry 313 (class 1259 OID 17746)
 -- Name: dsamminerals_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2515,8 +2545,8 @@ CREATE SEQUENCE public.dsamminerals_pk_seq
 ALTER TABLE public.dsamminerals_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4464 (class 0 OID 0)
--- Dependencies: 322
+-- TOC entry 5073 (class 0 OID 0)
+-- Dependencies: 313
 -- Name: dsamminerals_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2524,11 +2554,12 @@ ALTER SEQUENCE public.dsamminerals_pk_seq OWNED BY public.dsamminerals.pk;
 
 
 --
--- TOC entry 324 (class 1259 OID 486774)
+-- TOC entry 314 (class 1259 OID 17747)
 -- Name: dsample; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.dsample (
+    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass),
     idcollection character varying NOT NULL,
     idsample integer NOT NULL,
     fieldnum character varying,
@@ -2548,8 +2579,7 @@ CREATE TABLE public.dsample (
     radioactivity smallint,
     loaninformation character varying,
     securitylevel integer,
-    varioussampleinfo character varying,
-    pk integer DEFAULT nextval('public.seq_template_data_shared_pk'::regclass)
+    varioussampleinfo character varying
 )
 INHERITS (public.template_data);
 
@@ -2557,7 +2587,7 @@ INHERITS (public.template_data);
 ALTER TABLE public.dsample OWNER TO postgres;
 
 --
--- TOC entry 341 (class 1259 OID 509363)
+-- TOC entry 315 (class 1259 OID 17753)
 -- Name: dsample_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2572,7 +2602,7 @@ CREATE SEQUENCE public.dsample_pk_seq
 ALTER TABLE public.dsample_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 326 (class 1259 OID 486783)
+-- TOC entry 316 (class 1259 OID 17754)
 -- Name: dsamslimplate; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2589,7 +2619,7 @@ CREATE TABLE public.dsamslimplate (
 ALTER TABLE public.dsamslimplate OWNER TO postgres;
 
 --
--- TOC entry 325 (class 1259 OID 486781)
+-- TOC entry 317 (class 1259 OID 17759)
 -- Name: dsamslimplate_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2604,8 +2634,8 @@ CREATE SEQUENCE public.dsamslimplate_pk_seq
 ALTER TABLE public.dsamslimplate_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4465 (class 0 OID 0)
--- Dependencies: 325
+-- TOC entry 5074 (class 0 OID 0)
+-- Dependencies: 317
 -- Name: dsamslimplate_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2613,7 +2643,7 @@ ALTER SEQUENCE public.dsamslimplate_pk_seq OWNED BY public.dsamslimplate.pk;
 
 
 --
--- TOC entry 351 (class 1259 OID 511770)
+-- TOC entry 318 (class 1259 OID 17760)
 -- Name: duser_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2628,7 +2658,7 @@ CREATE SEQUENCE public.duser_id_seq
 ALTER TABLE public.duser_id_seq OWNER TO postgres;
 
 --
--- TOC entry 343 (class 1259 OID 511584)
+-- TOC entry 319 (class 1259 OID 17761)
 -- Name: duser; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2654,7 +2684,7 @@ CREATE TABLE public.duser (
 ALTER TABLE public.duser OWNER TO postgres;
 
 --
--- TOC entry 342 (class 1259 OID 511461)
+-- TOC entry 320 (class 1259 OID 17767)
 -- Name: duser_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2669,7 +2699,7 @@ CREATE SEQUENCE public.duser_pk_seq
 ALTER TABLE public.duser_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 344 (class 1259 OID 511607)
+-- TOC entry 321 (class 1259 OID 17768)
 -- Name: fos_group_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2684,7 +2714,7 @@ CREATE SEQUENCE public.fos_group_id_seq
 ALTER TABLE public.fos_group_id_seq OWNER TO postgres;
 
 --
--- TOC entry 345 (class 1259 OID 511609)
+-- TOC entry 322 (class 1259 OID 17769)
 -- Name: fos_group; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2698,7 +2728,7 @@ CREATE TABLE public.fos_group (
 ALTER TABLE public.fos_group OWNER TO postgres;
 
 --
--- TOC entry 346 (class 1259 OID 511618)
+-- TOC entry 323 (class 1259 OID 17775)
 -- Name: fos_role_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2713,7 +2743,7 @@ CREATE SEQUENCE public.fos_role_id_seq
 ALTER TABLE public.fos_role_id_seq OWNER TO postgres;
 
 --
--- TOC entry 347 (class 1259 OID 511642)
+-- TOC entry 324 (class 1259 OID 17776)
 -- Name: fos_role; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2729,7 +2759,7 @@ CREATE TABLE public.fos_role (
 ALTER TABLE public.fos_role OWNER TO postgres;
 
 --
--- TOC entry 349 (class 1259 OID 511732)
+-- TOC entry 325 (class 1259 OID 17782)
 -- Name: fos_user_collections_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2744,7 +2774,7 @@ CREATE SEQUENCE public.fos_user_collections_pk_seq
 ALTER TABLE public.fos_user_collections_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 350 (class 1259 OID 511734)
+-- TOC entry 326 (class 1259 OID 17783)
 -- Name: fos_user_collections; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2759,7 +2789,7 @@ CREATE TABLE public.fos_user_collections (
 ALTER TABLE public.fos_user_collections OWNER TO postgres;
 
 --
--- TOC entry 348 (class 1259 OID 511663)
+-- TOC entry 327 (class 1259 OID 17789)
 -- Name: fos_user_role; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2772,7 +2802,7 @@ CREATE TABLE public.fos_user_role (
 ALTER TABLE public.fos_user_role OWNER TO postgres;
 
 --
--- TOC entry 364 (class 1259 OID 512534)
+-- TOC entry 328 (class 1259 OID 17792)
 -- Name: generic_keyword; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2787,7 +2817,7 @@ CREATE TABLE public.generic_keyword (
 ALTER TABLE public.generic_keyword OWNER TO postgres;
 
 --
--- TOC entry 328 (class 1259 OID 486792)
+-- TOC entry 329 (class 1259 OID 17797)
 -- Name: larea; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2801,7 +2831,7 @@ CREATE TABLE public.larea (
 ALTER TABLE public.larea OWNER TO postgres;
 
 --
--- TOC entry 327 (class 1259 OID 486790)
+-- TOC entry 330 (class 1259 OID 17802)
 -- Name: larea_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2816,8 +2846,8 @@ CREATE SEQUENCE public.larea_pk_seq
 ALTER TABLE public.larea_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4466 (class 0 OID 0)
--- Dependencies: 327
+-- TOC entry 5075 (class 0 OID 0)
+-- Dependencies: 330
 -- Name: larea_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2825,7 +2855,7 @@ ALTER SEQUENCE public.larea_pk_seq OWNED BY public.larea.pk;
 
 
 --
--- TOC entry 330 (class 1259 OID 486801)
+-- TOC entry 331 (class 1259 OID 17803)
 -- Name: lkeywords; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2839,7 +2869,7 @@ CREATE TABLE public.lkeywords (
 ALTER TABLE public.lkeywords OWNER TO postgres;
 
 --
--- TOC entry 381 (class 1259 OID 528502)
+-- TOC entry 332 (class 1259 OID 17808)
 -- Name: lkeywords_bck20210722; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2853,7 +2883,7 @@ CREATE TABLE public.lkeywords_bck20210722 (
 ALTER TABLE public.lkeywords_bck20210722 OWNER TO postgres;
 
 --
--- TOC entry 329 (class 1259 OID 486799)
+-- TOC entry 333 (class 1259 OID 17813)
 -- Name: lkeywords_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2868,8 +2898,8 @@ CREATE SEQUENCE public.lkeywords_pk_seq
 ALTER TABLE public.lkeywords_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4467 (class 0 OID 0)
--- Dependencies: 329
+-- TOC entry 5076 (class 0 OID 0)
+-- Dependencies: 333
 -- Name: lkeywords_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2877,7 +2907,7 @@ ALTER SEQUENCE public.lkeywords_pk_seq OWNED BY public.lkeywords.pk;
 
 
 --
--- TOC entry 332 (class 1259 OID 486810)
+-- TOC entry 334 (class 1259 OID 17814)
 -- Name: lmapreftype; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2890,7 +2920,7 @@ CREATE TABLE public.lmapreftype (
 ALTER TABLE public.lmapreftype OWNER TO postgres;
 
 --
--- TOC entry 331 (class 1259 OID 486808)
+-- TOC entry 335 (class 1259 OID 17819)
 -- Name: lmapreftype_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2905,8 +2935,8 @@ CREATE SEQUENCE public.lmapreftype_pk_seq
 ALTER TABLE public.lmapreftype_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4468 (class 0 OID 0)
--- Dependencies: 331
+-- TOC entry 5077 (class 0 OID 0)
+-- Dependencies: 335
 -- Name: lmapreftype_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2914,7 +2944,7 @@ ALTER SEQUENCE public.lmapreftype_pk_seq OWNED BY public.lmapreftype.pk;
 
 
 --
--- TOC entry 334 (class 1259 OID 486819)
+-- TOC entry 336 (class 1259 OID 17820)
 -- Name: lmedium; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2929,7 +2959,7 @@ CREATE TABLE public.lmedium (
 ALTER TABLE public.lmedium OWNER TO postgres;
 
 --
--- TOC entry 333 (class 1259 OID 486817)
+-- TOC entry 337 (class 1259 OID 17825)
 -- Name: lmedium_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2944,8 +2974,8 @@ CREATE SEQUENCE public.lmedium_pk_seq
 ALTER TABLE public.lmedium_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4469 (class 0 OID 0)
--- Dependencies: 333
+-- TOC entry 5078 (class 0 OID 0)
+-- Dependencies: 337
 -- Name: lmedium_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2953,7 +2983,7 @@ ALTER SEQUENCE public.lmedium_pk_seq OWNED BY public.lmedium.pk;
 
 
 --
--- TOC entry 336 (class 1259 OID 486828)
+-- TOC entry 338 (class 1259 OID 17826)
 -- Name: lminerals; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2973,7 +3003,7 @@ CREATE TABLE public.lminerals (
 ALTER TABLE public.lminerals OWNER TO postgres;
 
 --
--- TOC entry 335 (class 1259 OID 486826)
+-- TOC entry 339 (class 1259 OID 17831)
 -- Name: lminerals_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -2988,8 +3018,8 @@ CREATE SEQUENCE public.lminerals_pk_seq
 ALTER TABLE public.lminerals_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4470 (class 0 OID 0)
--- Dependencies: 335
+-- TOC entry 5079 (class 0 OID 0)
+-- Dependencies: 339
 -- Name: lminerals_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -2997,7 +3027,7 @@ ALTER SEQUENCE public.lminerals_pk_seq OWNED BY public.lminerals.pk;
 
 
 --
--- TOC entry 338 (class 1259 OID 486837)
+-- TOC entry 340 (class 1259 OID 17832)
 -- Name: lprecision; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3011,7 +3041,7 @@ CREATE TABLE public.lprecision (
 ALTER TABLE public.lprecision OWNER TO postgres;
 
 --
--- TOC entry 337 (class 1259 OID 486835)
+-- TOC entry 341 (class 1259 OID 17837)
 -- Name: lprecision_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -3026,8 +3056,8 @@ CREATE SEQUENCE public.lprecision_pk_seq
 ALTER TABLE public.lprecision_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4471 (class 0 OID 0)
--- Dependencies: 337
+-- TOC entry 5080 (class 0 OID 0)
+-- Dependencies: 341
 -- Name: lprecision_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -3035,7 +3065,7 @@ ALTER SEQUENCE public.lprecision_pk_seq OWNED BY public.lprecision.pk;
 
 
 --
--- TOC entry 340 (class 1259 OID 486846)
+-- TOC entry 342 (class 1259 OID 17838)
 -- Name: ltitlelevel; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3049,7 +3079,7 @@ CREATE TABLE public.ltitlelevel (
 ALTER TABLE public.ltitlelevel OWNER TO postgres;
 
 --
--- TOC entry 339 (class 1259 OID 486844)
+-- TOC entry 343 (class 1259 OID 17844)
 -- Name: ltitlelevel_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -3064,8 +3094,8 @@ CREATE SEQUENCE public.ltitlelevel_pk_seq
 ALTER TABLE public.ltitlelevel_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4472 (class 0 OID 0)
--- Dependencies: 339
+-- TOC entry 5081 (class 0 OID 0)
+-- Dependencies: 343
 -- Name: ltitlelevel_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -3073,7 +3103,7 @@ ALTER SEQUENCE public.ltitlelevel_pk_seq OWNED BY public.ltitlelevel.pk;
 
 
 --
--- TOC entry 360 (class 1259 OID 512476)
+-- TOC entry 344 (class 1259 OID 17845)
 -- Name: v_all_contributions; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3107,7 +3137,7 @@ CREATE VIEW public.v_all_contributions AS
 ALTER TABLE public.v_all_contributions OWNER TO postgres;
 
 --
--- TOC entry 367 (class 1259 OID 512613)
+-- TOC entry 345 (class 1259 OID 17850)
 -- Name: v_all_contributions_to_object; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3170,7 +3200,7 @@ UNION
 ALTER TABLE public.v_all_contributions_to_object OWNER TO postgres;
 
 --
--- TOC entry 368 (class 1259 OID 512618)
+-- TOC entry 346 (class 1259 OID 17855)
 -- Name: v_all_contributions_to_object_agg; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3191,7 +3221,7 @@ CREATE VIEW public.v_all_contributions_to_object_agg AS
 ALTER TABLE public.v_all_contributions_to_object_agg OWNER TO postgres;
 
 --
--- TOC entry 369 (class 1259 OID 512622)
+-- TOC entry 347 (class 1259 OID 17859)
 -- Name: v_all_contributions_to_object_agg_merge; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3220,7 +3250,7 @@ CREATE VIEW public.v_all_contributions_to_object_agg_merge AS
 ALTER TABLE public.v_all_contributions_to_object_agg_merge OWNER TO postgres;
 
 --
--- TOC entry 375 (class 1259 OID 514365)
+-- TOC entry 348 (class 1259 OID 17864)
 -- Name: mv_all_contributions_to_object_agg_merge; Type: MATERIALIZED VIEW; Schema: public; Owner: postgres
 --
 
@@ -3237,7 +3267,7 @@ CREATE MATERIALIZED VIEW public.mv_all_contributions_to_object_agg_merge AS
 ALTER TABLE public.mv_all_contributions_to_object_agg_merge OWNER TO postgres;
 
 --
--- TOC entry 374 (class 1259 OID 514326)
+-- TOC entry 349 (class 1259 OID 17870)
 -- Name: tv_keyword_hierarchy_to_object; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3256,7 +3286,7 @@ CREATE TABLE public.tv_keyword_hierarchy_to_object (
 ALTER TABLE public.tv_keyword_hierarchy_to_object OWNER TO postgres;
 
 --
--- TOC entry 379 (class 1259 OID 514892)
+-- TOC entry 350 (class 1259 OID 17875)
 -- Name: mv_keyword_hierarchy_to_object_list_parent; Type: MATERIALIZED VIEW; Schema: public; Owner: postgres
 --
 
@@ -3269,7 +3299,7 @@ CREATE MATERIALIZED VIEW public.mv_keyword_hierarchy_to_object_list_parent AS
 ALTER TABLE public.mv_keyword_hierarchy_to_object_list_parent OWNER TO postgres;
 
 --
--- TOC entry 384 (class 1259 OID 593284)
+-- TOC entry 351 (class 1259 OID 17881)
 -- Name: mv_merge_keywords; Type: MATERIALIZED VIEW; Schema: public; Owner: postgres
 --
 
@@ -3288,7 +3318,7 @@ UNION
 ALTER TABLE public.mv_merge_keywords OWNER TO postgres;
 
 --
--- TOC entry 366 (class 1259 OID 512599)
+-- TOC entry 352 (class 1259 OID 17887)
 -- Name: v_rmca_main_objects_description; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3309,7 +3339,7 @@ SELECT
 ALTER TABLE public.v_rmca_main_objects_description OWNER TO postgres;
 
 --
--- TOC entry 373 (class 1259 OID 514270)
+-- TOC entry 353 (class 1259 OID 17891)
 -- Name: mv_rmca_main_objects_description; Type: MATERIALIZED VIEW; Schema: public; Owner: postgres
 --
 
@@ -3331,7 +3361,7 @@ CREATE MATERIALIZED VIEW public.mv_rmca_main_objects_description AS
 ALTER TABLE public.mv_rmca_main_objects_description OWNER TO postgres;
 
 --
--- TOC entry 358 (class 1259 OID 512453)
+-- TOC entry 354 (class 1259 OID 17897)
 -- Name: v_rmca_document_2_sample; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3350,7 +3380,7 @@ CREATE VIEW public.v_rmca_document_2_sample AS
 ALTER TABLE public.v_rmca_document_2_sample OWNER TO postgres;
 
 --
--- TOC entry 357 (class 1259 OID 512438)
+-- TOC entry 355 (class 1259 OID 17902)
 -- Name: v_rmca_loc_2_doc_loc_2_sample; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3367,7 +3397,8 @@ CREATE VIEW public.v_rmca_loc_2_doc_loc_2_sample AS
     dsample.idcollection AS idcollectionsample,
     dsample.idsample,
     dloccenter.coord_lat,
-    dloccenter.coord_long
+    dloccenter.coord_long,
+    dloccenter.geom
    FROM (((((public.dloccenter
      FULL JOIN public.dlinkdocloc ON (((dloccenter.idpt = dlinkdocloc.idpt) AND ((dloccenter.idcollection)::text = (dlinkdocloc.idcollecloc)::text))))
      FULL JOIN public.ddocument ON ((((dlinkdocloc.idcollecdoc)::text = (ddocument.idcollection)::text) AND (dlinkdocloc.iddoc = ddocument.iddoc))))
@@ -3379,7 +3410,7 @@ CREATE VIEW public.v_rmca_loc_2_doc_loc_2_sample AS
 ALTER TABLE public.v_rmca_loc_2_doc_loc_2_sample OWNER TO postgres;
 
 --
--- TOC entry 359 (class 1259 OID 512458)
+-- TOC entry 356 (class 1259 OID 17907)
 -- Name: v_rmca_merge_all_objects; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3397,7 +3428,8 @@ CREATE VIEW public.v_rmca_merge_all_objects AS
             v_rmca_loc_2_doc_loc_2_sample.idcollectionsample,
             v_rmca_loc_2_doc_loc_2_sample.idsample,
             v_rmca_loc_2_doc_loc_2_sample.coord_lat,
-            v_rmca_loc_2_doc_loc_2_sample.coord_long
+            v_rmca_loc_2_doc_loc_2_sample.coord_long,
+            v_rmca_loc_2_doc_loc_2_sample.geom
            FROM public.v_rmca_loc_2_doc_loc_2_sample
         ), b AS (
          SELECT v_rmca_document_2_sample.fk_document,
@@ -3407,7 +3439,8 @@ CREATE VIEW public.v_rmca_merge_all_objects AS
             v_rmca_document_2_sample.idcollectionsample,
             v_rmca_document_2_sample.idsample,
             NULL::numeric AS coord_lat,
-            NULL::numeric AS coord_long
+            NULL::numeric AS coord_long,
+            NULL::public.geometry AS geom
            FROM public.v_rmca_document_2_sample
           WHERE ((NOT (v_rmca_document_2_sample.fk_document IN ( SELECT a.fk_document
                    FROM a))) OR (NOT (v_rmca_document_2_sample.fk_sample IN ( SELECT a.fk_sample
@@ -3427,7 +3460,8 @@ CREATE VIEW public.v_rmca_merge_all_objects AS
     a.idcollectionsample,
     a.idsample,
     a.coord_lat,
-    a.coord_long
+    a.coord_long,
+    a.geom
    FROM a
 UNION
  SELECT NULL::integer AS fk_locality,
@@ -3442,14 +3476,15 @@ UNION
     b.idcollectionsample,
     b.idsample,
     b.coord_lat,
-    b.coord_long
+    b.coord_long,
+    b.geom
    FROM b;
 
 
 ALTER TABLE public.v_rmca_merge_all_objects OWNER TO postgres;
 
 --
--- TOC entry 362 (class 1259 OID 512521)
+-- TOC entry 357 (class 1259 OID 17912)
 -- Name: v_rmca_merge_all_objects_vertical_expand; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3467,18 +3502,20 @@ CREATE VIEW public.v_rmca_merge_all_objects_vertical_expand AS
             v_rmca_merge_all_objects.idcollectionsample,
             v_rmca_merge_all_objects.idsample,
             v_rmca_merge_all_objects.coord_long,
-            v_rmca_merge_all_objects.coord_lat
+            v_rmca_merge_all_objects.coord_lat,
+            v_rmca_merge_all_objects.geom
            FROM public.v_rmca_merge_all_objects
         )
  SELECT DISTINCT a.fk_locality AS main_pk,
     'locality'::text AS type,
     a.fk_document,
     a.fk_sample,
-    NULL::integer AS fk_localitie,
+    a.fk_locality AS fk_localitie,
     a.coord_long,
     a.coord_lat,
     a.idpt AS idobject,
-    a.idcollectionloc AS idcollection
+    a.idcollectionloc AS idcollection,
+    a.geom
    FROM a
   WHERE (a.fk_locality IS NOT NULL)
 UNION
@@ -3490,7 +3527,8 @@ UNION
     a.coord_long,
     a.coord_lat,
     a.iddoc AS idobject,
-    a.idcollection
+    a.idcollection,
+    a.geom
    FROM a
   WHERE (a.fk_document IS NOT NULL)
 UNION
@@ -3502,7 +3540,8 @@ UNION
     a.coord_long,
     a.coord_lat,
     a.idsample AS idobject,
-    a.idcollectionsample AS idcollection
+    a.idcollectionsample AS idcollection,
+    a.geom
    FROM a
   WHERE (a.fk_sample IS NOT NULL);
 
@@ -3510,7 +3549,7 @@ UNION
 ALTER TABLE public.v_rmca_merge_all_objects_vertical_expand OWNER TO postgres;
 
 --
--- TOC entry 372 (class 1259 OID 514263)
+-- TOC entry 358 (class 1259 OID 17917)
 -- Name: mv_rmca_merge_all_objects_vertical_expand; Type: MATERIALIZED VIEW; Schema: public; Owner: postgres
 --
 
@@ -3523,7 +3562,8 @@ CREATE MATERIALIZED VIEW public.mv_rmca_merge_all_objects_vertical_expand AS
     v_rmca_merge_all_objects_vertical_expand.coord_long,
     v_rmca_merge_all_objects_vertical_expand.coord_lat,
     v_rmca_merge_all_objects_vertical_expand.idobject,
-    v_rmca_merge_all_objects_vertical_expand.idcollection
+    v_rmca_merge_all_objects_vertical_expand.idcollection,
+    v_rmca_merge_all_objects_vertical_expand.geom
    FROM public.v_rmca_merge_all_objects_vertical_expand
   WITH NO DATA;
 
@@ -3531,7 +3571,7 @@ CREATE MATERIALIZED VIEW public.mv_rmca_merge_all_objects_vertical_expand AS
 ALTER TABLE public.mv_rmca_merge_all_objects_vertical_expand OWNER TO postgres;
 
 --
--- TOC entry 378 (class 1259 OID 514535)
+-- TOC entry 359 (class 1259 OID 17923)
 -- Name: t_data_log; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3543,14 +3583,15 @@ CREATE TABLE public.t_data_log (
     action character varying,
     old_value json,
     new_value json,
-    modification_date_time timestamp without time zone DEFAULT now() NOT NULL
+    modification_date_time timestamp without time zone DEFAULT now() NOT NULL,
+    secondary_table character varying
 );
 
 
 ALTER TABLE public.t_data_log OWNER TO postgres;
 
 --
--- TOC entry 377 (class 1259 OID 514533)
+-- TOC entry 360 (class 1259 OID 17929)
 -- Name: t_data_log_pk_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -3565,8 +3606,8 @@ CREATE SEQUENCE public.t_data_log_pk_seq
 ALTER TABLE public.t_data_log_pk_seq OWNER TO postgres;
 
 --
--- TOC entry 4473 (class 0 OID 0)
--- Dependencies: 377
+-- TOC entry 5082 (class 0 OID 0)
+-- Dependencies: 360
 -- Name: t_data_log_pk_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -3574,7 +3615,7 @@ ALTER SEQUENCE public.t_data_log_pk_seq OWNED BY public.t_data_log.pk;
 
 
 --
--- TOC entry 376 (class 1259 OID 514492)
+-- TOC entry 361 (class 1259 OID 17930)
 -- Name: tv_materialized_view_stamp; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3587,7 +3628,31 @@ CREATE TABLE public.tv_materialized_view_stamp (
 ALTER TABLE public.tv_materialized_view_stamp OWNER TO postgres;
 
 --
--- TOC entry 356 (class 1259 OID 511889)
+-- TOC entry 369 (class 1259 OID 31466)
+-- Name: v_distinctdlocstratumdesc; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.v_distinctdlocstratumdesc AS
+ SELECT DISTINCT (initcap((dlocstratumdesc.descript)::text))::character varying AS descript
+   FROM public.dlocstratumdesc;
+
+
+ALTER TABLE public.v_distinctdlocstratumdesc OWNER TO postgres;
+
+--
+-- TOC entry 370 (class 1259 OID 31509)
+-- Name: v_distinctlithostratum; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW public.v_distinctlithostratum AS
+ SELECT DISTINCT (initcap(TRIM(BOTH FROM dloclitho.lithostratum)))::character varying AS lithostratum
+   FROM public.dloclitho;
+
+
+ALTER TABLE public.v_distinctlithostratum OWNER TO postgres;
+
+--
+-- TOC entry 362 (class 1259 OID 17933)
 -- Name: v_doctitle_agg; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3603,7 +3668,7 @@ CREATE VIEW public.v_doctitle_agg AS
 ALTER TABLE public.v_doctitle_agg OWNER TO postgres;
 
 --
--- TOC entry 361 (class 1259 OID 512516)
+-- TOC entry 363 (class 1259 OID 17937)
 -- Name: v_rmca_merge_all_objects_vertical; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3667,7 +3732,7 @@ UNION
 ALTER TABLE public.v_rmca_merge_all_objects_vertical OWNER TO postgres;
 
 --
--- TOC entry 370 (class 1259 OID 512764)
+-- TOC entry 364 (class 1259 OID 17942)
 -- Name: v_keyword_hierarchy_to_object; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3710,7 +3775,7 @@ UNION
 ALTER TABLE public.v_keyword_hierarchy_to_object OWNER TO postgres;
 
 --
--- TOC entry 371 (class 1259 OID 512805)
+-- TOC entry 365 (class 1259 OID 17947)
 -- Name: v_keyword_hierarchy_to_object_list_parent; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3725,7 +3790,7 @@ UNION
 ALTER TABLE public.v_keyword_hierarchy_to_object_list_parent OWNER TO postgres;
 
 --
--- TOC entry 380 (class 1259 OID 522194)
+-- TOC entry 366 (class 1259 OID 17951)
 -- Name: v_lkeywords_merge; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3751,7 +3816,7 @@ CREATE VIEW public.v_lkeywords_merge AS
 ALTER TABLE public.v_lkeywords_merge OWNER TO postgres;
 
 --
--- TOC entry 354 (class 1259 OID 511864)
+-- TOC entry 367 (class 1259 OID 17956)
 -- Name: v_search_all_data; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3813,7 +3878,7 @@ CREATE VIEW public.v_search_all_data AS
 ALTER TABLE public.v_search_all_data OWNER TO postgres;
 
 --
--- TOC entry 353 (class 1259 OID 511859)
+-- TOC entry 368 (class 1259 OID 17961)
 -- Name: v_search_alldata; Type: VIEW; Schema: public; Owner: postgres
 --
 
@@ -3912,7 +3977,7 @@ CREATE VIEW public.v_search_alldata AS
 ALTER TABLE public.v_search_alldata OWNER TO postgres;
 
 --
--- TOC entry 3909 (class 2604 OID 486351)
+-- TOC entry 4494 (class 2604 OID 17966)
 -- Name: codecollection pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3920,7 +3985,7 @@ ALTER TABLE ONLY public.codecollection ALTER COLUMN pk SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3910 (class 2604 OID 486371)
+-- TOC entry 4496 (class 2604 OID 17967)
 -- Name: dcontributor pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3928,7 +3993,7 @@ ALTER TABLE ONLY public.dcontributor ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3913 (class 2604 OID 486391)
+-- TOC entry 4498 (class 2604 OID 17968)
 -- Name: ddocarchive pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3936,7 +4001,7 @@ ALTER TABLE ONLY public.ddocarchive ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3916 (class 2604 OID 486432)
+-- TOC entry 4501 (class 2604 OID 17969)
 -- Name: ddocsatellite pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3944,7 +4009,7 @@ ALTER TABLE ONLY public.ddocsatellite ALTER COLUMN pk SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3918 (class 2604 OID 486451)
+-- TOC entry 4503 (class 2604 OID 17970)
 -- Name: ddoctitle pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3952,7 +4017,7 @@ ALTER TABLE ONLY public.ddoctitle ALTER COLUMN pk SET DEFAULT nextval('public.dd
 
 
 --
--- TOC entry 3924 (class 2604 OID 486473)
+-- TOC entry 4510 (class 2604 OID 17971)
 -- Name: dgestion pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3960,7 +4025,7 @@ ALTER TABLE ONLY public.dgestion ALTER COLUMN pk SET DEFAULT nextval('public.dge
 
 
 --
--- TOC entry 3926 (class 2604 OID 486493)
+-- TOC entry 4512 (class 2604 OID 17972)
 -- Name: dinstitute pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3968,7 +4033,7 @@ ALTER TABLE ONLY public.dinstitute ALTER COLUMN pk SET DEFAULT nextval('public.d
 
 
 --
--- TOC entry 3928 (class 2604 OID 486512)
+-- TOC entry 4514 (class 2604 OID 17973)
 -- Name: dlinkcontdoc pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3976,7 +4041,7 @@ ALTER TABLE ONLY public.dlinkcontdoc ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3929 (class 2604 OID 511884)
+-- TOC entry 4515 (class 2604 OID 17974)
 -- Name: dlinkcontloc pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3984,7 +4049,7 @@ ALTER TABLE ONLY public.dlinkcontloc ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3933 (class 2604 OID 486534)
+-- TOC entry 4519 (class 2604 OID 17975)
 -- Name: dlinkcontribute pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -3992,7 +4057,7 @@ ALTER TABLE ONLY public.dlinkcontribute ALTER COLUMN pk SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 3934 (class 2604 OID 486543)
+-- TOC entry 4520 (class 2604 OID 17976)
 -- Name: dlinkcontsam pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4000,7 +4065,7 @@ ALTER TABLE ONLY public.dlinkcontsam ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3935 (class 2604 OID 486562)
+-- TOC entry 4521 (class 2604 OID 17977)
 -- Name: dlinkdocsam pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4008,7 +4073,7 @@ ALTER TABLE ONLY public.dlinkdocsam ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3936 (class 2604 OID 486589)
+-- TOC entry 4522 (class 2604 OID 17978)
 -- Name: dlinkgestsam pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4016,7 +4081,7 @@ ALTER TABLE ONLY public.dlinkgestsam ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3937 (class 2604 OID 486598)
+-- TOC entry 4523 (class 2604 OID 17979)
 -- Name: dlinklocsam pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4024,7 +4089,7 @@ ALTER TABLE ONLY public.dlinklocsam ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3939 (class 2604 OID 486608)
+-- TOC entry 4525 (class 2604 OID 17980)
 -- Name: dloccarto pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4032,7 +4097,7 @@ ALTER TABLE ONLY public.dloccarto ALTER COLUMN pk SET DEFAULT nextval('public.dl
 
 
 --
--- TOC entry 3943 (class 2604 OID 486644)
+-- TOC entry 4529 (class 2604 OID 17981)
 -- Name: dlocdrillingtype pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4040,7 +4105,7 @@ ALTER TABLE ONLY public.dlocdrillingtype ALTER COLUMN pk SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 3945 (class 2604 OID 486654)
+-- TOC entry 4531 (class 2604 OID 17982)
 -- Name: dlochydro pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4048,7 +4113,7 @@ ALTER TABLE ONLY public.dlochydro ALTER COLUMN pk SET DEFAULT nextval('public.dl
 
 
 --
--- TOC entry 3946 (class 2604 OID 486663)
+-- TOC entry 4532 (class 2604 OID 17983)
 -- Name: dloclitho pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4056,7 +4121,7 @@ ALTER TABLE ONLY public.dloclitho ALTER COLUMN pk SET DEFAULT nextval('public.dl
 
 
 --
--- TOC entry 3947 (class 2604 OID 486702)
+-- TOC entry 4533 (class 2604 OID 17984)
 -- Name: dlocstructure pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4064,7 +4129,7 @@ ALTER TABLE ONLY public.dlocstructure ALTER COLUMN pk SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3948 (class 2604 OID 486711)
+-- TOC entry 4534 (class 2604 OID 17985)
 -- Name: docplanvol pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4072,7 +4137,7 @@ ALTER TABLE ONLY public.docplanvol ALTER COLUMN pk SET DEFAULT nextval('public.d
 
 
 --
--- TOC entry 3950 (class 2604 OID 486730)
+-- TOC entry 4536 (class 2604 OID 17986)
 -- Name: dsamgranulo pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4080,7 +4145,7 @@ ALTER TABLE ONLY public.dsamgranulo ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3951 (class 2604 OID 486739)
+-- TOC entry 4537 (class 2604 OID 17987)
 -- Name: dsamheavymin pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4088,7 +4153,7 @@ ALTER TABLE ONLY public.dsamheavymin ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3952 (class 2604 OID 486748)
+-- TOC entry 4538 (class 2604 OID 17988)
 -- Name: dsamheavymin2 pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4096,7 +4161,7 @@ ALTER TABLE ONLY public.dsamheavymin2 ALTER COLUMN pk SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3955 (class 2604 OID 486768)
+-- TOC entry 4541 (class 2604 OID 17989)
 -- Name: dsamminerals pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4104,7 +4169,7 @@ ALTER TABLE ONLY public.dsamminerals ALTER COLUMN pk SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3957 (class 2604 OID 486804)
+-- TOC entry 4547 (class 2604 OID 17990)
 -- Name: lkeywords pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4112,7 +4177,7 @@ ALTER TABLE ONLY public.lkeywords ALTER COLUMN pk SET DEFAULT nextval('public.lk
 
 
 --
--- TOC entry 3958 (class 2604 OID 486813)
+-- TOC entry 4548 (class 2604 OID 17991)
 -- Name: lmapreftype pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4120,7 +4185,7 @@ ALTER TABLE ONLY public.lmapreftype ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3959 (class 2604 OID 486831)
+-- TOC entry 4549 (class 2604 OID 17992)
 -- Name: lminerals pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4128,7 +4193,7 @@ ALTER TABLE ONLY public.lminerals ALTER COLUMN pk SET DEFAULT nextval('public.lm
 
 
 --
--- TOC entry 3960 (class 2604 OID 486840)
+-- TOC entry 4550 (class 2604 OID 17993)
 -- Name: lprecision pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4136,7 +4201,7 @@ ALTER TABLE ONLY public.lprecision ALTER COLUMN pk SET DEFAULT nextval('public.l
 
 
 --
--- TOC entry 3962 (class 2604 OID 486850)
+-- TOC entry 4552 (class 2604 OID 17994)
 -- Name: ltitlelevel pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4144,7 +4209,7 @@ ALTER TABLE ONLY public.ltitlelevel ALTER COLUMN pk SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3968 (class 2604 OID 514538)
+-- TOC entry 4554 (class 2604 OID 17995)
 -- Name: t_data_log pk; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -4152,7 +4217,7 @@ ALTER TABLE ONLY public.t_data_log ALTER COLUMN pk SET DEFAULT nextval('public.t
 
 
 --
--- TOC entry 4008 (class 2606 OID 486857)
+-- TOC entry 4591 (class 2606 OID 22629)
 -- Name: ddocsatellite DDocSatellite_IDDoc_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4161,7 +4226,7 @@ ALTER TABLE ONLY public.ddocsatellite
 
 
 --
--- TOC entry 4129 (class 2606 OID 486859)
+-- TOC entry 4714 (class 2606 OID 22631)
 -- Name: dsamarays DSamARays_IDCollection_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4170,7 +4235,7 @@ ALTER TABLE ONLY public.dsamarays
 
 
 --
--- TOC entry 3973 (class 2606 OID 486861)
+-- TOC entry 4558 (class 2606 OID 22633)
 -- Name: codecollection codecollection_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4179,7 +4244,7 @@ ALTER TABLE ONLY public.codecollection
 
 
 --
--- TOC entry 3975 (class 2606 OID 486863)
+-- TOC entry 4560 (class 2606 OID 22635)
 -- Name: codecollection codecollection_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4188,7 +4253,7 @@ ALTER TABLE ONLY public.codecollection
 
 
 --
--- TOC entry 4216 (class 2606 OID 514544)
+-- TOC entry 4799 (class 2606 OID 22637)
 -- Name: t_data_log data_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4197,7 +4262,7 @@ ALTER TABLE ONLY public.t_data_log
 
 
 --
--- TOC entry 3977 (class 2606 OID 592802)
+-- TOC entry 4562 (class 2606 OID 22639)
 -- Name: dcontribution dcontribution_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4206,7 +4271,7 @@ ALTER TABLE ONLY public.dcontribution
 
 
 --
--- TOC entry 3979 (class 2606 OID 486867)
+-- TOC entry 4564 (class 2606 OID 22641)
 -- Name: dcontribution dcontribution_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4215,7 +4280,7 @@ ALTER TABLE ONLY public.dcontribution
 
 
 --
--- TOC entry 3981 (class 2606 OID 486869)
+-- TOC entry 4566 (class 2606 OID 22643)
 -- Name: dcontributor dcontributor_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4224,7 +4289,7 @@ ALTER TABLE ONLY public.dcontributor
 
 
 --
--- TOC entry 3983 (class 2606 OID 486871)
+-- TOC entry 4568 (class 2606 OID 22645)
 -- Name: dcontributor dcontributor_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4233,7 +4298,7 @@ ALTER TABLE ONLY public.dcontributor
 
 
 --
--- TOC entry 3986 (class 2606 OID 486873)
+-- TOC entry 4571 (class 2606 OID 22647)
 -- Name: ddocaerphoto ddocaerphoto_pid_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4242,7 +4307,7 @@ ALTER TABLE ONLY public.ddocaerphoto
 
 
 --
--- TOC entry 3988 (class 2606 OID 486875)
+-- TOC entry 4573 (class 2606 OID 22649)
 -- Name: ddocaerphoto ddocaerphoto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4251,7 +4316,7 @@ ALTER TABLE ONLY public.ddocaerphoto
 
 
 --
--- TOC entry 3990 (class 2606 OID 486877)
+-- TOC entry 4575 (class 2606 OID 22651)
 -- Name: ddocaerphoto ddocaerphoto_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4260,7 +4325,7 @@ ALTER TABLE ONLY public.ddocaerphoto
 
 
 --
--- TOC entry 3992 (class 2606 OID 486879)
+-- TOC entry 4577 (class 2606 OID 22653)
 -- Name: ddocarchive ddocarchive_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4269,7 +4334,7 @@ ALTER TABLE ONLY public.ddocarchive
 
 
 --
--- TOC entry 3996 (class 2606 OID 486881)
+-- TOC entry 4581 (class 2606 OID 22655)
 -- Name: ddocfilm ddocfilm_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4278,7 +4343,7 @@ ALTER TABLE ONLY public.ddocfilm
 
 
 --
--- TOC entry 3998 (class 2606 OID 486883)
+-- TOC entry 4583 (class 2606 OID 22657)
 -- Name: ddocfilm ddocfilm_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4287,7 +4352,7 @@ ALTER TABLE ONLY public.ddocfilm
 
 
 --
--- TOC entry 4000 (class 2606 OID 486885)
+-- TOC entry 4585 (class 2606 OID 22659)
 -- Name: ddoclinks ddoclinks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4296,7 +4361,7 @@ ALTER TABLE ONLY public.ddoclinks
 
 
 --
--- TOC entry 4002 (class 2606 OID 486887)
+-- TOC entry 4587 (class 2606 OID 22661)
 -- Name: ddoclinks ddoclinks_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4305,7 +4370,7 @@ ALTER TABLE ONLY public.ddoclinks
 
 
 --
--- TOC entry 4004 (class 2606 OID 486889)
+-- TOC entry 4589 (class 2606 OID 22663)
 -- Name: ddocmap ddocmap_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4314,16 +4379,7 @@ ALTER TABLE ONLY public.ddocmap
 
 
 --
--- TOC entry 4006 (class 2606 OID 486891)
--- Name: ddocmap ddocmap_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.ddocmap
-    ADD CONSTRAINT ddocmap_unique UNIQUE (iddoc, idcollection);
-
-
---
--- TOC entry 4010 (class 2606 OID 486893)
+-- TOC entry 4593 (class 2606 OID 22665)
 -- Name: ddocsatellite ddocsatellite_iddoc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4332,7 +4388,7 @@ ALTER TABLE ONLY public.ddocsatellite
 
 
 --
--- TOC entry 4012 (class 2606 OID 486895)
+-- TOC entry 4595 (class 2606 OID 22667)
 -- Name: ddocsatellite ddocsatellite_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4341,7 +4397,7 @@ ALTER TABLE ONLY public.ddocsatellite
 
 
 --
--- TOC entry 4014 (class 2606 OID 486897)
+-- TOC entry 4597 (class 2606 OID 22669)
 -- Name: ddocsatellite ddocsatellite_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4350,7 +4406,7 @@ ALTER TABLE ONLY public.ddocsatellite
 
 
 --
--- TOC entry 4016 (class 2606 OID 486899)
+-- TOC entry 4599 (class 2606 OID 22671)
 -- Name: ddocscale ddocscale_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4359,7 +4415,7 @@ ALTER TABLE ONLY public.ddocscale
 
 
 --
--- TOC entry 4018 (class 2606 OID 486901)
+-- TOC entry 4601 (class 2606 OID 22673)
 -- Name: ddocscale ddocscale_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4368,7 +4424,7 @@ ALTER TABLE ONLY public.ddocscale
 
 
 --
--- TOC entry 4020 (class 2606 OID 486903)
+-- TOC entry 4603 (class 2606 OID 22675)
 -- Name: ddoctitle ddoctitle_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4377,7 +4433,7 @@ ALTER TABLE ONLY public.ddoctitle
 
 
 --
--- TOC entry 4022 (class 2606 OID 486905)
+-- TOC entry 4605 (class 2606 OID 22677)
 -- Name: ddoctitle ddoctitle_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4386,7 +4442,7 @@ ALTER TABLE ONLY public.ddoctitle
 
 
 --
--- TOC entry 4024 (class 2606 OID 512568)
+-- TOC entry 4609 (class 2606 OID 22679)
 -- Name: ddocument ddocument_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4395,7 +4451,7 @@ ALTER TABLE ONLY public.ddocument
 
 
 --
--- TOC entry 4026 (class 2606 OID 486909)
+-- TOC entry 4611 (class 2606 OID 22681)
 -- Name: ddocument ddocument_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4404,7 +4460,7 @@ ALTER TABLE ONLY public.ddocument
 
 
 --
--- TOC entry 4028 (class 2606 OID 486913)
+-- TOC entry 4613 (class 2606 OID 22683)
 -- Name: dgestion dgestion_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4413,7 +4469,7 @@ ALTER TABLE ONLY public.dgestion
 
 
 --
--- TOC entry 4030 (class 2606 OID 486915)
+-- TOC entry 4615 (class 2606 OID 22685)
 -- Name: dgestion dgestion_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4422,7 +4478,7 @@ ALTER TABLE ONLY public.dgestion
 
 
 --
--- TOC entry 4032 (class 2606 OID 486917)
+-- TOC entry 4617 (class 2606 OID 22687)
 -- Name: dgestionnaire dgestionnaire_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4431,7 +4487,7 @@ ALTER TABLE ONLY public.dgestionnaire
 
 
 --
--- TOC entry 4034 (class 2606 OID 486919)
+-- TOC entry 4619 (class 2606 OID 22689)
 -- Name: dgestionnaire dgestionnaire_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4440,7 +4496,7 @@ ALTER TABLE ONLY public.dgestionnaire
 
 
 --
--- TOC entry 4036 (class 2606 OID 486921)
+-- TOC entry 4621 (class 2606 OID 22691)
 -- Name: dinstitute dinstitute_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4449,7 +4505,7 @@ ALTER TABLE ONLY public.dinstitute
 
 
 --
--- TOC entry 4038 (class 2606 OID 486923)
+-- TOC entry 4623 (class 2606 OID 22693)
 -- Name: dinstitute dinstitute_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4458,7 +4514,7 @@ ALTER TABLE ONLY public.dinstitute
 
 
 --
--- TOC entry 4040 (class 2606 OID 486925)
+-- TOC entry 4625 (class 2606 OID 22695)
 -- Name: dkeyword dkeyword_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4467,7 +4523,7 @@ ALTER TABLE ONLY public.dkeyword
 
 
 --
--- TOC entry 4042 (class 2606 OID 486927)
+-- TOC entry 4627 (class 2606 OID 22697)
 -- Name: dkeyword dkeyword_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4476,7 +4532,7 @@ ALTER TABLE ONLY public.dkeyword
 
 
 --
--- TOC entry 4044 (class 2606 OID 486929)
+-- TOC entry 4629 (class 2606 OID 22699)
 -- Name: dlinkcontdoc dlinkcontdoc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4485,7 +4541,7 @@ ALTER TABLE ONLY public.dlinkcontdoc
 
 
 --
--- TOC entry 4046 (class 2606 OID 486931)
+-- TOC entry 4631 (class 2606 OID 22701)
 -- Name: dlinkcontdoc dlinkcontdoc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4494,7 +4550,7 @@ ALTER TABLE ONLY public.dlinkcontdoc
 
 
 --
--- TOC entry 4048 (class 2606 OID 486933)
+-- TOC entry 4633 (class 2606 OID 22703)
 -- Name: dlinkcontloc dlinkcontloc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4503,7 +4559,7 @@ ALTER TABLE ONLY public.dlinkcontloc
 
 
 --
--- TOC entry 4050 (class 2606 OID 486935)
+-- TOC entry 4635 (class 2606 OID 22705)
 -- Name: dlinkcontloc dlinkcontloc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4512,7 +4568,7 @@ ALTER TABLE ONLY public.dlinkcontloc
 
 
 --
--- TOC entry 4052 (class 2606 OID 486937)
+-- TOC entry 4637 (class 2606 OID 22707)
 -- Name: dlinkcontribute dlinkcontribute_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4521,7 +4577,7 @@ ALTER TABLE ONLY public.dlinkcontribute
 
 
 --
--- TOC entry 4054 (class 2606 OID 592673)
+-- TOC entry 4639 (class 2606 OID 22709)
 -- Name: dlinkcontribute dlinkcontribute_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4530,7 +4586,7 @@ ALTER TABLE ONLY public.dlinkcontribute
 
 
 --
--- TOC entry 4057 (class 2606 OID 486941)
+-- TOC entry 4642 (class 2606 OID 22711)
 -- Name: dlinkcontsam dlinkcontsam_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4539,7 +4595,7 @@ ALTER TABLE ONLY public.dlinkcontsam
 
 
 --
--- TOC entry 4059 (class 2606 OID 486943)
+-- TOC entry 4644 (class 2606 OID 22713)
 -- Name: dlinkcontsam dlinkcontsam_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4548,7 +4604,7 @@ ALTER TABLE ONLY public.dlinkcontsam
 
 
 --
--- TOC entry 4061 (class 2606 OID 486945)
+-- TOC entry 4646 (class 2606 OID 22715)
 -- Name: dlinkdocloc dlinkdocloc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4557,7 +4613,7 @@ ALTER TABLE ONLY public.dlinkdocloc
 
 
 --
--- TOC entry 4063 (class 2606 OID 486947)
+-- TOC entry 4648 (class 2606 OID 22717)
 -- Name: dlinkdocloc dlinkdocloc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4566,7 +4622,7 @@ ALTER TABLE ONLY public.dlinkdocloc
 
 
 --
--- TOC entry 4065 (class 2606 OID 486949)
+-- TOC entry 4650 (class 2606 OID 22719)
 -- Name: dlinkdocsam dlinkdocsam_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4575,7 +4631,7 @@ ALTER TABLE ONLY public.dlinkdocsam
 
 
 --
--- TOC entry 4067 (class 2606 OID 486951)
+-- TOC entry 4652 (class 2606 OID 22721)
 -- Name: dlinkdocsam dlinkdocsam_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4584,7 +4640,7 @@ ALTER TABLE ONLY public.dlinkdocsam
 
 
 --
--- TOC entry 4069 (class 2606 OID 486953)
+-- TOC entry 4654 (class 2606 OID 22723)
 -- Name: dlinkgestdoc dlinkgestdoc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4593,7 +4649,7 @@ ALTER TABLE ONLY public.dlinkgestdoc
 
 
 --
--- TOC entry 4071 (class 2606 OID 486955)
+-- TOC entry 4656 (class 2606 OID 22725)
 -- Name: dlinkgestdoc dlinkgestdoc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4602,7 +4658,7 @@ ALTER TABLE ONLY public.dlinkgestdoc
 
 
 --
--- TOC entry 4073 (class 2606 OID 486957)
+-- TOC entry 4658 (class 2606 OID 22727)
 -- Name: dlinkgestloc dlinkgestloc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4611,7 +4667,7 @@ ALTER TABLE ONLY public.dlinkgestloc
 
 
 --
--- TOC entry 4075 (class 2606 OID 486959)
+-- TOC entry 4660 (class 2606 OID 22729)
 -- Name: dlinkgestloc dlinkgestloc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4620,7 +4676,7 @@ ALTER TABLE ONLY public.dlinkgestloc
 
 
 --
--- TOC entry 4077 (class 2606 OID 486961)
+-- TOC entry 4662 (class 2606 OID 22731)
 -- Name: dlinkgestsam dlinkgestsam_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4629,7 +4685,7 @@ ALTER TABLE ONLY public.dlinkgestsam
 
 
 --
--- TOC entry 4079 (class 2606 OID 486963)
+-- TOC entry 4664 (class 2606 OID 22733)
 -- Name: dlinkgestsam dlinkgestsam_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4638,7 +4694,7 @@ ALTER TABLE ONLY public.dlinkgestsam
 
 
 --
--- TOC entry 4081 (class 2606 OID 486965)
+-- TOC entry 4666 (class 2606 OID 22735)
 -- Name: dlinklocsam dlinklocsam_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4647,7 +4703,7 @@ ALTER TABLE ONLY public.dlinklocsam
 
 
 --
--- TOC entry 4083 (class 2606 OID 486967)
+-- TOC entry 4668 (class 2606 OID 22737)
 -- Name: dlinklocsam dlinklocsam_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4656,7 +4712,7 @@ ALTER TABLE ONLY public.dlinklocsam
 
 
 --
--- TOC entry 4085 (class 2606 OID 486969)
+-- TOC entry 4670 (class 2606 OID 22739)
 -- Name: dloccarto dloccarto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4665,7 +4721,7 @@ ALTER TABLE ONLY public.dloccarto
 
 
 --
--- TOC entry 4087 (class 2606 OID 486971)
+-- TOC entry 4672 (class 2606 OID 22741)
 -- Name: dloccarto dloccarto_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4674,7 +4730,7 @@ ALTER TABLE ONLY public.dloccarto
 
 
 --
--- TOC entry 4089 (class 2606 OID 512578)
+-- TOC entry 4674 (class 2606 OID 22743)
 -- Name: dloccenter dloccenter_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4683,7 +4739,7 @@ ALTER TABLE ONLY public.dloccenter
 
 
 --
--- TOC entry 4091 (class 2606 OID 486975)
+-- TOC entry 4676 (class 2606 OID 22745)
 -- Name: dloccenter dloccenter_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4692,7 +4748,7 @@ ALTER TABLE ONLY public.dloccenter
 
 
 --
--- TOC entry 4093 (class 2606 OID 486977)
+-- TOC entry 4678 (class 2606 OID 22747)
 -- Name: dlocdrilling dlocdrilling_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4701,7 +4757,7 @@ ALTER TABLE ONLY public.dlocdrilling
 
 
 --
--- TOC entry 4095 (class 2606 OID 486979)
+-- TOC entry 4680 (class 2606 OID 22749)
 -- Name: dlocdrilling dlocdrilling_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4710,7 +4766,7 @@ ALTER TABLE ONLY public.dlocdrilling
 
 
 --
--- TOC entry 4097 (class 2606 OID 486981)
+-- TOC entry 4682 (class 2606 OID 22751)
 -- Name: dlocdrillingtype dlocdrillingtype_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4719,7 +4775,7 @@ ALTER TABLE ONLY public.dlocdrillingtype
 
 
 --
--- TOC entry 4099 (class 2606 OID 486983)
+-- TOC entry 4684 (class 2606 OID 22753)
 -- Name: dlocdrillingtype dlocdrillingtype_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4728,7 +4784,7 @@ ALTER TABLE ONLY public.dlocdrillingtype
 
 
 --
--- TOC entry 4101 (class 2606 OID 486985)
+-- TOC entry 4686 (class 2606 OID 22755)
 -- Name: dlochydro dlochydro_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4737,7 +4793,7 @@ ALTER TABLE ONLY public.dlochydro
 
 
 --
--- TOC entry 4103 (class 2606 OID 486987)
+-- TOC entry 4688 (class 2606 OID 22757)
 -- Name: dlochydro dlochydro_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4746,7 +4802,7 @@ ALTER TABLE ONLY public.dlochydro
 
 
 --
--- TOC entry 4105 (class 2606 OID 486989)
+-- TOC entry 4690 (class 2606 OID 22759)
 -- Name: dloclitho dloclitho_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4755,7 +4811,7 @@ ALTER TABLE ONLY public.dloclitho
 
 
 --
--- TOC entry 4107 (class 2606 OID 486991)
+-- TOC entry 4692 (class 2606 OID 22761)
 -- Name: dloclitho dloclitho_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4764,7 +4820,7 @@ ALTER TABLE ONLY public.dloclitho
 
 
 --
--- TOC entry 4109 (class 2606 OID 486993)
+-- TOC entry 4694 (class 2606 OID 22763)
 -- Name: dlocpolygon dlocpolygon_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4773,7 +4829,7 @@ ALTER TABLE ONLY public.dlocpolygon
 
 
 --
--- TOC entry 4111 (class 2606 OID 486995)
+-- TOC entry 4696 (class 2606 OID 22765)
 -- Name: dlocpolygon dlocpolygon_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4782,7 +4838,7 @@ ALTER TABLE ONLY public.dlocpolygon
 
 
 --
--- TOC entry 4113 (class 2606 OID 486997)
+-- TOC entry 4698 (class 2606 OID 22767)
 -- Name: dlocquadril dlocquadril_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4791,7 +4847,7 @@ ALTER TABLE ONLY public.dlocquadril
 
 
 --
--- TOC entry 4115 (class 2606 OID 486999)
+-- TOC entry 4700 (class 2606 OID 22769)
 -- Name: dlocquadril dlocquadril_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4800,7 +4856,7 @@ ALTER TABLE ONLY public.dlocquadril
 
 
 --
--- TOC entry 4117 (class 2606 OID 487001)
+-- TOC entry 4702 (class 2606 OID 22771)
 -- Name: dlocstratumdesc dlocstatumdesc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4809,7 +4865,7 @@ ALTER TABLE ONLY public.dlocstratumdesc
 
 
 --
--- TOC entry 4119 (class 2606 OID 487003)
+-- TOC entry 4704 (class 2606 OID 22773)
 -- Name: dlocstratumdesc dlocstatumdesc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4818,7 +4874,7 @@ ALTER TABLE ONLY public.dlocstratumdesc
 
 
 --
--- TOC entry 4121 (class 2606 OID 487005)
+-- TOC entry 4706 (class 2606 OID 22775)
 -- Name: dlocstructure dlocstructure_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4827,7 +4883,7 @@ ALTER TABLE ONLY public.dlocstructure
 
 
 --
--- TOC entry 4123 (class 2606 OID 487007)
+-- TOC entry 4708 (class 2606 OID 22777)
 -- Name: dlocstructure dlocstructure_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4836,7 +4892,7 @@ ALTER TABLE ONLY public.dlocstructure
 
 
 --
--- TOC entry 4125 (class 2606 OID 487009)
+-- TOC entry 4710 (class 2606 OID 22779)
 -- Name: docplanvol docplanvol_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4845,7 +4901,7 @@ ALTER TABLE ONLY public.docplanvol
 
 
 --
--- TOC entry 4127 (class 2606 OID 487011)
+-- TOC entry 4712 (class 2606 OID 22781)
 -- Name: docplanvol docplanvol_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4854,7 +4910,7 @@ ALTER TABLE ONLY public.docplanvol
 
 
 --
--- TOC entry 4131 (class 2606 OID 487015)
+-- TOC entry 4716 (class 2606 OID 22783)
 -- Name: dsamarays dsamarays_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4863,7 +4919,7 @@ ALTER TABLE ONLY public.dsamarays
 
 
 --
--- TOC entry 4133 (class 2606 OID 487017)
+-- TOC entry 4718 (class 2606 OID 22785)
 -- Name: dsamarays dsamarays_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4872,7 +4928,7 @@ ALTER TABLE ONLY public.dsamarays
 
 
 --
--- TOC entry 4135 (class 2606 OID 487019)
+-- TOC entry 4720 (class 2606 OID 22787)
 -- Name: dsamgranulo dsamgranulo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4881,7 +4937,7 @@ ALTER TABLE ONLY public.dsamgranulo
 
 
 --
--- TOC entry 4137 (class 2606 OID 487021)
+-- TOC entry 4722 (class 2606 OID 22789)
 -- Name: dsamgranulo dsamgranulo_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4890,7 +4946,7 @@ ALTER TABLE ONLY public.dsamgranulo
 
 
 --
--- TOC entry 4143 (class 2606 OID 487023)
+-- TOC entry 4728 (class 2606 OID 22791)
 -- Name: dsamheavymin2 dsamheavymin2_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4899,7 +4955,7 @@ ALTER TABLE ONLY public.dsamheavymin2
 
 
 --
--- TOC entry 4145 (class 2606 OID 487025)
+-- TOC entry 4730 (class 2606 OID 22793)
 -- Name: dsamheavymin2 dsamheavymin2_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4908,7 +4964,7 @@ ALTER TABLE ONLY public.dsamheavymin2
 
 
 --
--- TOC entry 4139 (class 2606 OID 487027)
+-- TOC entry 4724 (class 2606 OID 22795)
 -- Name: dsamheavymin dsamheavymin_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4917,7 +4973,7 @@ ALTER TABLE ONLY public.dsamheavymin
 
 
 --
--- TOC entry 4141 (class 2606 OID 487029)
+-- TOC entry 4726 (class 2606 OID 22797)
 -- Name: dsamheavymin dsamheavymin_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4926,7 +4982,7 @@ ALTER TABLE ONLY public.dsamheavymin
 
 
 --
--- TOC entry 4147 (class 2606 OID 511883)
+-- TOC entry 4732 (class 2606 OID 22799)
 -- Name: dsammagsusc dsammagsusc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4935,7 +4991,7 @@ ALTER TABLE ONLY public.dsammagsusc
 
 
 --
--- TOC entry 4149 (class 2606 OID 487033)
+-- TOC entry 4734 (class 2606 OID 22801)
 -- Name: dsammagsusc dsammagsusc_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4944,7 +5000,7 @@ ALTER TABLE ONLY public.dsammagsusc
 
 
 --
--- TOC entry 4151 (class 2606 OID 487035)
+-- TOC entry 4736 (class 2606 OID 22803)
 -- Name: dsamminerals dsamminerals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4953,7 +5009,7 @@ ALTER TABLE ONLY public.dsamminerals
 
 
 --
--- TOC entry 4153 (class 2606 OID 487037)
+-- TOC entry 4738 (class 2606 OID 22805)
 -- Name: dsamminerals dsamminerals_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4962,7 +5018,7 @@ ALTER TABLE ONLY public.dsamminerals
 
 
 --
--- TOC entry 4155 (class 2606 OID 512574)
+-- TOC entry 4740 (class 2606 OID 22807)
 -- Name: dsample dsample_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4971,7 +5027,7 @@ ALTER TABLE ONLY public.dsample
 
 
 --
--- TOC entry 4157 (class 2606 OID 487041)
+-- TOC entry 4742 (class 2606 OID 22809)
 -- Name: dsample dsample_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4980,7 +5036,7 @@ ALTER TABLE ONLY public.dsample
 
 
 --
--- TOC entry 4159 (class 2606 OID 487043)
+-- TOC entry 4744 (class 2606 OID 22811)
 -- Name: dsamslimplate dsamslimplate_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4989,7 +5045,7 @@ ALTER TABLE ONLY public.dsamslimplate
 
 
 --
--- TOC entry 4161 (class 2606 OID 487045)
+-- TOC entry 4746 (class 2606 OID 22813)
 -- Name: dsamslimplate dsamslimplate_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4998,7 +5054,7 @@ ALTER TABLE ONLY public.dsamslimplate
 
 
 --
--- TOC entry 4195 (class 2606 OID 511768)
+-- TOC entry 4748 (class 2606 OID 22815)
 -- Name: duser duser_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5007,7 +5063,7 @@ ALTER TABLE ONLY public.duser
 
 
 --
--- TOC entry 4197 (class 2606 OID 511595)
+-- TOC entry 4750 (class 2606 OID 22817)
 -- Name: duser duser_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5016,7 +5072,7 @@ ALTER TABLE ONLY public.duser
 
 
 --
--- TOC entry 4179 (class 2606 OID 509382)
+-- TOC entry 4783 (class 2606 OID 22819)
 -- Name: lminerals fmnameunique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5025,7 +5081,7 @@ ALTER TABLE ONLY public.lminerals
 
 
 --
--- TOC entry 4199 (class 2606 OID 511617)
+-- TOC entry 4752 (class 2606 OID 22821)
 -- Name: fos_group fos_group_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5034,7 +5090,7 @@ ALTER TABLE ONLY public.fos_group
 
 
 --
--- TOC entry 4201 (class 2606 OID 511650)
+-- TOC entry 4754 (class 2606 OID 22823)
 -- Name: fos_role fos_role_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5043,7 +5099,7 @@ ALTER TABLE ONLY public.fos_role
 
 
 --
--- TOC entry 4203 (class 2606 OID 511652)
+-- TOC entry 4756 (class 2606 OID 22825)
 -- Name: fos_role fos_role_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5052,7 +5108,7 @@ ALTER TABLE ONLY public.fos_role
 
 
 --
--- TOC entry 4207 (class 2606 OID 511742)
+-- TOC entry 4758 (class 2606 OID 22827)
 -- Name: fos_user_collections fos_user_collections_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5061,7 +5117,7 @@ ALTER TABLE ONLY public.fos_user_collections
 
 
 --
--- TOC entry 4209 (class 2606 OID 511744)
+-- TOC entry 4760 (class 2606 OID 22829)
 -- Name: fos_user_collections fos_user_collections_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5070,7 +5126,7 @@ ALTER TABLE ONLY public.fos_user_collections
 
 
 --
--- TOC entry 4205 (class 2606 OID 511667)
+-- TOC entry 4762 (class 2606 OID 22831)
 -- Name: fos_user_role fos_user_role_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5079,7 +5135,7 @@ ALTER TABLE ONLY public.fos_user_role
 
 
 --
--- TOC entry 4214 (class 2606 OID 512541)
+-- TOC entry 4765 (class 2606 OID 22833)
 -- Name: generic_keyword generic_keyword_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5088,7 +5144,7 @@ ALTER TABLE ONLY public.generic_keyword
 
 
 --
--- TOC entry 4163 (class 2606 OID 487047)
+-- TOC entry 4767 (class 2606 OID 22835)
 -- Name: larea larea_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5097,7 +5153,7 @@ ALTER TABLE ONLY public.larea
 
 
 --
--- TOC entry 4165 (class 2606 OID 487049)
+-- TOC entry 4769 (class 2606 OID 22837)
 -- Name: larea larea_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5106,7 +5162,7 @@ ALTER TABLE ONLY public.larea
 
 
 --
--- TOC entry 4167 (class 2606 OID 487051)
+-- TOC entry 4771 (class 2606 OID 22839)
 -- Name: lkeywords lkeywords_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5115,7 +5171,7 @@ ALTER TABLE ONLY public.lkeywords
 
 
 --
--- TOC entry 4171 (class 2606 OID 487053)
+-- TOC entry 4775 (class 2606 OID 22841)
 -- Name: lmapreftype lmapreftype_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5124,7 +5180,7 @@ ALTER TABLE ONLY public.lmapreftype
 
 
 --
--- TOC entry 4173 (class 2606 OID 487055)
+-- TOC entry 4777 (class 2606 OID 22843)
 -- Name: lmapreftype lmapreftype_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5133,7 +5189,7 @@ ALTER TABLE ONLY public.lmapreftype
 
 
 --
--- TOC entry 4175 (class 2606 OID 511870)
+-- TOC entry 4779 (class 2606 OID 22845)
 -- Name: lmedium lmedium_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5142,7 +5198,7 @@ ALTER TABLE ONLY public.lmedium
 
 
 --
--- TOC entry 4177 (class 2606 OID 487059)
+-- TOC entry 4781 (class 2606 OID 22847)
 -- Name: lmedium lmedium_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5151,7 +5207,7 @@ ALTER TABLE ONLY public.lmedium
 
 
 --
--- TOC entry 4181 (class 2606 OID 487061)
+-- TOC entry 4785 (class 2606 OID 22849)
 -- Name: lminerals lminerals_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5160,7 +5216,7 @@ ALTER TABLE ONLY public.lminerals
 
 
 --
--- TOC entry 4183 (class 2606 OID 487063)
+-- TOC entry 4787 (class 2606 OID 22851)
 -- Name: lminerals lminerals_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5169,7 +5225,7 @@ ALTER TABLE ONLY public.lminerals
 
 
 --
--- TOC entry 4187 (class 2606 OID 511830)
+-- TOC entry 4791 (class 2606 OID 22853)
 -- Name: lprecision lprecision_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5178,7 +5234,7 @@ ALTER TABLE ONLY public.lprecision
 
 
 --
--- TOC entry 4189 (class 2606 OID 511832)
+-- TOC entry 4793 (class 2606 OID 22855)
 -- Name: lprecision lprecision_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5187,7 +5243,7 @@ ALTER TABLE ONLY public.lprecision
 
 
 --
--- TOC entry 4191 (class 2606 OID 487069)
+-- TOC entry 4795 (class 2606 OID 22857)
 -- Name: ltitlelevel ltitlelevel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5196,7 +5252,7 @@ ALTER TABLE ONLY public.ltitlelevel
 
 
 --
--- TOC entry 4193 (class 2606 OID 487071)
+-- TOC entry 4797 (class 2606 OID 22859)
 -- Name: ltitlelevel ltitlelevel_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5205,7 +5261,7 @@ ALTER TABLE ONLY public.ltitlelevel
 
 
 --
--- TOC entry 4185 (class 2606 OID 509380)
+-- TOC entry 4789 (class 2606 OID 22861)
 -- Name: lminerals mnameunique; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5214,7 +5270,7 @@ ALTER TABLE ONLY public.lminerals
 
 
 --
--- TOC entry 3994 (class 2606 OID 487073)
+-- TOC entry 4579 (class 2606 OID 22863)
 -- Name: ddocarchive pk_ddoc_archives; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5223,7 +5279,7 @@ ALTER TABLE ONLY public.ddocarchive
 
 
 --
--- TOC entry 4211 (class 2606 OID 512592)
+-- TOC entry 4607 (class 2606 OID 22865)
 -- Name: template_data pk_template_data; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5232,7 +5288,7 @@ ALTER TABLE ONLY public.template_data
 
 
 --
--- TOC entry 4169 (class 2606 OID 487075)
+-- TOC entry 4773 (class 2606 OID 22867)
 -- Name: lkeywords unique_keywords; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5241,7 +5297,7 @@ ALTER TABLE ONLY public.lkeywords
 
 
 --
--- TOC entry 4212 (class 1259 OID 512598)
+-- TOC entry 4763 (class 1259 OID 22868)
 -- Name: fki_fk_generic_keyword_to_template; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -5249,7 +5305,7 @@ CREATE INDEX fki_fk_generic_keyword_to_template ON public.generic_keyword USING 
 
 
 --
--- TOC entry 4055 (class 1259 OID 592791)
+-- TOC entry 4640 (class 1259 OID 22869)
 -- Name: idcontribution; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -5257,15 +5313,15 @@ CREATE INDEX idcontribution ON public.dlinkcontribute USING btree (idcontributio
 
 
 --
--- TOC entry 3984 (class 1259 OID 592679)
+-- TOC entry 4569 (class 1259 OID 22870)
 -- Name: idx_unique_contributor; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE UNIQUE INDEX idx_unique_contributor ON public.dcontributor USING btree ((COALESCE(people, ''::character varying)), (COALESCE(peoplefonction, ''::character varying)), (COALESCE(peopletitre, ''::character varying)), (COALESCE(peoplestatut, ''::character varying)), (COALESCE(institut, ''::character varying)));
+CREATE UNIQUE INDEX idx_unique_contributor ON public.dcontributor USING btree (COALESCE(people, ''::character varying), COALESCE(peoplefonction, ''::character varying), COALESCE(peopletitre, ''::character varying), COALESCE(peoplestatut, ''::character varying), COALESCE(institut, ''::character varying));
 
 
 --
--- TOC entry 4405 (class 2618 OID 512602)
+-- TOC entry 5011 (class 2618 OID 17890)
 -- Name: v_rmca_main_objects_description _RETURN; Type: RULE; Schema: public; Owner: postgres
 --
 
@@ -5327,55 +5383,63 @@ UNION
 
 
 --
--- TOC entry 4273 (class 2620 OID 536540)
+-- TOC entry 4859 (class 2620 OID 22872)
 -- Name: lkeywords trg_rmca_control_keyword; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_rmca_control_keyword BEFORE INSERT OR DELETE OR UPDATE ON public.lkeywords FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE PROCEDURE public.fct_trg_rmca_control_keyword();
+CREATE TRIGGER trg_rmca_control_keyword BEFORE INSERT OR DELETE OR UPDATE ON public.lkeywords FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE FUNCTION public.fct_trg_rmca_control_keyword();
 
 
 --
--- TOC entry 4274 (class 2620 OID 536541)
+-- TOC entry 4858 (class 2620 OID 22873)
 -- Name: lkeywords trg_rmca_control_keyword_upd; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_rmca_control_keyword_upd AFTER UPDATE ON public.lkeywords FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE PROCEDURE public.fct_trg_rmca_control_upd_keyword();
+CREATE TRIGGER trg_rmca_control_keyword_upd AFTER UPDATE ON public.lkeywords FOR EACH ROW WHEN ((pg_trigger_depth() = 0)) EXECUTE FUNCTION public.fct_trg_rmca_control_upd_keyword();
 
 
 --
--- TOC entry 4270 (class 2620 OID 593095)
+-- TOC entry 4855 (class 2620 OID 22874)
 -- Name: dloccenter trg_rmca_coordinates; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_rmca_coordinates BEFORE INSERT OR UPDATE ON public.dloccenter FOR EACH ROW EXECUTE PROCEDURE public.fct_trg_rmca_coordinates();
+CREATE TRIGGER trg_rmca_coordinates BEFORE INSERT OR UPDATE ON public.dloccenter FOR EACH ROW EXECUTE FUNCTION public.fct_trg_rmca_coordinates();
 
 
 --
--- TOC entry 4271 (class 2620 OID 514554)
+-- TOC entry 4853 (class 2620 OID 22875)
+-- Name: dcontribution trg_trk_log_table_contribution; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trg_trk_log_table_contribution AFTER INSERT OR DELETE OR UPDATE ON public.dcontribution FOR EACH ROW EXECUTE FUNCTION public.fct_trk_log_table();
+
+
+--
+-- TOC entry 4856 (class 2620 OID 22876)
 -- Name: dloccenter trg_trk_log_table_dloccenter; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_trk_log_table_dloccenter AFTER INSERT OR DELETE OR UPDATE ON public.dloccenter FOR EACH ROW EXECUTE PROCEDURE public.fct_trk_log_table();
+CREATE TRIGGER trg_trk_log_table_dloccenter AFTER INSERT OR DELETE OR UPDATE ON public.dloccenter FOR EACH ROW EXECUTE FUNCTION public.fct_trk_log_table();
 
 
 --
--- TOC entry 4269 (class 2620 OID 514552)
+-- TOC entry 4854 (class 2620 OID 22877)
 -- Name: ddocument trg_trk_log_table_document; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_trk_log_table_document AFTER INSERT OR DELETE OR UPDATE ON public.ddocument FOR EACH ROW EXECUTE PROCEDURE public.fct_trk_log_table();
+CREATE TRIGGER trg_trk_log_table_document AFTER INSERT OR DELETE OR UPDATE ON public.ddocument FOR EACH ROW EXECUTE FUNCTION public.fct_trk_log_table();
 
 
 --
--- TOC entry 4272 (class 2620 OID 514553)
+-- TOC entry 4857 (class 2620 OID 22878)
 -- Name: dsample trg_trk_log_table_dsample; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER trg_trk_log_table_dsample AFTER INSERT OR DELETE OR UPDATE ON public.dsample FOR EACH ROW EXECUTE PROCEDURE public.fct_trk_log_table();
+CREATE TRIGGER trg_trk_log_table_dsample AFTER INSERT OR DELETE OR UPDATE ON public.dsample FOR EACH ROW EXECUTE FUNCTION public.fct_trk_log_table();
 
 
 --
--- TOC entry 4217 (class 2606 OID 487076)
+-- TOC entry 4800 (class 2606 OID 22879)
 -- Name: ddocaerphoto DDocAerPhoto_FID_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5384,7 +5448,7 @@ ALTER TABLE ONLY public.ddocaerphoto
 
 
 --
--- TOC entry 4218 (class 2606 OID 487081)
+-- TOC entry 4801 (class 2606 OID 22884)
 -- Name: ddocaerphoto DDocAerPhoto_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5393,7 +5457,7 @@ ALTER TABLE ONLY public.ddocaerphoto
 
 
 --
--- TOC entry 4219 (class 2606 OID 487086)
+-- TOC entry 4803 (class 2606 OID 22889)
 -- Name: ddocfilm DDocFilm_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5402,7 +5466,7 @@ ALTER TABLE ONLY public.ddocfilm
 
 
 --
--- TOC entry 4220 (class 2606 OID 487091)
+-- TOC entry 4804 (class 2606 OID 22894)
 -- Name: ddoclinks DDocLinks_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5411,7 +5475,7 @@ ALTER TABLE ONLY public.ddoclinks
 
 
 --
--- TOC entry 4221 (class 2606 OID 487096)
+-- TOC entry 4805 (class 2606 OID 22899)
 -- Name: ddocmap DDocMap_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5420,7 +5484,7 @@ ALTER TABLE ONLY public.ddocmap
 
 
 --
--- TOC entry 4222 (class 2606 OID 487101)
+-- TOC entry 4806 (class 2606 OID 22904)
 -- Name: ddocsatellite DDocSatellite_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5429,7 +5493,7 @@ ALTER TABLE ONLY public.ddocsatellite
 
 
 --
--- TOC entry 4223 (class 2606 OID 487106)
+-- TOC entry 4807 (class 2606 OID 22909)
 -- Name: ddocscale DDocScale_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5438,7 +5502,7 @@ ALTER TABLE ONLY public.ddocscale
 
 
 --
--- TOC entry 4224 (class 2606 OID 487111)
+-- TOC entry 4808 (class 2606 OID 22914)
 -- Name: ddoctitle DDocTitle_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5447,7 +5511,16 @@ ALTER TABLE ONLY public.ddoctitle
 
 
 --
--- TOC entry 4225 (class 2606 OID 487116)
+-- TOC entry 4802 (class 2606 OID 22919)
+-- Name: ddocarchive DDocarchive_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.ddocarchive
+    ADD CONSTRAINT "DDocarchive_IDCollection_fk" FOREIGN KEY (idcollection, iddoc) REFERENCES public.ddocument(idcollection, iddoc);
+
+
+--
+-- TOC entry 4809 (class 2606 OID 22924)
 -- Name: ddocument DDocument_Medium_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5456,7 +5529,7 @@ ALTER TABLE ONLY public.ddocument
 
 
 --
--- TOC entry 4226 (class 2606 OID 487121)
+-- TOC entry 4810 (class 2606 OID 22929)
 -- Name: dgestion DGestion_IDEncodeur_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5465,7 +5538,7 @@ ALTER TABLE ONLY public.dgestion
 
 
 --
--- TOC entry 4227 (class 2606 OID 487126)
+-- TOC entry 4811 (class 2606 OID 22934)
 -- Name: dkeyword DKeyword_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5474,7 +5547,7 @@ ALTER TABLE ONLY public.dkeyword
 
 
 --
--- TOC entry 4228 (class 2606 OID 487131)
+-- TOC entry 4812 (class 2606 OID 22939)
 -- Name: dlinkcontdoc DLinkContDoc_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5483,7 +5556,7 @@ ALTER TABLE ONLY public.dlinkcontdoc
 
 
 --
--- TOC entry 4229 (class 2606 OID 487136)
+-- TOC entry 4813 (class 2606 OID 22944)
 -- Name: dlinkcontdoc DLinkContDoc_IDContribution_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5492,7 +5565,7 @@ ALTER TABLE ONLY public.dlinkcontdoc
 
 
 --
--- TOC entry 4230 (class 2606 OID 487141)
+-- TOC entry 4814 (class 2606 OID 22949)
 -- Name: dlinkcontloc DLinkContLoc_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5501,7 +5574,7 @@ ALTER TABLE ONLY public.dlinkcontloc
 
 
 --
--- TOC entry 4233 (class 2606 OID 487146)
+-- TOC entry 4817 (class 2606 OID 22954)
 -- Name: dlinkcontsam DLinkContSam_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5510,7 +5583,7 @@ ALTER TABLE ONLY public.dlinkcontsam
 
 
 --
--- TOC entry 4234 (class 2606 OID 487151)
+-- TOC entry 4818 (class 2606 OID 22959)
 -- Name: dlinkcontsam DLinkContSam_IDContribution_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5519,7 +5592,7 @@ ALTER TABLE ONLY public.dlinkcontsam
 
 
 --
--- TOC entry 4231 (class 2606 OID 592808)
+-- TOC entry 4815 (class 2606 OID 22964)
 -- Name: dlinkcontribute DLinkContribute_IDContribution_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5528,7 +5601,7 @@ ALTER TABLE ONLY public.dlinkcontribute
 
 
 --
--- TOC entry 4232 (class 2606 OID 487161)
+-- TOC entry 4816 (class 2606 OID 22969)
 -- Name: dlinkcontribute DLinkContribute_IDContributor_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5537,7 +5610,7 @@ ALTER TABLE ONLY public.dlinkcontribute
 
 
 --
--- TOC entry 4235 (class 2606 OID 487166)
+-- TOC entry 4819 (class 2606 OID 22974)
 -- Name: dlinkdocloc DLinkDocLoc_IDCollecDoc_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5546,7 +5619,7 @@ ALTER TABLE ONLY public.dlinkdocloc
 
 
 --
--- TOC entry 4236 (class 2606 OID 487171)
+-- TOC entry 4820 (class 2606 OID 22979)
 -- Name: dlinkdocloc DLinkDocLoc_IDCollecLoc_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5555,7 +5628,7 @@ ALTER TABLE ONLY public.dlinkdocloc
 
 
 --
--- TOC entry 4237 (class 2606 OID 487176)
+-- TOC entry 4821 (class 2606 OID 22984)
 -- Name: dlinkdocsam DLinkDocSam_IDCollectionDoc_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5564,7 +5637,7 @@ ALTER TABLE ONLY public.dlinkdocsam
 
 
 --
--- TOC entry 4238 (class 2606 OID 487181)
+-- TOC entry 4822 (class 2606 OID 22989)
 -- Name: dlinkdocsam DLinkDocSam_IDCollectionSample_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5573,7 +5646,7 @@ ALTER TABLE ONLY public.dlinkdocsam
 
 
 --
--- TOC entry 4239 (class 2606 OID 487186)
+-- TOC entry 4823 (class 2606 OID 22994)
 -- Name: dlinkgestdoc DLinkGestDoc_IDCollecDoc_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5582,7 +5655,7 @@ ALTER TABLE ONLY public.dlinkgestdoc
 
 
 --
--- TOC entry 4240 (class 2606 OID 487191)
+-- TOC entry 4824 (class 2606 OID 22999)
 -- Name: dlinkgestdoc DLinkGestDoc_IDGestion_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5591,7 +5664,7 @@ ALTER TABLE ONLY public.dlinkgestdoc
 
 
 --
--- TOC entry 4241 (class 2606 OID 487196)
+-- TOC entry 4825 (class 2606 OID 23004)
 -- Name: dlinkgestloc DLinkGestLoc_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5600,7 +5673,7 @@ ALTER TABLE ONLY public.dlinkgestloc
 
 
 --
--- TOC entry 4242 (class 2606 OID 487201)
+-- TOC entry 4826 (class 2606 OID 23009)
 -- Name: dlinkgestsam DLinkGestSam_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5609,7 +5682,7 @@ ALTER TABLE ONLY public.dlinkgestsam
 
 
 --
--- TOC entry 4243 (class 2606 OID 487206)
+-- TOC entry 4827 (class 2606 OID 23014)
 -- Name: dlinkgestsam DLinkGestSam_IDGestion_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5618,7 +5691,7 @@ ALTER TABLE ONLY public.dlinkgestsam
 
 
 --
--- TOC entry 4244 (class 2606 OID 487211)
+-- TOC entry 4828 (class 2606 OID 23019)
 -- Name: dlinklocsam DLinkLocSam_IDCollecSample_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5627,7 +5700,7 @@ ALTER TABLE ONLY public.dlinklocsam
 
 
 --
--- TOC entry 4245 (class 2606 OID 487216)
+-- TOC entry 4829 (class 2606 OID 23024)
 -- Name: dlinklocsam DLinkLocSam_IDCollectionLoc_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5636,7 +5709,7 @@ ALTER TABLE ONLY public.dlinklocsam
 
 
 --
--- TOC entry 4246 (class 2606 OID 487221)
+-- TOC entry 4830 (class 2606 OID 23029)
 -- Name: dloccarto DLocCarto_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5645,7 +5718,7 @@ ALTER TABLE ONLY public.dloccarto
 
 
 --
--- TOC entry 4247 (class 2606 OID 511833)
+-- TOC entry 4831 (class 2606 OID 23034)
 -- Name: dloccenter DLocCenter_IDPrecision_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5654,7 +5727,7 @@ ALTER TABLE ONLY public.dloccenter
 
 
 --
--- TOC entry 4249 (class 2606 OID 487231)
+-- TOC entry 4833 (class 2606 OID 23039)
 -- Name: dlocdrillingtype DLocDrillingType_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5663,7 +5736,7 @@ ALTER TABLE ONLY public.dlocdrillingtype
 
 
 --
--- TOC entry 4248 (class 2606 OID 487236)
+-- TOC entry 4832 (class 2606 OID 23044)
 -- Name: dlocdrilling DLocDrilling_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5672,7 +5745,7 @@ ALTER TABLE ONLY public.dlocdrilling
 
 
 --
--- TOC entry 4250 (class 2606 OID 487241)
+-- TOC entry 4834 (class 2606 OID 23049)
 -- Name: dlochydro DLocHydro_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5681,16 +5754,16 @@ ALTER TABLE ONLY public.dlochydro
 
 
 --
--- TOC entry 4251 (class 2606 OID 487246)
+-- TOC entry 4835 (class 2606 OID 23054)
 -- Name: dloclitho DLocLitho_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.dloclitho
-    ADD CONSTRAINT "DLocLitho_IDCollection_fk" FOREIGN KEY (idcollection, idpt) REFERENCES public.dloccenter(idcollection, idpt);
+    ADD CONSTRAINT "DLocLitho_IDCollection_fk" FOREIGN KEY (idpt, idcollection) REFERENCES public.dloccenter(idpt, idcollection) ON UPDATE CASCADE;
 
 
 --
--- TOC entry 4252 (class 2606 OID 487251)
+-- TOC entry 4836 (class 2606 OID 23059)
 -- Name: dlocpolygon DLocPolygon_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5699,16 +5772,7 @@ ALTER TABLE ONLY public.dlocpolygon
 
 
 --
--- TOC entry 4253 (class 2606 OID 487256)
--- Name: dlocpolygon DLocPolygon_PolyArea_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.dlocpolygon
-    ADD CONSTRAINT "DLocPolygon_PolyArea_fk" FOREIGN KEY (polyarea) REFERENCES public.larea(polyarea);
-
-
---
--- TOC entry 4254 (class 2606 OID 487261)
+-- TOC entry 4837 (class 2606 OID 23069)
 -- Name: dlocquadril DLocQuadril_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5717,7 +5781,7 @@ ALTER TABLE ONLY public.dlocquadril
 
 
 --
--- TOC entry 4255 (class 2606 OID 487266)
+-- TOC entry 4838 (class 2606 OID 23074)
 -- Name: dlocstratumdesc DLocStatumDesc_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5726,7 +5790,16 @@ ALTER TABLE ONLY public.dlocstratumdesc
 
 
 --
--- TOC entry 4256 (class 2606 OID 487271)
+-- TOC entry 4839 (class 2606 OID 23079)
+-- Name: dlocstructure DLocstructure_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dlocstructure
+    ADD CONSTRAINT "DLocstructure_IDCollection_fk" FOREIGN KEY (idpt, idcollection) REFERENCES public.dloccenter(idpt, idcollection) ON UPDATE CASCADE;
+
+
+--
+-- TOC entry 4840 (class 2606 OID 23084)
 -- Name: dsamarays DSamARays_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5735,7 +5808,7 @@ ALTER TABLE ONLY public.dsamarays
 
 
 --
--- TOC entry 4257 (class 2606 OID 487276)
+-- TOC entry 4841 (class 2606 OID 23089)
 -- Name: dsamgranulo DSamGranulo_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5744,7 +5817,7 @@ ALTER TABLE ONLY public.dsamgranulo
 
 
 --
--- TOC entry 4259 (class 2606 OID 487281)
+-- TOC entry 4843 (class 2606 OID 23094)
 -- Name: dsamheavymin2 DSamHeavyMin2_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5753,7 +5826,7 @@ ALTER TABLE ONLY public.dsamheavymin2
 
 
 --
--- TOC entry 4258 (class 2606 OID 487286)
+-- TOC entry 4842 (class 2606 OID 23099)
 -- Name: dsamheavymin DSamHeavyMin_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5762,7 +5835,7 @@ ALTER TABLE ONLY public.dsamheavymin
 
 
 --
--- TOC entry 4260 (class 2606 OID 487296)
+-- TOC entry 4844 (class 2606 OID 23104)
 -- Name: dsamminerals DSamMinerals_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5771,7 +5844,7 @@ ALTER TABLE ONLY public.dsamminerals
 
 
 --
--- TOC entry 4261 (class 2606 OID 487301)
+-- TOC entry 4845 (class 2606 OID 23109)
 -- Name: dsamminerals DSamMinerals_IDMineral_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5780,7 +5853,7 @@ ALTER TABLE ONLY public.dsamminerals
 
 
 --
--- TOC entry 4262 (class 2606 OID 487306)
+-- TOC entry 4846 (class 2606 OID 23114)
 -- Name: dsamslimplate DSamSlimPlate_IDCollection_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5789,7 +5862,7 @@ ALTER TABLE ONLY public.dsamslimplate
 
 
 --
--- TOC entry 4268 (class 2606 OID 514545)
+-- TOC entry 4852 (class 2606 OID 23119)
 -- Name: t_data_log fk_data_log_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5798,7 +5871,7 @@ ALTER TABLE ONLY public.t_data_log
 
 
 --
--- TOC entry 4267 (class 2606 OID 512593)
+-- TOC entry 4851 (class 2606 OID 23124)
 -- Name: generic_keyword fk_generic_keyword_to_template; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5807,7 +5880,7 @@ ALTER TABLE ONLY public.generic_keyword
 
 
 --
--- TOC entry 4265 (class 2606 OID 511745)
+-- TOC entry 4847 (class 2606 OID 23129)
 -- Name: fos_user_collections fos_user_collections_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5816,7 +5889,7 @@ ALTER TABLE ONLY public.fos_user_collections
 
 
 --
--- TOC entry 4266 (class 2606 OID 511755)
+-- TOC entry 4848 (class 2606 OID 23134)
 -- Name: fos_user_collections fos_user_collections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5825,7 +5898,7 @@ ALTER TABLE ONLY public.fos_user_collections
 
 
 --
--- TOC entry 4263 (class 2606 OID 511673)
+-- TOC entry 4849 (class 2606 OID 23139)
 -- Name: fos_user_role fos_user_role_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5834,7 +5907,7 @@ ALTER TABLE ONLY public.fos_user_role
 
 
 --
--- TOC entry 4264 (class 2606 OID 511760)
+-- TOC entry 4850 (class 2606 OID 23144)
 -- Name: fos_user_role fos_user_role_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5842,19 +5915,7 @@ ALTER TABLE ONLY public.fos_user_role
     ADD CONSTRAINT fos_user_role_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.duser(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
---
--- TOC entry 4422 (class 0 OID 0)
--- Dependencies: 8
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
--- Completed on 2021-11-08 16:17:04
+-- Completed on 2022-11-03 18:26:55
 
 --
 -- PostgreSQL database dump complete
