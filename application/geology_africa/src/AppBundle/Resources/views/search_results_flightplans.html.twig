@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/search_results_flightplans.html.twig #}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+<div class="row">
+	<div class="col-sm-1">pk</div>
+	<div class="col-sm-1">fid</div>
+	<div class="col-sm-2">block name</div>
+	<div class="col-sm-1">bid</div>
+	<div class="col-sm-2">band</div>
+	<div class="col-sm-3">comment</div>
+</div>
+{% for doc in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1"><a target="_blank" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['fid'] ~ " " ~(doc['nombloc']??"")}}"  href="{{ path('app_edit_flightplan', {'pk':doc['pk'] }) }}" >{{ doc['pk'] }}</a></div>
+	<div class="col-sm-1" class="is_modal_value">{{ doc['fid'] }}</div>
+	<div class="col-sm-2">{{ doc['nombloc'] }}</div>
+	<div class="col-sm-1">{{ doc['bid'] }}</div>
+	<div class="col-sm-2">{{ doc['bande'] }}</div>
+	<div class="col-sm-3">{{ doc['comment'] }}</div>
+</div>
+{%  endfor %}

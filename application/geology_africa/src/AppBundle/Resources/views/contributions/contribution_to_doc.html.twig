@@ -1,6 +1,6 @@
 {# src/AppBundle/Resources/views/contributions/contribution_to_doc.html.twig #}
 CONTRIB TO DOC
 {% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/contributions/detail_contribution_to_doc.html.twig" , 'ctrl_prefix' : 'contrib_to_doc', 'ajax_route': path('get_widget_contrib_to_doc', {'table':"contribution"}), 'fk_values': dlinkcontdoc|default(null),
-'delete_route':'app_delete_dlinkcontdoc_from_contrib', 'container_pk':dcontribution.pk,
+'delete_route':'app_delete_dlinkcontdoc', 'container_pk':dcontribution.pk,
 'fk_key_field':'pk'
  }  %}

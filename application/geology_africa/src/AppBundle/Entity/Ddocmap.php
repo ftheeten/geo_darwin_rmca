@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ddocmap", uniqueConstraints={@ORM\UniqueConstraint(name="ddocmap_unique", columns={"iddoc", "idcollection"})}, indexes={@ORM\Index(name="IDX_2FED311C31E478089F44A603", columns={"idcollection", "iddoc"})})
  * @ORM\Entity
  */
-class Ddocmap
+class Ddocmap extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -43,17 +43,7 @@ class Ddocmap
      */
     private $oncartesius;
 
-    /**
-     * @var \AppBundle\Entity\Ddocument
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
-     */
-    private $idcollection;
-
+    
 
 
     /**
@@ -65,6 +55,13 @@ class Ddocmap
     {
         return $this->pk;
     }
+	
+	public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
+    }	
 
     /**
      * Set projection
@@ -138,27 +135,5 @@ class Ddocmap
         return $this->oncartesius;
     }
 
-    /**
-     * Set idcollection
-     *
-     * @param \AppBundle\Entity\Ddocument $idcollection
-     *
-     * @return Ddocmap
-     */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
-    {
-        $this->idcollection = $idcollection;
-
-        return $this;
-    }
-
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Ddocument
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
+   
 }

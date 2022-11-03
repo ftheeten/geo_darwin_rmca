@@ -1,0 +1,3 @@
+{# src/AppBundle/Resources/views/documents/documentform_film.html.twig #}
+
+{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with { 'nested_template':"@App/documents/film_detail.html.twig" , 'ctrl_prefix' : 'film_', 'ajax_route': path('get_widget_film'), 'fk_values': films|default(null), 'fk_value_field':'pk', 'fk_key_field':'pk', 'delete_route':'app_delete_film', 'container_pk':ddocument.pk }  %}

@@ -1,20 +1,26 @@
 {# src/AppBundle/Resources/views/dloccenter/pointform.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% include "@App/forms/security_shift.html.twig" %}
+{% set current_tab=current_tab|default("main-tab") %}
+
+{% if read_mode!="create" %}
+<h2>{{ dloccenter.idcollection??""}} {{ dloccenter.idpt??""}}</h2>
+{% endif %}
 <ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link " id="stratum-tab" data-bs-toggle="tab" data-bs-target="#stratum" type="button" role="tab" aria-controls="stratum" aria-selected="true">Stratum</button>
-  </li>
-  
+    {{ read_test.enable_bootstrap_tab("main-tab", current_tab,"#main", "main", "Home", "shift_mode") }}
+    {{ read_test.enable_bootstrap_tab("stratum-tab", current_tab,"#stratum", "stratum", "Stratum", "shift_mode") }}
+	{% if read_mode!="create" %}
+	{{ read_test.enable_bootstrap_tab("log-tab", current_tab,"#log", "log", "Logs") }}	
+	{% endif %}
 </ul>
 
-{{ form_start(point_form, {'attr': {'class': 'form-horizontal','id': 'point_form'}}) }}
+{{ read_test.form_read_mode(read_mode, point_form, {'attr': {'class': 'form-horizontal','id': 'point_form'}}) }}
 {% set form =point_form %}
 <div class="tab-content">
 {% include "@App/validation_errors.html.twig" with {'local_form' : point_form}  %}
- <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab">   
 
+  {{ read_test.activate_boostrap_tab("main", current_tab, "main-tab") }}
 	<table class="ui-front table_edit">
 		<TR>
 			<TH class="title_table_edit" width="100%" colspan = "6">
@@ -30,22 +36,18 @@
 							Collection:
 						</th>
 						<td width = "12%">
-							{% if dloccenter.pk != "" %}
-								{{dloccenter.idcollection}}
-							{% else %}
-								{{ form_widget(point_form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
-							{% endif %}
+							
+								{{ read_test.widget_read_mode(read_mode,point_form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}},dloccenter.idcollection??"" ) }}
+							
 						</td>
 						<th width = "12%" style="text-align:right">
 							ID :
 						</th>
 						<td  width = "12%">
-							{% if dloccenter.pk != "" %}
-								{{dloccenter.idpt}}
-							{% else %}
-								{{ form_widget(point_form.idpt, {'attr': {'class': 'form-control inp_PointID'}}) }}
+							
+								{{ read_test.widget_read_mode(read_mode,point_form.idpt, {'attr': {'class': 'form-control inp_PointID'}},dloccenter.idpt ??"") }}
 								{{ form_errors(point_form.idpt) }}
-							{% endif %}
+							
 							<input type='button' id="get_idcollection" value="Get next ID"></input>
 						</td>
 
@@ -53,7 +55,7 @@
 							Field number:
 						</th>
 						<td  width = "65%" colspan = "3">
-							{{ form_widget(point_form.fieldnum, {'attr': {'class': 'form-control inp_Fieldnum'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.fieldnum, {'attr': {'class': 'form-control inp_Fieldnum'}},dloccenter.fieldnum ??"") }}
 						</td>
 					</tr>
 					<tr>
@@ -61,19 +63,19 @@
 							Place:
 						</TH>
 						<td >
-							{{ form_widget(point_form.place, {'attr': {'class': 'form-control inp_Place'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.place, {'attr': {'class': 'form-control inp_Place'}},dloccenter.place ??"") }}
 						</td>
 						<TH  style="text-align:right">
 							Country:
 						</TH>
 						<td >
-							{{ form_widget(point_form.country, {'attr': {'class': 'form-control inp_Country'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.country, {'attr': {'class': 'form-control inp_Country'}},dloccenter.country ??"") }}
 						</td>
 						<TH  style="text-align:right">
 							Doc reference:
 						</TH>
 						<td>
-							{{ form_widget(point_form.docref, {'attr': {'class': 'form-control inp_Docref'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.docref, {'attr': {'class': 'form-control inp_Docref'}},dloccenter.docref ??"") }}
 						</td>
 					</tr>
 					<tr>
@@ -81,7 +83,12 @@
 							Date:
 						</TD>
 						<td >
-							{{ form_widget(point_form.date, {'attr': {'class': 'form-control inp_Date js-datepicker'}}) }}
+							{% if dloccenter.date is defined %}
+								{% set date_display=dloccenter.date|date('d-m-Y') %}
+							{% else %}
+								{% set date_display="" %}
+							{% endif %}
+							{{ read_test.widget_read_mode(read_mode,point_form.date, {'attr': {'class': 'form-control inp_Date js-datepicker'}},date_display) }}
 						</td>
 					</tr>
 					<tr>
@@ -89,13 +96,13 @@
 							Geographical description:
 						</TD>
 						<td >
-							{{ form_widget(point_form.geodescription, {'attr': {'class': 'form-control inp_Geodescription'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.geodescription, {'attr': {'class': 'form-control inp_Geodescription'}},dloccenter.geodescription??"") }}
 						</td>
 						<TH  style="text-align:right">
 							Description of the position:
 						</TD>
 						<td >
-							{{ form_widget(point_form.positiondescription, {'attr': {'class': 'form-control inp_Positiondescription'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.positiondescription, {'attr': {'class': 'form-control inp_Positiondescription'}},dloccenter.positiondescription??"") }}
 						</td>
 					</tr>
 					<tr>
@@ -103,7 +110,7 @@
 							Various info:
 						</TD>
 						<td >
-							{{ form_widget(point_form.variousinfo, {'attr': {'class': 'form-control inp_Variousinfo'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.variousinfo, {'attr': {'class': 'form-control inp_Variousinfo'}},dloccenter.variousinfo ??"") }}
 						</td>
 					</tr>
 					<tr>
@@ -111,7 +118,7 @@
 							Precision:
 						</TD>
 						<TD>
-							{{ form_widget(point_form.idprecision, {'attr': {'class': 'form-control inp_Idprecision'}}) }}
+							{{ read_test.widget_read_mode(read_mode,point_form.idprecision, {'attr': {'class': 'form-control inp_Idprecision'}},dloccenter.idprecision.precision ??"") }}
 						</TD>
 					</tr>
 					<tr>
@@ -146,37 +153,31 @@
 			</TD>
 		</TR>
 	</Table>
-	</div>
-	 <div class="tab-pane" id="stratum" role="tabpanel" aria-labelledby="stratum-tab">
+	{{ read_test.end_activate_boostrap_tab() }}
+	{{ read_test.activate_boostrap_tab("stratum", current_tab, "stratum-tab") }}
 	 {% include "@App/dloccenter/point_to_stratum.html.twig"  %}
-	 </div>
+	{{ read_test.end_activate_boostrap_tab() }}
+	{% if read_mode!="create" %}
+	 {{ read_test.activate_boostrap_tab("log", current_tab, "log-tab") }}
+		{% include "@App/forms/logs.html.twig" with {'logs' : logs} %}
+	{{ read_test.end_activate_boostrap_tab() }}
+	{% endif %}
   </div>
-  <input type="submit" class="btn btn-default pull-right submitbutton" />
+  {{ form_row(form._token) }}
+  {{ read_test.submit_button_log(read_mode) }}
+  {{ read_test.submit_read_mode(read_mode, "btn btn-default pull-right submitbutton" ) }}
 				<div class="alert_message"></div>
 	<div><input type="hidden" name="current_tab" id="current_tab"/></div>
-{{ form_end(point_form) }}
+{{ read_test.form_end_read_mode(point_form) }}
 
 <script type="text/javascript">
-var current_tab="main-tab";
+
 $(document).ready(
 	function()
 	{
-		$(".nav-link").click(
-			function()
-			{
-				console.log($(this).attr("id"));
-				current_tab=$(this).attr("id");
-				$("#current_tab").val(current_tab);
-			}
-		);
-		
-		{% if current_tab is defined %}
-		console.log("TAB_IS_DEFINED");
-		console.log("{{ current_tab }}");
-			{% if current_tab!='main_tab' %}
-				$("#{{ current_tab }}").click();			
-			{% endif %}
-		{% endif %}
+		current_tab="{{ current_tab }}";
+		//alert(current_tab);
+		init_tab_url(".mode_shift", current_tab);
 	}
 );
 

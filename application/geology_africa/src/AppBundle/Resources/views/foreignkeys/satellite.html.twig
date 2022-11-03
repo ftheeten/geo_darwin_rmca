@@ -1,42 +1,43 @@
 {# src/AppBundle/Resources/views/foreignkeys/satellite.html.twig #}
-
+{% import "@App/forms/read_test.html.twig" as read_test  %}
 {% set default_val = default_val|default(null) %}
 
 <div class="row">			
 		<div class="col-sm-1">{{ index }}</div>
 		
-		<div class="col-sm-2"><input type="text" name="{{ ctrl_prefix }}satpk[{{index}}]" id="{{ ctrl_prefix }}satpk_{{ index }}" style="width:100%" ></input></div>
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "satpk_"  ~ index, ctrl_prefix ~ "satpk["  ~ index~"]", default_val.pk ?? "","", "width:100%"  ) }}</div>
 		<div class="col-sm-3"></div>			
 </div>
 <div class="row">			
 		<div class="col-sm-1">Satellite number</div>
-		<div class="col-sm-2"><input type="text" name="{{ ctrl_prefix }}satnum[{{index}}]" id="{{ ctrl_prefix }}satnum_{{ index }}" style="width:100%" ></input></div>
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "satnum_"  ~ index, ctrl_prefix ~ "satnum["  ~ index~"]", default_val.satnum ?? "","", "width:100%"  ) }}</div>
 		<div class="col-sm-9"></div>		
 </div>
 <div class="row">
 	
 		<div class="col-sm-1">Type satellite</div>
-		<div class="col-sm-2"><select name="{{ ctrl_prefix }}sattype[{{index}}]" id="{{ ctrl_prefix }}sattype_{{ index }}" style="width:100%" multiple="multiple" ></select></div>
+		<div class="col-sm-2">
+		{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "sattype_"  ~ index , ctrl_prefix ~ "sattype["  ~ index~"]" , path('app_sattype_autocomplete'), "sattype", default_val.sattype ?? "", "", "width:100%") }}</div>
 		
 		<div class="col-sm-1">Sensor</div>
-		<div class="col-sm-2"><select name="{{ ctrl_prefix }}sensor[{{index}}]" id="{{ ctrl_prefix }}sensor_{{ index }}" style="width:100%" multiple="multiple" ></select></div>
+		<div class="col-sm-2">{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "sensor_"  ~ index , ctrl_prefix ~ "senror["  ~ index ~"]", path('app_satsensor_autocomplete'), "sensor", default_val.sensor ?? "", "", "width:100%") }}</div>
 		<div class="col-sm-1">Mode radar</div>
-		<div class="col-sm-2"><select name="{{ ctrl_prefix }}moderadar[{{index}}]" id="{{ ctrl_prefix }}moderadar_{{ index }}" style="width:100%" multiple="multiple" ></select></div>
+		<div class="col-sm-2">{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "moderadar_"  ~ index , ctrl_prefix ~ "moderadar["  ~ index~"]" , path('app_satmoderadar_autocomplete'), "moderadar", default_val.moderadar ?? "", "", "width:100%") }}</div>
 		<div class="col-sm-1">Type orbit</div>
-		<div class="col-sm-2"><select name="{{ ctrl_prefix }}orbit[{{index}}]" id="{{ ctrl_prefix }}orbit_{{ index }}" style="width:100%" multiple="multiple" ></select></div>		
+		<div class="col-sm-2">{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "orbit_"  ~ index , ctrl_prefix ~ "orbit["  ~ index ~"]", path('app_satorbit_autocomplete'), "orbit", default_val.orbit ?? "", "", "width:100%") }}</div>		
 </div>
 
 <div class="row">
 	
 		
 		<div class="col-sm-1">Path track</div>
-		<div class="col-sm-2"><input type="text"  name="{{ ctrl_prefix }}pathtrack[{{index}}]" id="{{ ctrl_prefix }}pathtrack_{{ index }}" style="width:100%" ></input></div>
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "pathtrack_"  ~ index, ctrl_prefix ~ "pathtrack["  ~ index~"]", default_val.pathtrack ?? "","", "width:100%"  ) }}</div>
 		<div class="col-sm-1">Row frame</div>
-		<div class="col-sm-2"><select name="{{ ctrl_prefix }}rowframe[{{index}}]" id="{{ ctrl_prefix }}rowframe_{{ index }}" style="width:100%" multiple="multiple" ></select></div>	
+		<div class="col-sm-2">{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "rowframe_"  ~ index , ctrl_prefix ~ "rowframe["  ~ index~"]" , path('app_satrowframe_autocomplete'), "rowframe", default_val.rowframe ?? "", "", "width:100%") }}</div>	
 		<div class="col-sm-1">Date </div>
-		<div class="col-sm-2"><input type="text" name="{{ ctrl_prefix }}date[{{index}}]" id="{{ ctrl_prefix }}date_{{ index }}"  style="width:100%" ></input></div>
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "date_"  ~ index, ctrl_prefix ~ "date["  ~ index~"]", default_val.date ?? "","", "width:100%"  ) }}</div>
 		<div class="col-sm-1">Time</div>
-		<div class="col-sm-2"><input type="text" name="{{ ctrl_prefix }}time[{{index}}]" id="{{ ctrl_prefix }}time_{{ index }}"  style="width:100%" ></input></div>			
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "time_"  ~ index, ctrl_prefix ~ "time["  ~ index ~"]", default_val.time ?? "","", "width:100%"  ) }}</div>			
 </div>
 
 <script>
@@ -45,18 +46,7 @@ $(document).ready(
             {				
 					
 				
-				$("#{{ ctrl_prefix }}sattype_{{ index }}").select2(select2_generic("{{ path('app_sattype_autocomplete')}}","sattype","sattype" ),0);
 				
-				$("#{{ ctrl_prefix }}orbit_{{ index }}").select2(select2_generic("{{ path('app_satorbit_autocomplete')}}","orbit","orbit" ),0);
-				
-				$("#{{ ctrl_prefix }}sensor_{{ index }}").select2(select2_generic("{{ path('app_satsensor_autocomplete')}}","sensor","sensor" ),0);
-				
-				$("#{{ ctrl_prefix }}moderadar_{{ index }}").select2(select2_generic("{{ path('app_satmoderadar_autocomplete')}}","moderadar","moderadar" ),0);
-				
-				
-				
-				
-				$("#{{ ctrl_prefix }}rowframe_{{ index }}").select2(select2_generic("{{ path('app_satrowframe_autocomplete')}}","rowframe","rowframe" ),0);
 				
 				$("#{{ ctrl_prefix }}date_{{ index }}").datepicker(
 					{format: 'yyyy-m-d'}					
@@ -64,33 +54,6 @@ $(document).ready(
 				//$("#{{ ctrl_prefix }}time_{{ index }}").datepicker(
 				//	{format: 'yyyy-m-d'});
 				
-				{% if not default_val is null %}
-				
-					$("#{{ ctrl_prefix }}satpk_{{ index }}").val("{{ default_val.pk }}");
-					
-					$("#{{ ctrl_prefix }}satnum_{{ index }}").val("{{ default_val.satnum }}");
-					
-					var newOption = new Option("{{ default_val.sattype }}", "{{ default_val.sattype  }}", true, true);
-					$('#{{ ctrl_prefix }}sattype_{{ index }}').append(newOption).trigger('change');
-					
-					var newOption = new Option("{{ default_val.sensor }}", "{{ default_val.sensor  }}", true, true);
-					$('#{{ ctrl_prefix }}sensor_{{ index }}').append(newOption).trigger('change');
-					
-					var newOption = new Option("{{ default_val.moderadar }}", "{{ default_val.moderadar  }}", true, true);
-					$('#{{ ctrl_prefix }}moderadar_{{ index }}').append(newOption).trigger('change');
-					
-					var newOption = new Option("{{ default_val.orbit }}", "{{ default_val.orbit  }}", true, true);
-					$('#{{ ctrl_prefix }}orbit_{{ index }}').append(newOption).trigger('change');
-					
-					$("{{ ctrl_prefix }}pathtrack_{{ index }}").val("{{ default_val.pathtrack }}");
-					
-					var newOption = new Option("{{ default_val.rowframe }}", "{{ default_val.rowframe  }}", true, true);
-					$('#{{ ctrl_prefix }}rowframe_{{ index }}').append(newOption).trigger('change');
-					
-					$("{{ ctrl_prefix }}date_{{ index }}").val("{{ default_val.date }}");
-					
-					//$("{{ ctrl_prefix }}time_{{ index }}").val("{{ default_val.time }}");
-				{% endif %}
 				
 			});
 </script>

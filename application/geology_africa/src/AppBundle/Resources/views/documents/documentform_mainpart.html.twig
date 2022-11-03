@@ -1,3 +1,5 @@
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{{ read_mode }}
 <div>
 <table class="ui-front table_edit">
 		<tr>
@@ -14,7 +16,7 @@
 				{% if ddocument.pk != "" %}
 					{{ddocument.idcollection}}
 				{% else %}
-					{{ form_widget(form.idcollection, {'attr': {'class': 'form-control inp_Idcollection'}}) }}
+					{{ read_test.widget_read_mode(read_mode, form.idcollection,  {'attr':{'class': 'form-control inp_Idcollection'}},ddocument.idcollection ) }}
 					
 				{% endif %}
 			</td>
@@ -25,7 +27,7 @@
 				{% if ddocument.pk != "" %}
 					{{ddocument.iddoc}}
 				{% else %}
-					{{ form_widget(form.iddoc, {'attr': {'class': 'form-control inp_DocID vshortlength', 'style': 'width: 200px'}}) }}
+					{{ read_test.widget_read_mode(read_mode, form.iddoc, {'attr': {'class': 'form-control inp_DocID vshortlength', 'style': 'width: 200px'}}, form.iddoc ?? "") }}
 					{{ form_errors(form.iddoc) }}
 					<input type='button' id="get_idcollection" value="Get next ID"></input>
 				{% endif %}
@@ -34,13 +36,13 @@
 				Archive mumber:
 			</th>
 			<td  width = "8%">
-				{{ form_widget(form.numarchive, {'attr': {'class': 'form-control inp_Numarchive'}}) }}
+				{{ read_test.widget_read_mode(read_mode, form.numarchive, {'attr': {'class': 'form-control inp_Numarchive'}}, ddocument.numarchive ??"" ) }}
 			</td>
 			<th width = "8%" style="text-align:right">
 				Central mumber:
 			</th>
 			<td  width = "45%">
-				{{ form_widget(form.centralnum, {'attr': {'class': 'form-control inp_Centralnum'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.centralnum, {'attr': {'class': 'form-control inp_Centralnum'}}, ddocument.centralnum ?? "" )}}
 			</td>
 		</tr>
 
@@ -49,19 +51,19 @@
 				Filename:
 			</th>
 			<td >
-				{{ form_widget(form.filename, {'attr': {'class': 'form-control inp_Filename'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.filename, {'attr': {'class': 'form-control inp_Filename'}}, ddocument.filename ?? "") }}
 			</td>
 			<th style="text-align:right">
 				Caption:
 			</th>
 			<td >
-				{{ form_widget(form.caption, {'attr': {'class': 'form-control inp_Caption'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.caption, {'attr': {'class': 'form-control inp_Caption'}}, ddocument.caption ?? "") }}
 			</td>
 			<th style="text-align:right">
 				Medium:
 			</th>
 			<td  colspan = "3">
-				{{ form_widget(form.medium, {'attr': {'class': 'form-control'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.medium, {'attr': {'class': 'form-control'}}, ddocument.medium.Medium ??"" ) }}
 			</td>
 		</tr>
 
@@ -70,13 +72,13 @@
 				Location:
 			</th>
 			<td >
-				{{ form_widget(form.location, {'attr': {'class': 'form-control inp_Location'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.location, {'attr': {'class': 'form-control inp_Location'}}, ddocument.location??"") }}
 			</td>
 			<th style="text-align:right">
 				Numerical location:
 			</th>
 			<td  colspan = "5">
-				{{ form_widget(form.numericallocation, {'attr': {'class': 'form-control inp_Numericallocation'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.numericallocation, {'attr': {'class': 'form-control inp_Numericallocation'}}, ddocument.numericallocation ?? "") }}
 			</td>
 		</tr>
 
@@ -85,7 +87,7 @@
 				Document information:
 			</th>
 			<td  colspan = "4">
-				{{ form_widget(form.docinfo, {'attr': {'class': 'form-control inp_Docinfo'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.docinfo, {'attr': {'class': 'form-control inp_Docinfo'}}, ddocument.docinfo ?? "" ) }}
 			</td>
 			<td  colspan = "3">
 				
@@ -96,19 +98,19 @@
 				Edition:
 			</th>
 			<td >
-				{{ form_widget(form.edition, {'attr': {'class': 'form-control inp_Edition'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.edition, {'attr': {'class': 'form-control inp_Edition'}}, ddocument.edition ?? "") }}
 			</td>
 			<th style="text-align:right">
 				Publication place:
 			</th>
 			<td >
-				{{ form_widget(form.pubplace, {'attr': {'class': 'form-control inp_Pubplace'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.pubplace, {'attr': {'class': 'form-control inp_Pubplace'}},ddocument.pubplace ?? "") }}
 			</td>
 			<th style="text-align:right">
 				Document type:
 			</th>
 			<td  colspan = "3">
-				{{ form_widget(form.doccartotype, {'attr': {'class': 'form-control inp_Doccartotype'}}) }}
+				{{ read_test.widget_read_mode(read_mode,form.doccartotype, {'attr': {'class': 'form-control inp_Doccartotype'}},ddocument.doccartotype ?? "") }}
 			</td>
 		</tr>
 		

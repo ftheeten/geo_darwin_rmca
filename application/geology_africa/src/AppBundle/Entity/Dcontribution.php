@@ -260,7 +260,7 @@ class Dcontribution extends GeodarwinEntity
 			$peoples[]=$contributor->getPeople();
 		}
 		$tmp.=implode(", ", $peoples)." (".$this->getYear().")";
-		print($tmp);
+		//print($tmp);
 		$this->description=$tmp;
 	}
 	
@@ -317,6 +317,7 @@ class Dcontribution extends GeodarwinEntity
 	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
 	{
 		//print("BEGIN_2");
+		print(count($new_dlinkcontribute));
 		$this->initDlinkcontribute($em);
 		if(count($new_dlinkcontribute)>0)
 		{
@@ -326,7 +327,7 @@ class Dcontribution extends GeodarwinEntity
 			$em,
 			Dlinkcontribute::class,
 			"dlinkcontribute", 			
-			"getLinkSignature", 
+			"getPk", 
 			$new_dlinkcontribute,		
 			array("idcontribution"=>$this->idcontribution));
 		}

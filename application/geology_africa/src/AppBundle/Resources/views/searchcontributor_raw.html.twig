@@ -15,7 +15,7 @@
 </div>
 <div class="row">
      <div class="col-sm-2"></div>
-    <div class="col-sm-2"><input type="button" value="search" id="go_search"/></div>
+    <div class="col-sm-2"><input type="button" value="search" id="go_search_contrib2"/></div>
 </div>
 <div id="div_results" class="row"></div>
 </div>
@@ -26,7 +26,7 @@
     {{ parent() }}
 	<script language='javascript'>
 	
-	 var search_logic=function(current_page, page_size, csv)
+	 var search_logic_contrib2=function(current_page, page_size, csv)
 	{
 		criterias={}
 		criterias["current_page"]=current_page;
@@ -45,9 +45,9 @@
 	}
 	
 	
-	var search=function(current_page, page_size)
+	var search_contrib2=function(current_page, page_size)
 	{
-		search_logic(current_page, page_size,false)
+		search_logic_contrib2(current_page, page_size,false)
 					
 	}
 		
@@ -58,10 +58,11 @@
 			 $("#namecontrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","people","people" ),0);
 			  $("#institute").select2(select2_generic("{{ path('app_contribinstitutions_autocomplete')}}","institut","institut" ),0);
 			  
-			  $("#go_search").click(
+			  $("#go_search_contrib2").click(
 				function()
 				{
-					search(1, $("#page_size").val());
+					search=search_contrib2;
+					search_contrib2(1, $("#page_size").val());
 				});
 		}
 	);

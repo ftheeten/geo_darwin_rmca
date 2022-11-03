@@ -151,3 +151,21 @@ app_lithostratum_autocomplete:
     defaults: 
      _controller: AppBundle:Autocomplete:lithostratum_autocomplete
     methods:  GET
+    
+app_lithostratum_standard_autocomplete:
+    path:     /get_lithostratum_std
+    defaults: 
+     _controller: AppBundle:Autocomplete:lithostratum_standard_autocomplete
+    methods:  GET
+    
+app_map_projection_autocomplete:
+    path:     /get_mapprojection
+    defaults: 
+     _controller: AppBundle:Autocomplete:map_projection_autocomplete
+    methods:  GET
+
+app_stratumdesc_autocomplete:
+    path:    /get_stratumdesc
+    defaults:
+     _controller: AppBundle:Autocomplete:stratumdesc_autocomplete
+    methods:  GET    

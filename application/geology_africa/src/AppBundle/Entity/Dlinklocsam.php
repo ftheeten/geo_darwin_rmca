@@ -104,4 +104,19 @@ class Dlinklocsam
     {
         return $this->idcollectionloc;
     }
+	
+	//dloclitho
+	
+	public $dloclitho;
+	public $dsample;
+	
+	public function getLocLitho()
+	{
+		return $this->dloclitho;
+	}
+	
+	public function getSample()
+	{
+		return $this->dsample;
+	}
 }

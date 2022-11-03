@@ -1,19 +1,43 @@
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
 {% set default_val = default_val|default(null) %}
-<input type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" />
-<input type="text" id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" />
+{% set search_form = search_form|default(null) %}
+{% include "@App/forms/standalonejs.html.twig" %}
+<div class="row">
+{% if not default_val is null %}
+	<a id="link_contrib_{{index}}" target="_blank" href="{{ path('app_edit_contribution',{ 'pk' : default_val.contribution.pk }) }}">{{ index }} : {{default_val.contribution.pk}}</a>
+{% else %}
+	<a id="link_contrib_{{index}}" target="_blank" href="">{{ index }} : </a>
+{% endif %}
 
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_link_"~ index, ctrl_prefix ~"_id_link_"~ index,default_val.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_contrib_"~ index, ctrl_prefix ~"_id_contrib_"~ index,default_val.contribution.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_description_contrib_"~ index, ctrl_prefix ~"_description_contrib_"~ index,(default_val.contribution.idcontribution ?? ""  ~ " " ~ default_val.contribution.description ?? "")|trim  ,"readonly_class") }}
+</div>
 <script type="text/javascript">
 $(document).ready(
 	function()
-	{	
-		{% if not default_val is null %}
-			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ default_val.contribution.pk }}");
-			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ default_val.contribution.getDescription() }}");
-			
-			
-		{% endif %}
+	{
+		$('.readonly_class').attr('readonly', true);
+		
+		
+		$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").click(
+			function()
+			{
+				var new_key=$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val();
+				console.log("changed_data");
+				var url=$("#link_contrib_{{index}}").attr("href");
+				console.log(url);
+				var url_elems=url.split("/");
+				url_elems[url_elems.length-1]=new_key;
+				url=url_elems.join("/");
+				$("#link_contrib_{{index}}").attr("href", url);
+				$("#link_contrib_{{index}}").text("{{ index }} : "+new_key);
+			}
+		);
 	});
-	
-</script>
 
-{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontribution_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index }%}
+</script>
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontribution_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_description_contrib_" ~ index , "index":index, "ctrl_suffix": "doc_to_contrib", "form":search_form  }%}

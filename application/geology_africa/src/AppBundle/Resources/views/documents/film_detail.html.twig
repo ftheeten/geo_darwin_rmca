@@ -1,0 +1,16 @@
+{# src/AppBundle/Resources/views/documents/film_detail.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set default_val = default_val|default(null) %}
+{% set read_mode=read_mode|default("read") %}
+{% set val_to_display = default_val.film|default(null) %}
+{% set val_pk = default_val.pk|default(null) %}
+
+
+<div class="row">			
+		<div class="col-sm-1">{{ index }}</div>
+		<div class="col-sm-5">
+		
+		{{ read_test.input_read_mode(read_mode, "text", "widget_film_pk"  ~ index, "widget_film_pk["  ~ index~"]", default_val.pk ?? "","", "width:100%"  ) }}
+		{{ read_test.input_read_mode(read_mode, "text", "widget_film"~ index, "widget_film["~ index~"]",default_val.film ?? "","readonly_class", "width:100%") }}
+		</div>
+</div>

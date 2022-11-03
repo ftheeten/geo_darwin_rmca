@@ -1,0 +1,40 @@
+{# src/AppBundle/Resources/views/forms/logs.html.twig #}
+{% set logs=logs|default(none) %}
+Logs
+<div class="row">
+<div class="col-sm-1">
+	Filter
+</div>
+<div class="col-sm-2">
+	<select id="choose_log" name="choose_log">
+		<option value="">All</option>
+		<option value="typelog_update">Update</option>
+		<option value="typelog_insert">Insert</option>
+		<option value="typelog_delete">Delete</option>
+		<option value="typelog_validate">Validate</option>
+		<option value="typelog_invalidate">Invalidate</option>
+	</select>
+</div>
+</div>
+<div class="row">
+	<div class="col-sm-1">id</div>
+	<div class="col-sm-2">date</div>
+	<div class="col-sm-1">action</div>
+	<div class="col-sm-1">relation</div>
+	<div class="col-sm-2">first_name</div>
+	<div class="col-sm-2">name</div>
+	<div class="col-sm-2">old value</div>
+	</div>
+{% if logs is iterable %}
+{% for key,value in logs %}
+	<div class="row typelog_{{  value.action }} typelog">
+	<div class="col-sm-1">{{ key + 1}}</div>
+	<div class="col-sm-2">{{  value.modification_date_time|date('d-m-Y H:i:s') }}</div>
+	<div class="col-sm-1">{{  value.action }}</div>
+	<div class="col-sm-1">{{  value.secondary_table }}</div>
+	<div class="col-sm-2">{{  value.first_name }}</div>
+	<div class="col-sm-2">{{  value.last_name }}</div>
+	<div class="col-sm-2">{{  value.difference }}</div>
+	</div>
+{% endfor %}
+{% endif %}

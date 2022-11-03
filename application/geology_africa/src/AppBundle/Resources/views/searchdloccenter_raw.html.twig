@@ -1,0 +1,22 @@
+{# src/AppBundle/Resources/views/searchdloccenter_raw.html.twig #}
+{% use "@App/forms/standalonejs.html.twig" %}
+{% block body %}
+<div class="container">
+<br/>
+<br/>
+<br/>
+<div class="row">
+	<div class="col-sm-2">Collection</div>
+		<div class="col-sm-3"><select name="collection" id="collection" style="width:100%" multiple="multiple" ></select>
+    </div>
+	<div class="col-sm-2">ID point</div>
+		<div class="col-sm-3"><select name="idpt" id="idpt" style="width:100%" multiple="multiple" ></select>
+    </div>		
+</div>
+</div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+	<script language='javascript'>
+	</script>
+{% endblock %}

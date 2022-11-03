@@ -1,0 +1,76 @@
+{# src/AppBundle/Resources/views/addplanvol.html.twig #}
+
+{% extends "@App/addlayout.html.twig" %}
+
+{% block title %}
+  {{ parent() }} 
+{% endblock %}
+
+{% block body %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% include "@App/forms/security_shift.html.twig" %}
+{{  read_test.form_read_mode(read_mode, form, {'attr': {'id': 'form_planvol'}}) }}
+{{ form_row(form._token) }}
+<div class="container">
+<div class="row">
+<div class="col-sm-1">fid</div>
+<div class="col-sm-2">
+	
+	{% if read_mode=="create" %}
+		{{ read_test.widget_read_mode(read_mode, form.fid , {'attr':{'class': 'flight_fid'}}, docplanvol.fid?? "") }}
+		<input type='button' id="get_idflightplan" value="Get next ID"></input>
+	{% else %}
+		{{ docplanvol.fid?? "" }}
+	{% endif %}
+</div>
+<div class="col-sm-1">bid</div>
+<div class="col-sm-2">
+	{{ read_test.widget_read_mode(read_mode, form.bid , {'attr': {}}, docplanvol.bid?? "") }}
+</div>
+<div class="col-sm-1">band</div>
+<div class="col-sm-2">
+	{{ read_test.widget_read_mode(read_mode, form.bande , {}, docplanvol.bande?? "") }}
+</div>
+<div class="col-sm-1">Nom bloc</div>
+<div class="col-sm-2">
+	{{ read_test.widget_read_mode(read_mode, form.nombloc , {}, docplanvol.nombloc?? "") }}
+</div>
+</div>
+<div class="row">
+	<div class="col-sm-1">Comment</div>
+	<div class="col-sm-5">
+	{{ read_test.widget_read_mode(read_mode, form.comment , {}, docplanvol.comment?? "") }}
+</div>
+</div>
+</div>
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#form_planvol' , 'delete_route': 'app_delete_flightplan' } %}		
+
+{{ read_test.form_end_read_mode(read_mode,form) }}
+
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">   
+<script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/core.js') }}"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+	$("#get_idflightplan").click(
+			function()
+			{
+				
+				 jQuery.getJSON("{{ path('app_get_next_id')}}",
+					{
+					'table':'docplanvol'},
+					function(result)
+					{
+						$('.flight_fid').val(result.id);						
+					}
+				 );
+				
+			}
+		);
+});
+</script>
+
+{% endblock %}

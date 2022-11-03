@@ -31,9 +31,11 @@ use AppBundle\Entity\Dlinkcontribute;
 use AppBundle\Entity\Dlinkcontsam;
 use AppBundle\Entity\Dlinkcontloc;
 use AppBundle\Entity\Dlinkcontdoc;
+use AppBundle\Entity\Dlinkdocloc;
 use AppBundle\Entity\Dlocdrilling; 
 use AppBundle\Entity\DLoclitho;
 use AppBundle\Entity\Dkeyword;
+use AppBundle\Entity\TDataLog;
 
 class AbstractController extends Controller
 {
@@ -79,6 +81,29 @@ class AbstractController extends Controller
 		return $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']);
 	}
 	
+	protected function enable_read_write(Request $request, $default="read", $variable="mode")
+	{
+		return $this->get_request_var($request, $variable, $default);
+	}
+	
+	protected function validate_form(Request $request, $em, $name_table, $pk_obj)
+	{
+		$validate=$this->get_request_var($request, "validate_log", "");
+		if($validate=="validate"||$validate=="invalidate")
+		{
+			//$em = $this->getDoctrine()->getManager();
+			//$username = $this->getUser()->getUsername();
+			$log=new TDataLog();
+			$log->setAction($validate);
+			$log->setRecordId($pk_obj);
+			$log->setReferencedTable($name_table);
+			$log->setModificationDateTime(date("Y-m-d H:i:s"));
+			$log->setUserRef($this->getUser());
+			$em->persist($log);
+			$em->flush();
+		}
+	}
+	
 	public function get_next_idAction(Request $request)
 	{
 		
@@ -107,6 +132,12 @@ class AbstractController extends Controller
 				$sql_table="dloccenter";
 				$field="idpt";
 			}
+			elseif($table=="dcontribution")
+			{
+				$sql_table="dcontribution";
+				$field="idcontribution";
+			}
+			
 			
 			else
 			{
@@ -137,9 +168,14 @@ class AbstractController extends Controller
 				$sql_table="dloccenter";
 				$field="idpt";
 			}
+			elseif($table=="docplanvol")
+			{
+				$sql_table="docplanvol";
+				$field="fid::integer";
+			}
 			$em = $this->container->get('doctrine')->getEntityManager();
-			$RAW_QUERY="SELECT MAX(COALESCE(".$field.",0))+ 1 as next_id FROM ".$sql_table." ;";
-			print($RAW_QUERY);
+			$RAW_QUERY="SELECT COALESCE(MAX(COALESCE(".$field.",0))+ 1,1) as next_id FROM ".$sql_table." ;";
+		
 			$statement = $em->getConnection()->prepare($RAW_QUERY);
 			$statement->execute();
 			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -185,6 +221,12 @@ class AbstractController extends Controller
         $statement->execute();
         $codes = $statement->fetchAll();        
         return new JsonResponse($codes);
+    }
+	
+	 public function all_dloccenter_categoriesAction(Request $request)
+	 {
+		       
+        return new JsonResponse([["main_type"=>'georef']]);
     }
 	
 	public function all_collectionsAction(Request $request)
@@ -287,7 +329,7 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 		}
 		else
 		{
-			print("IS_NULL");
+			//print("IS_NULL");
 			return null;
 		}		
 	}
@@ -307,23 +349,29 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			$params=$request->query->all();
 		}
 		$tmp_array=Array();
+		//print( $prefix_pk_url);
+		//print("<br/>");
 		foreach($params as $key=>$val)
 		{			
-			
+			//print("_RECORD_<br/>");
 			if(strpos($key, $prefix_pk_url )===0)
-			{						
-				$tmp_idx=preg_replace('/^(.+?)(\d+)$/i', '${2}', $key);				
+			{		
+				//print($key);
+				$tmp_idx=preg_replace('/^(.+?)(\d+)$/i', '${2}', $key);
+				//print($tmp_idx);
 				$id_obj=$request->request->get($prefix_pk_url.$tmp_idx);						
 				$tmp_obj=$this->handle_many_to_many_detail_general($request, $tmp_idx, $target_class_name, $field_target_id,$id_obj , $link_class_name, $fk_mapping, $http_mapping, $direct_mapping);
 				$tmp_array[$tmp_idx]=$tmp_obj;
+				//print_r((array)$tmp_array[$tmp_idx]);
 				//$this->addFlash('success', 'DATA RECORDED IN DATABASE!');
 			}
 		}
+		//print_r($tmp_array);
 		return $tmp_array;
 	}	
 	
 	
-	public function getHTTPOneToManyByIndex($request, $pk_field, $target_class_name, $http_mapping=Array(), $direct_mapping = Array() )
+	public function getHTTPOneToManyByIndex($request, $pk_field, $target_class_name, $http_mapping=Array(), $direct_mapping = Array() , $checkbox_mapping=Array())
 	{
 		//print("call");
 		$array_obj=Array();
@@ -375,8 +423,28 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 				{
 					call_user_func_array(array($dlink_obj, $method), array($val));
 				}
+				foreach($checkbox_mapping as $field=>$method)
+				{
+					
+					$array_tmp=$request->request->get($field);
+					
+					if(isset($array_tmp))
+					{
+						if(array_key_exists($i,$array_tmp))
+						{
+							
+							call_user_func(array($dlink_obj, $method), true);
+						}
+						else
+						{
+							
+							call_user_func(array($dlink_obj, $method), false);
+						}
+					}
+				}
+				
 				$i++;
-				print($i);
+				//print($i);
 			}
 		}		
 		return $array_obj;		

@@ -1,6 +1,9 @@
 {# src/AppBundle/Resources/views/forms/form_buttons.html.twig #}
 {% use "@App/forms/standalonejs.html.twig" %}
+{% set read_mode=read_mode|default("read") %}
+{% if read_mode=="write" or  read_mode=="create"   %}
 {% block body %}
+
 {% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
 <div class="row">
 <div class="col-sm-2">
@@ -33,5 +36,7 @@
 	
 	);
 </script>
+
 {% endblock %}
+{% endif %}
 {% endif %}

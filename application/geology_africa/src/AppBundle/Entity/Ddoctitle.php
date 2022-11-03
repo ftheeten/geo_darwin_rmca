@@ -23,7 +23,7 @@ class Ddoctitle extends GeodarwinDocForeignKey
      * @ORM\GeneratedValue(strategy="SEQUENCE")
      * @ORM\SequenceGenerator(sequenceName="ddoctitle_pk_seq", allocationSize=1, initialValue=1)
      */
-    private $pk;
+    protected $pk;
 
     /**
      * @var integer

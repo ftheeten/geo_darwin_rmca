@@ -1,42 +1,35 @@
 {% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+
 <div class="row">
-<input class="col-sm-2" type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_contrib_{{ index }}" name="{{ ctrl_prefix }}_id_contrib_{{ index }}" readonly/>
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk_"~ index, ctrl_prefix ~"_pk_"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+<div class="row">
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_contrib_"~ index, ctrl_prefix ~"_id_contrib_"~ index,default_val.dcontributor.pk ?? "","readonly_class") }}
 </div>
 <div class="row">
 <div class="col-sm-1">Name</div>
 <div class="col-sm-2"> 
-<textarea id="{{ ctrl_prefix }}_name_contrib_{{ index }}"  name="{{ ctrl_prefix }}_name_contrib_{{ index }}" style="width:100%" readonly></textarea>
+{{ read_test.input_read_mode(read_mode, "textarea",  ctrl_prefix ~"_name_contrib_"~ index , ctrl_prefix ~"_name_contrib_"~ index, (default_val.dcontributor.people??"")  ~" " ~ (default_val.dcontributor.institut??"") | trim , "readonly_class")  }}
 </div>
 <div class="col-sm-1">Role</div>
 <div class="col-sm-2"> 
-<select style="width:100%" class="select2" id="{{ ctrl_prefix }}_role_contrib_{{ index }}"  name="{{ ctrl_prefix }}_role_contrib_{{ index }}"></select>
+{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~"_role_contrib_" ~ index, ctrl_prefix ~"_role_contrib_" ~ index, path('app_contribrole_autocomplete'),"contributorrole", default_val.contributorrole??"","select2","width:100%"  ) }}
 </div>
 <div class="col-sm-1">order</div>
 <div class="col-sm-2">
-<input type="text" class="order_contributor" id="{{ ctrl_prefix }}_order_contrib_{{ index }}" name="{{ ctrl_prefix }}_order_contrib_{{ index }}" style="width:100%" />
 
+{{ read_test.input_read_mode(read_mode, "text",  ctrl_prefix ~"_order_contrib_"~ index , ctrl_prefix ~"_order_contrib_"~ index, index , "order_contributor", "width:100%")  }}
 <script type="text/javascript">
 $(document).ready(
 	function()
 	{
+		 $('.readonly_class').attr('readonly', true);
 		
 		
-		$("#{{ ctrl_prefix }}_role_contrib_{{ index }}").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);
-		
-		$("#{{ ctrl_prefix }}_order_contrib_{{ index }}").val("{{ index }}");
-		
-		{% if not default_val is null %}
-			$("#{{ ctrl_prefix }}_id_contrib_{{ index }}").val("{{ default_val.dcontributor.pk }}");
-			$("#{{ ctrl_prefix }}_name_contrib_{{ index }}").val("{{ default_val.dcontributor.people  ~" " ~ (default_val.dcontributor.institut??"") }}");
-			
-			var newOption = new Option("{{ default_val.contributorrole }}", "{{ default_val.contributorrole }}", true, true);
-			$('#{{ ctrl_prefix }}_role_contrib_{{ index }}').append(newOption).trigger('change');
-			
-			
-			
-		{% endif %}
 	});
 	
 </script>
 
-{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontributor_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index, "ctrl_suffix": "contrib_to_person" }%}
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchcontributor_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_contrib_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_contrib_" ~ index , "index":index, "ctrl_suffix": "contrib_to_person", "read_mode": read_mode }%}

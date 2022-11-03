@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use AppBundle\Form\SearchAllForm;
-
+use Symfony\Component\HttpFoundation\Response;
 
 class SearchController extends AbstractController
 {
@@ -73,11 +73,11 @@ class SearchController extends AbstractController
 		return $this->render('@App/search_all/searchallbs.html.twig',array('form' => $form->createView()));  
 	}
 	
-	 public function searchallbs_documents_rawAction(Request $request)
+	 /*public function searchallbs_documents_rawAction(Request $request)
 	 {    
         $form=$this->createForm(SearchAllForm::class, null);
 		return $this->render('@App/searchallbs_raw.html.twig',array('form' => $form->createView(), 'type_filter'=>'document'));  
-	}
+	}*/
 	
 	public function searchallbs_rawAction(Request $request)
 	{
@@ -442,6 +442,151 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 		return $this->render('@App/no_results_bs.html.twig');
 	}
 	
+	public function flightplan_searchAction(Request $request)
+	{
+		$current_page=$request->get("current_page",1);
+        $page_size=$request->get("page_size",$this->page_size);
+		$offset=(((int)$current_page)-1)* (int)$page_size;
+		
+		$fid=$request->get("fid");
+		$nombloc=$request->get("nombloc");
+		$bid=$request->get("bid");
+		$band=$request->get("band");
+		$results=Array();
+		$pagination=Array();
+		
+		$params_sql=Array();
+		$params_sql_or=Array();
+		$params_sql_or_group=Array();
+		$params_pdo=Array();
+		$idx_param=1;
+		
+		if($request->request->has("fid"))
+		{
+			
+			$fid=$request->get("fid");
+			if(strlen($fid)>0)
+			{
+				$params_sql_or=Array();
+				$fids=[$fid];
+				foreach($fids as $fid)
+				{
+					
+						$params_sql_or[]="LOWER(fid) LIKE LOWER(".$this->gen_pdo_name($idx_param).")";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$fid;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+					
+				}
+				$params_sql_or_group["fid"]=$params_sql_or;
+			}
+		}
+		if($request->request->has("nombloc"))
+		{
+			$nombloc=$request->get("nombloc");
+			if(strlen($nombloc)>0)
+			{
+				$params_sql_or=Array();
+				$nomblocs=[$nombloc];
+				foreach($nomblocs as $nombloc)
+				{
+					
+						$params_sql_or[]="LOWER(nombloc) = LOWER(".$this->gen_pdo_name($idx_param).")";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$nombloc;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+					
+				}
+				$params_sql_or_group["nombloc"]=$params_sql_or;
+			}
+		}
+		if($request->request->has("bid"))
+		{
+			$bid=$request->get("bid");
+			if(strlen($bid))
+			{
+				
+				$params_sql_or=Array();
+				$bids=[$bid];
+				foreach($bids as $bid)
+				{
+					
+						$params_sql_or[]="LOWER(bid) LIKE LOWER(".$this->gen_pdo_name($idx_param).")";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$bid;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+					
+				}
+				$params_sql_or_group["bid"]=$params_sql_or;
+			}
+		}
+		if($request->request->has("band"))
+		{
+			$band=$request->get("band");
+			if(strlen($band)>0)
+			{
+				$params_sql_or=Array();
+				$bands=[$band];
+				foreach($bands as $band)
+				{
+					
+						$params_sql_or[]="LOWER(bande) LIKE LOWER(".$this->gen_pdo_name($idx_param).")";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$band;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+					
+				}
+				$params_sql_or_group["band"]=$params_sql_or;
+			}
+		}
+		
+		$query_or_builder=Array();
+			
+		foreach($params_sql_or_group as $key=>$params_sql_or)
+		{
+			$params_sql[]="(".implode(" OR ", $params_sql_or ).")";
+		}
+		
+		if(count($params_sql)>0)
+		{
+			$query_where=" WHERE ".implode(" AND ", $params_sql );				
+		}
+		else
+		{
+			$query_where="";				
+		}
+		
+		$RAW_QUERY='
+			WITH main_q AS (SELECT * FROM docplanvol '.$query_where.')
+			SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY fid OFFSET :offset LIMIT :limit;';
+		$em = $this->container->get('doctrine')->getEntityManager();	
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		foreach($params_pdo as $key=>$val)
+		{
+			$statement->bindParam($key, $val["value"],  $val["type"]);				
+		}
+		$statement->bindParam(":offset", $offset, \PDO::PARAM_INT);
+		$statement->bindParam(":limit", $page_size, \PDO::PARAM_INT);
+		$statement->execute();
+		$results = $statement->fetchAll(\PDO::FETCH_ASSOC);	
+		if(count($results)>0)
+		{
+			$count_all=$results[0]["full_count"];
+			$pagination = array(
+				'page' => $current_page,
+				'route' => 'search_main',
+				'pages_count' => ceil($count_all / $page_size)
+			);
+			
+			return $this->render('@App/search_results_flightplans.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
+		}
+		else
+		{
+			return $this->render('@App/no_results_bs.html.twig');
+		}
+		return $this->render('@App/no_results_bs.html.twig');
+	}
+	
 	public function main_searchAction(Request $request)
     {
 	
@@ -607,7 +752,10 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				$wkt_search=$request->get("wkt_search");
                 if(strlen(trim($wkt_search)))
                 {
-                    $params_sql_or[]="ST_INTERSECTS(ST_SETSRID(ST_Point(coord_long, coord_lat),4326), ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326))";
+                    $params_sql_or[]="(ST_INTERSECTS(ST_SETSRID(ST_Point(coord_long, coord_lat),4326), ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326)) 
+					OR 
+					ST_INTERSECTS(geom, ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326)) 
+					)";
                     $params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$wkt_search;
                     $params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
                    
@@ -708,6 +856,31 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
                 }			
             }
 			
+			if($request->request->has("stratum"))
+			{
+				$stratum_array=$request->get("stratum");
+				$params_sql_or=Array();
+				foreach($stratum_array as $stratum)
+				{
+					$stratum=strtolower($stratum);
+					$params_sql_or[]="EXISTS(
+					
+					SELECT dloclitho.idpt FROM dloclitho INNER JOIN dloccenter ON 
+					dloclitho.idcollection=dloccenter.idcollection 
+					AND
+					dloclitho.idpt=dloccenter.idpt 
+					WHERE LOWER(TRIM(lithostratum))= LOWER(TRIM(".$this->gen_pdo_name($idx_param).")) 
+					AND dloccenter.pk=b.fk_localitie 
+					
+					)";                                          
+                   
+					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$stratum;
+					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+					$idx_param++;
+				}
+				$params_sql_or_group["stratum"]=$params_sql_or;
+			}
+			
 			$query_or_builder=Array();
 			
 			foreach($params_sql_or_group as $key=>$params_sql_or)
@@ -800,7 +973,15 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				);
 				if(!$display_csv)
 				{
-					return $this->render('@App/search_all/search_results_bs.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all, "geojson"=>$geojson, "headers1"=>implode("\r\n", $headers1),"headers2"=>implode("\r\n", $headers2),"headers3"=>implode("\r\n", $headers3), "headers4"=>implode("\r\n", $headers4) ));
+					$is_modal=false;
+					if($request->request->has("is_modal"))
+					{
+						if($request->get("is_modal"))
+						{
+							$is_modal=true;
+						}
+					}
+					return $this->render('@App/search_all/search_results_bs.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all, "geojson"=>$geojson, "headers1"=>implode("\r\n", $headers1),"headers2"=>implode("\r\n", $headers2),"headers3"=>implode("\r\n", $headers3), "headers4"=>implode("\r\n", $headers4), "is_modal"=>$is_modal ));
 				}
 				else
 				{
@@ -872,6 +1053,10 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 	
     public function searchsatelliteAction(Request $request){
 		return $this->render('@App/searchsatellite.html.twig');
+    }
+	
+	public function searchflightplanAction(Request $request){
+		return $this->render('@App/searchflightplan.html.twig');
     }
 	
 	public function searchstratumAction(Request $request){

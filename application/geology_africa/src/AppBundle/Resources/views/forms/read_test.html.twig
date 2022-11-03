@@ -1,0 +1,117 @@
+{# src/AppBundle/Resources/views/forms/read_test.html.twig #}
+
+{% macro widget_read_mode(read_mode, id_widget, options , default_val, class_control) %}
+	{% if read_mode == "write" or read_mode=="create" %}
+		{{ form_widget(id_widget, options) }}
+		
+	{% elseif read_mode == "read" %}	
+		<div class="{{ class_control }}">{{ default_val }}</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro form_read_mode(read_mode, form, options) %}
+	{% if read_mode == "write" or read_mode=="create" %}
+		{{ form_start(form, options) }}
+	{% endif %}
+{% endmacro %}
+
+{% macro form_end_read_mode(read_mode,form, options) %}
+	{% if read_mode == "write" or read_mode=="create" %}
+	    {% set options=options|default({}) %}
+		{{ form_end(form, options) }}
+	{% endif %}
+{% endmacro %}
+
+{% macro submit_read_mode(read_mode, class, id_form) %}
+	{% if read_mode == "write" or read_mode=="create" %}
+		<input type="submit" class="{{class}}", id="{{ id_form }}">
+	{% endif %}
+{% endmacro %}
+
+{% macro input_read_mode(read_mode, type_control, id_control, name_control, default_val, class_control, style_control, step) %}
+	{% if read_mode == "write" or read_mode=="create" %}
+		{% if type_control=="textarea" %}
+			<textarea  id="{{ id_control }}" name="{{ name_control }}" class="{{ class_control }}" style="{{ style_control }}" ></textarea>
+		{% elseif type_control=="number" %}
+			 <input type="number" name="{{ name_control }}" class="{{ class_control }}" style="{{ style_control }}" step="{{ step }}"  value="{{ default_val }}"/>
+		{% elseif type_control=="checkbox" %}
+			{% if default_val==1 %}
+				{% set checked="checked" %}
+			{% else %}
+				{% set checked="" %}
+			{% endif %}
+			 <input type="checkbox"  id="{{ id_control }}" name="{{ name_control }}" class="{{ class_control }}" style="{{ style_control }}" value="{{ default_val }}" {{ checked }}/>
+		{% else %}
+			<input type="{{ type_control }}"  id="{{ id_control }}" name="{{ name_control }}" class="{{ class_control }}" style="{{ style_control }}" value="{{ default_val }}" />
+		{% endif %}
+		{% if not default_val is null %}
+			<script type="text/javascript">
+				$(document).ready(
+					function()
+					{
+						$("{{'#'}}{{ id_control }}").val("{{ default_val }}");
+					});
+			</script>
+		{% endif %}
+		
+	{% elseif read_mode == "read" %}
+		<div>{{ default_val }}</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro select2_read_mode(read_mode, id_control, name_control, ajax_url, field_select2, default_val, class_control, style_control) %}
+	{% if read_mode == "write" or read_mode=="create"  %}
+		<select name="{{ name_control }}" id="{{ id_control }}" class="{{ class_control }}" style="{{ style_control }}" ></select>
+		<script type="text/javascript">
+				$(document).ready(
+					function()
+					{
+						$("{{'#'}}{{ id_control }}").select2(select2_generic("{{ ajax_url }}","{{ field_select2 }}","{{ field_select2 }}" ),0);
+						
+						{% if not default_val is null %}
+							var newOption = new Option("{{ default_val }}", "{{ default_val }}", true, true);
+							$("{{'#'}}{{ id_control }}").append(newOption).trigger('change');
+						{% endif %}
+					});
+			</script>
+		
+	{% elseif read_mode == "read" %}
+		<div>{{ default_val }}</div>
+	{% endif %}
+	
+{% endmacro %}
+
+{% macro enable_bootstrap_tab(id, selected_tab,  target, controls, label) %}
+	{% if id==selected_tab %}
+		 <li class="nav-item" role="presentation">
+			<button class="nav-link active" id="{{ id }}" data-bs-toggle="tab" data-bs-target="{{ target }}" type="button" role="tab" aria-controls="{{ controls }}" aria-selected="true">{{ label }}</button>
+		</li>
+	{% else %}
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="{{ id }}" data-bs-toggle="tab" data-bs-target="{{ target }}" type="button" role="tab" aria-controls="{{ controls }}" aria-selected="true">{{ label }}</button>
+		</li>		
+	{% endif %}
+{% endmacro %}
+
+{% macro activate_boostrap_tab(id, selected_tab, label) %}
+	{% if label==selected_tab %}
+		<div class="tab-pane active" id="{{ id }}" role="tabpanel" aria-labelledby="{{ label }}">   
+	{% else %}
+		<div class="tab-pane" id="{{ id }}" role="tabpanel" aria-labelledby="{{ label }}">   
+	{% endif %}
+{% endmacro %}
+
+{% macro end_activate_boostrap_tab() %}
+	</div>
+{% endmacro %}
+
+{% macro submit_button_log(read_mode) %}
+	{% if read_mode == "write"  %}
+		<select id="validate_log" name="validate_log">
+			<option value="update">Update</option>
+			<option value="validate">Validate</option>
+			<option value="invalidate">Invalidate</option>
+		</select>
+	{% endif %}
+{% endmacro %}
+

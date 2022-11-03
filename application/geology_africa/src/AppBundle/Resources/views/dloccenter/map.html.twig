@@ -1,6 +1,7 @@
 {# src/AppBundle/Resources/views/dloccenter/pointform.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
 <style>
-
+	{% if read_mode!="read" %}
       .draw-point {
         top: 65px;
         left: .5em;
@@ -20,7 +21,7 @@
         text-align: center; 
            
       }
-      
+      {% endif %}
       
       .move-map {
         top: 135px;
@@ -50,8 +51,8 @@
 										<table>
 											<tr>
 												<TH  style="text-align:right">Altitude:</TH>
-												<td  colspan="3"> {{ form_widget(point_form.altitude, {'attr': {'class': 'form-control inp_Altitude vshortlength'}}) }}m
-													<!--<input type="text" id="inp_altitude" name="inp_altitude" class="inp_altitude vshortlength">m-->
+												<td  colspan="3"> {{ read_test.widget_read_mode(read_mode, point_form.altitude, {'attr': {'class': 'form-control inp_Altitude vshortlength'}}, dloccenter.altitude??"") }}m
+													
 												</td>
 											</tr>
 											<tr>
@@ -59,7 +60,7 @@
 													<b>Coordinates source:</b>
 												</TH>
 												<td>
-													{{ form_widget(point_form.coordinate_format, {'attr': {'class': 'coordinate_format'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.coordinate_format, {'attr': {'class': 'coordinate_format'}}, dloccenter.coordinate_format??"") }}
 												</td>
 											</tr>
 											<tr>
@@ -67,7 +68,7 @@
 													WKT
 												</td>
 												<td>
-													{{ form_widget(point_form.wkt, {'attr': {'class': 'wkt'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.wkt, {'attr': {'class': 'wkt'}}, dloccenter.wkt ??"", "wkt") }}
 												</td>
 											</tr>
 											
@@ -81,7 +82,7 @@
 													Decimal latitude
 												</td>
 												<td>
-													{{ form_widget(point_form.coordlat, {'attr': {'class': 'coordlat coord_dd shortlength disable-bootstrap'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.coordlat, {'attr': {'class': 'coordlat coord_dd shortlength disable-bootstrap'}}, dloccenter.coordlat??"") }}
 												</td>
 											</tr>
 											<tr  class="coord_dd">
@@ -89,7 +90,7 @@
 													Decimal longitude
 												</td>
 												<td>
-													{{ form_widget(point_form.coordlong, {'attr': {'class': 'coordlong coord_dd shortlength disable-bootstrap'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.coordlong, {'attr': {'class': 'coordlong coord_dd shortlength disable-bootstrap'}}, dloccenter.coordlong ??"") }}
 												</td>
 											</tr>
 											<tr class="coord_dms">
@@ -97,10 +98,10 @@
 													latitude DMS
 												</td>
 												<td>
-													{{ form_widget(point_form.latitude_degrees, {'attr': {'class': 'latitude_degrees coord_dms vshortlength disable-bootstrap'}}) }}°
-													{{ form_widget(point_form.latitude_minutes, {'attr': {'class': 'latitude_minutes coord_dms shortlength disable-bootstrap'}}) }}'
-													{{ form_widget(point_form.latitude_seconds, {'attr': {'class': 'latitude_seconds coord_dms shortlength disable-bootstrap'}}) }}"
-													{{ form_widget(point_form.latitude_direction, {'attr': {'class': 'latitude_direction  coord_dms  disable-bootstrap', 'style':'width:auto'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.latitude_degrees, {'attr': {'class': 'latitude_degrees coord_dms vshortlength disable-bootstrap'}}, dloccenter.latitude_degrees ??"") }}°
+													{{ read_test.widget_read_mode(read_mode, point_form.latitude_minutes, {'attr': {'class': 'latitude_minutes coord_dms shortlength disable-bootstrap'}}, dloccenter.latitude_minutes ??"") }}'
+													{{ read_test.widget_read_mode(read_mode, point_form.latitude_seconds, {'attr': {'class': 'latitude_seconds coord_dms shortlength disable-bootstrap'}}, dloccenter.latitude_seconds ??"") }}"
+													{{ read_test.widget_read_mode(read_mode, point_form.latitude_direction, {'attr': {'class': 'latitude_direction  coord_dms  disable-bootstrap', 'style':'width:auto'}}, dloccenter.latitude_direction??"") }}
 												</td>
 											</tr>
 											<tr  class="coord_dms">
@@ -108,10 +109,10 @@
 													longitude DMS
 												</td>
 												<td>
-													{{ form_widget(point_form.longitude_degrees, {'attr': {'class': 'longitude_degrees coord_dms vshortlength disable-bootstrap'}}) }}°
-													{{ form_widget(point_form.longitude_minutes, {'attr': {'class': 'longitude_minutes coord_dms shortlength disable-bootstrap'}}) }}'
-													{{ form_widget(point_form.longitude_seconds, {'attr': {'class': 'longitude_seconds coord_dms shortlength disable-bootstrap'}}) }}"
-													{{ form_widget(point_form.longitude_direction, {'attr': {'class': 'longitude_direction coord_dms disable-bootstrap', 'style':'width:auto'}}) }}
+													{{ read_test.widget_read_mode(read_mode, point_form.longitude_degrees, {'attr': {'class': 'longitude_degrees coord_dms vshortlength disable-bootstrap'}}, dloccenter.longitude_degrees ??"") }}°
+													{{ read_test.widget_read_mode(read_mode, point_form.longitude_minutes, {'attr': {'class': 'longitude_minutes coord_dms shortlength disable-bootstrap'}}, dloccenter.longitude_minutes ??"") }}'
+													{{ read_test.widget_read_mode(read_mode, point_form.longitude_seconds, {'attr': {'class': 'longitude_seconds coord_dms shortlength disable-bootstrap'}}, dloccenter.longitude_seconds ??"") }}"
+													{{ read_test.widget_read_mode(read_mode, point_form.longitude_direction, {'attr': {'class': 'longitude_direction coord_dms disable-bootstrap', 'style':'width:auto'}}, dloccenter.longitude_direction??"") }}
 												</td>
 											</tr>
 											
@@ -128,7 +129,7 @@
 											<tr>
 												<td colspan="4" >
 													MAP
-													<!--<input type="button" id="modeMap" name="modeMap" value="Enable selection"></input> -->
+													
 													<div  style="width:700px;height:400px;" id="ol_map" class="ol_map"></div>
 													<div id="mouse-position"></div>
 												</td>
@@ -229,7 +230,12 @@ var ol_ext_inherits = function(child,parent) {
         
 var test_has_coords=function()
 {
-	var wkt=$(".wkt").val();
+	{% if read_mode=="read" %}
+		var wkt=$(".wkt").text();
+	{% else %}
+		var wkt=$(".wkt").val();
+	{% endif %}
+	console.log(wkt);
 	if(wkt.length>0)
 	{
 		console.log("put point");
@@ -355,9 +361,15 @@ var init_data_map=function(target)
 				  center: ol.proj.fromLonLat([0,0]),
 				  zoom: 2
 				}),
-				controls: ol.control.defaults({
+				{% if read_mode=="read" %}
+					controls: ol.control.defaults({
 						attributionOptions: ({collapsible: false})
-				}).extend([mousePositionControl, scaleLineControl,  fullScreenControl,  new DrawPointControl(),  new DrawPolygonControl()])
+					}).extend([mousePositionControl, scaleLineControl,  fullScreenControl])
+				{% else %}
+					controls: ol.control.defaults({
+						attributionOptions: ({collapsible: false})
+					}).extend([mousePositionControl, scaleLineControl,  fullScreenControl,  new DrawPointControl(),  new DrawPolygonControl()])
+				{% endif %}
 		});
 	console.log("MAP_ADDED");
 	map.addLayer(OSM_layer);

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="docplanvol", uniqueConstraints={@ORM\UniqueConstraint(name="docplanvol_unique", columns={"fid"})})
  * @ORM\Entity
  */
-class Docplanvol
+class Docplanvol extends GeodarwinEntity
 {
     /**
      * @var integer

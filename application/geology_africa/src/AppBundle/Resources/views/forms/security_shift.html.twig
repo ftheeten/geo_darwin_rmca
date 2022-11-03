@@ -1,0 +1,20 @@
+{# src/AppBundle/Resources/views/forms/security_shift.html.twig #}
+
+{% set read_mode = read_mode|default("read") %}
+{% if read_mode=="write" or read_mode=="create" %}
+
+<a class="mode_shift" href="{{ app.request.server.get('REQUEST_SCHEME') ~ '://' ~ 
+   app.request.server.get('SERVER_NAME') ~ 
+   app.request.server.get('PHP_SELF')  }}?mode=read" id="toggle_read" class="toggle_rights">Read</a>
+{% elseif read_mode=="read" %}
+
+<a class="mode_shift" href="{{ app.request.server.get('REQUEST_SCHEME') ~ '://' ~ 
+   app.request.server.get('SERVER_NAME') ~ 
+   app.request.server.get('PHP_SELF')  }}?mode=write" id="toggle_modify" class="toggle_rights">Modify</a>
+{% endif %}
+
+<script language="javascript">
+	
+	
+	
+</script>

@@ -21,7 +21,12 @@ use AppBundle\Entity\LMedium;
 use AppBundle\Entity\DLoccenter;
 use AppBundle\Entity\Ddocument;
 use AppBundle\Entity\Ddoctitle;
+use AppBundle\Entity\Ddocscale;
+use AppBundle\Entity\Ddocfilm;
 use AppBundle\Entity\Ddocsatellite;
+use AppBundle\Entity\Ddocmap;
+use AppBundle\Entity\Ddocarchive;
+use AppBundle\Entity\Ddocaerphoto;
 use AppBundle\Entity\Dsamheavymin;
 use AppBundle\Entity\Dsamheavymin2;
 use AppBundle\Entity\Dcontribution;
@@ -30,11 +35,14 @@ use AppBundle\Entity\Dlinkcontribute;
 use AppBundle\Entity\Dlinkcontsam;
 use AppBundle\Entity\Dlinkcontloc;
 use AppBundle\Entity\Dlinkcontdoc;
+use AppBundle\Entity\Dlinkdocloc;
 use AppBundle\Entity\Dlocdrilling; 
 use AppBundle\Entity\DLoclitho;
 use AppBundle\Entity\Dlocstratumdesc;
 use AppBundle\Entity\Dkeyword;
 
+use AppBundle\Entity\Docplanvol;
+use AppBundle\Entity\TDataLog;
 use AppBundle\Form\DsampleType;
 use AppBundle\Form\DsampleEditType;
 use AppBundle\Form\LmineralsType;
@@ -49,6 +57,7 @@ use AppBundle\Form\PointEditType;
 use AppBundle\Form\StratumType;
 use AppBundle\Form\CodecollectionEditType;
 use AppBundle\Form\CollectionType;
+use AppBundle\Form\DocplanvolType;
 use AppBundle\Form\EntityManager;
 use AppBundle\Form\SearchAllForm;
 
@@ -96,7 +105,8 @@ class GeoController extends AbstractController
 			}
 			return $this->render($redirect_add, array(
 				'form' => $form->createView(),
-				'originaction'=>'add_beforecommit'
+				'originaction'=>'add_beforecommit',
+				'read_mode' => 'create'
 			));
 		}
 		else
@@ -131,24 +141,29 @@ class GeoController extends AbstractController
 							$em = $this->getDoctrine()->getManager();
 							$em->flush();
 							$this->addFlash('success','DATA RECORDED IN DATABASE!');  
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));
 							
 						}catch(\Doctrine\DBAL\DBALException $e ) {
 							
 							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));
 						}
 						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
 							$form->addError(new FormError($e->getMessage()));	
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));						
 						}
 						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
 							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));						
 						}
 						catch(Exception $e ) {
 							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));						
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));						
 						}
 						finally
 						{
@@ -159,11 +174,13 @@ class GeoController extends AbstractController
 					elseif ($form->isSubmitted() && !$form->isValid() )
 					{
 						$form->addError(new FormError("Other validation error"));
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+						'read_mode'=>$this->enable_read_write($request)));
 					}
 					elseif (!$form->isSubmitted())
 					{					
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+						'read_mode'=>$this->enable_read_write($request)));
 					}
 				}
 				else
@@ -174,7 +191,13 @@ class GeoController extends AbstractController
 				
 			}
 			//print("test");
-			return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit'));
+
+			return $this->render($twig, array(
+				$name_twig_class => $obj,
+				'form' => $form->createView(),
+				'origin'=>'edit',
+				'originaction'=>'edit',
+				'read_mode'=>$this->enable_read_write($request)));
 		}
 		else
 		{
@@ -182,7 +205,11 @@ class GeoController extends AbstractController
 		}
 	}	
 	
-		
+	public function checkRightsGeneral($controller_name='AppBundle\Controller\GeoController')
+	{
+		$rightoncollection = $this->container->get($controller_name)->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
+		return $rightoncollection;
+	}
 	
 	
 	public function addsampleAction(Request $request){
@@ -368,7 +395,8 @@ class GeoController extends AbstractController
 			return $this->render('@App/contributions/contributionform.html.twig', array(
 					'form' => $form->createView(),
 					'dcontribution' => $dcontribution,
-					'originaction'=>'add_beforecommit'
+					'originaction'=>'add_beforecommit',
+					'read_mode'=>"create"
 				)
 			);
 		}
@@ -415,9 +443,11 @@ class GeoController extends AbstractController
 							"pk",
 							Dlinkcontribute::class,
 							Array("getIdContributor"=>"setIdContributor"),
-							Array("contribdetail_role_contrib_"=>"setContributorrole", "contribdetail_order_contrib_"=>"setContributororder"),
+							Array("contribdetail_role_contrib_"=>"setContributorrole", "contribdetail_order_contrib_"=>"setContributororder",
+							"contribdetail_pk_"=>"setPk"),
 							Array("setIdContribution"=>$dcontribution->getIdContribution())
 						);
+						
 						if($dlinkcontribute!==null)
 						{
 							
@@ -490,6 +520,9 @@ class GeoController extends AbstractController
 				$search_form=$this->createForm(SearchAllForm::class, null);		
 				//Doctrine query seems asynchronous so need to pass the method to get fk directly to the template
 				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
+				$logs=$em->getRepository(TDataLog::class)
+						 ->findContributions("dcontribution", $dcontribution->getPk());
+				$this->validate_form($request,$em,"dcontribution",$dcontribution->getPk());
 				return $this->render('@App/contributions/contributionform.html.twig', array(
 					'dcontribution' => $dcontribution,
 					'form' => $form->createView(),
@@ -498,7 +531,9 @@ class GeoController extends AbstractController
 					'originaction'=>'edit',
 					'dlinkcontribute'=>$dcontribution->initDlinkcontribute($em),
 					'dlinkcontdoc'=>$dcontribution->initDlinkcontdoc($em),
-					'current_tab'=>$current_tab
+					'current_tab'=>$current_tab,
+					'logs'=>$logs,
+					'read_mode'=>$this->enable_read_write($request)
 				));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -691,7 +726,8 @@ class GeoController extends AbstractController
 			return $this->render('@App/documents/adddocument.html.twig', array(
 				'ddocument' => $ddocument,
 				'form' => $form->createView(),
-				'originaction'=>'add_beforecommit'
+				'originaction'=>'add_beforecommit',
+				'read_mode'=>"create"
 				
 			));
 		}else{
@@ -744,14 +780,15 @@ class GeoController extends AbstractController
 				'dloccenter' => $dloccenter,
 				'point_form' => $form->createView(),
 				'form2' => $form2->createView(),
-				'originaction'=>'add_beforecommit'
+				'originaction'=>'add_beforecommit',
+				'read_mode'=>"create"
 			));
 		}else{
 			return $this->render('@App/collnoaccess.html.twig');
 		}
     }
 	
-	public function addstratumAction(Request $request){
+	/*public function addstratumAction(Request $request){
 		$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('4,15,26',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
 		if ($rightoncollection == true){
 			$dloclitho = new DLoclitho();
@@ -796,6 +833,7 @@ class GeoController extends AbstractController
 			return $this->render('@App/collnoaccess.html.twig');
 		}
     }
+	*/
 	
 	public function adddrillingAction(Request $request){
 		$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('4,15,26',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
@@ -1387,9 +1425,11 @@ class GeoController extends AbstractController
 				{
 					try 
 					{
+						//print("test_1");
 						$dloclitho_http=$this->get_request_var($request,"point_to_stratum_lithostratum",null);
 						if($dloclitho_http!==null)
 						{
+							//print("test_2");	
 							//print("save_sat");
 							//date not handled
 							$dloclitho=$this->getHTTPOneToManyByIndex($request, "point_to_stratum_lithostratum",DLoclitho::class,
@@ -1406,7 +1446,9 @@ class GeoController extends AbstractController
 								["setIdcollection"=>$dloccenter->getIdcollection(), "setIdpt"=>$dloccenter->getIdpt(),]
 								
 								);
-							//print_r($satellites);
+							//print_r($dloclitho);
+							//modify pk before fk and do not take id stratum in constraint to allow modification !!
+							$dloccenter->initNewDloclitho($em, $dloclitho);
 							if(count($dloclitho)>0)
 							{	
 								//attach description
@@ -1415,11 +1457,14 @@ class GeoController extends AbstractController
 									//print_r($key);
 									//print_r($obj);
 									$desc_prefix="point_to_stratum_description_".$key."_description";
-									print($desc_prefix);
+									$desc_pk_prefix="point_to_stratum_description_".$key."_pk";
+									//print($desc_prefix);
 									$desc_http=$this->get_request_var($request,$desc_prefix,null);
-									if($desc_http!==null)
+									$desc_pk=$this->get_request_var($request,$desc_pk_prefix,null);
+									if($desc_http!==null && $desc_pk!=null)
 									{
 										$array_desc=Array();
+										$i=1;
 										foreach($desc_http as $desc)
 										{
 											//print_r($obj);
@@ -1427,13 +1472,16 @@ class GeoController extends AbstractController
 											$tmp_desc->setDescript($desc);
 											$tmp_desc->setIdcollection($obj->getIdcollection());
 											$tmp_desc->setIdpt($obj->getIdpt());
-											$tmp_desc->setIdstratum($obj->getIdstratum());
+										    $tmp_desc->setIdstratum($obj->getIdstratum());
+											 $tmp_desc->setPk($desc_pk[$i]);
 											$array_desc[]=$tmp_desc;
+											$i++;
 										}
 										$obj->initNewDlocstratumdesc($em, $array_desc);
+										
 									}
 								}
-								$dloccenter->initNewDloclitho($em, $dloclitho);
+								
 							}
 						}
 						$em->flush();
@@ -1467,7 +1515,9 @@ class GeoController extends AbstractController
 				$longarr[0]=$dloccenter->getCoordLong();
 				$latarr =array();
 				$latarr[0]=$dloccenter->getCoordLat();
-
+				$logs=$em->getRepository(TDataLog::class)
+						 ->findContributions("dloccenter", $dloccenter->getPk());
+				//$this->validate_form($request, $em,"dloccenter",$dloccenter->getPk());
 				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
 				return $this->render('@App/dloccenter/editpoint.html.twig', array(
 						'latcoord' => $latarr,
@@ -1477,7 +1527,9 @@ class GeoController extends AbstractController
 						'dloclitho'	=>	$dloccenter->initDloclitho($em),					
 						'origin'=>'edit',
 						'originaction'=>'edit',
-						'current_tab'=>$current_tab
+						'current_tab'=>$current_tab,
+						'logs'=>$logs,
+						'read_mode'=>$this->enable_read_write($request)
 					));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -1497,22 +1549,12 @@ class GeoController extends AbstractController
 			throw $this->createNotFoundException('No document found' );
 		}else{
 
-			//medium
-			/*if (!is_null($ddocument->getMedium())){
-				$medium = $ddocument->getMedium()->getMedium(); // $ddocument->getMedium() is considered as a table because it's a FK
-
-				$lmedium = $this->getDoctrine()
-					->getRepository(LMedium::class)
-					->findBy(array('medium' => $medium));
-			}
-			$lmediumList = $this->getDoctrine()
-				->getRepository(LMedium::class)
-				->findAll();*/
-				
+						
 			
 			$keywords=$ddocument->initDkeywords($em);
 			$titles=$ddocument->initDdoctitles($em);
 			$dlinkcontribute=$ddocument->initDLinkcontdoc($em);
+			$dlinkdocloc=$ddocument->initDLinkdocloc($em);
 			$satellites=$ddocument->initDdocsatellite($em);
 
 			
@@ -1529,6 +1571,7 @@ class GeoController extends AbstractController
 
 				if ($form->isSubmitted() && $form->isValid()) {
 					try {
+						//print("submit");
 						//echo "<script>console.log('dans valid' );</script>";
 						$keywords_pk=$request->get("widget_keywords_pk",null);
 						$keywords=$request->get("widget_keywords",null);
@@ -1586,6 +1629,71 @@ class GeoController extends AbstractController
 							}
 							$titles=$ddocument->initNewDdoctitles($em, $array_titles);
 							
+							
+							
+							
+							//throw new UndefinedOptionsException();
+						}
+						
+						$scale_pk=$request->get("widget_scale_pk",null);
+						$scale=$request->get("widget_scale",null);
+						
+						if($scale!==null)
+						{
+							$array_scale=[];
+							$i=1;
+							foreach($scale as $sc)
+							{
+								$keyobj=new Ddocscale();
+								$keyobj->setScale($sc);
+								$keyobj->setIdcollection($ddocument->getIdCollection());
+								$keyobj->setIddoc($ddocument->getIddoc());
+								if(array_key_exists($i,$scale_pk ))
+								{
+									
+									if(is_numeric($scale_pk[$i]))
+									{
+										$keyobj->setPk($scale_pk[$i]);
+									}
+								}
+								
+								$array_scale[$i]= $keyobj;
+								$i++;
+								
+								
+							}
+							
+							$scale=$ddocument->initNewDdocscale($em, $array_scale);
+							//throw new UndefinedOptionsException();
+						}
+						
+						$film_pk=$request->get("widget_film_pk",null);
+						$film=$request->get("widget_film",null);
+						
+						if($film!==null)
+						{
+							$array_film=[];
+							$i=1;
+							foreach($film as $fl)
+							{
+								$keyobj=new Ddocfilm();
+								$keyobj->setFilm($fl);
+								$keyobj->setIdcollection($ddocument->getIdCollection());
+								$keyobj->setIddoc($ddocument->getIddoc());
+								if(array_key_exists($i,$film_pk ))
+								{
+									if(is_numeric($film_pk[$i]))
+									{
+										$keyobj->setPk($film_pk[$i]);
+									}
+								}
+								
+								$array_film[]= $keyobj;
+								$i++;
+								
+							}
+							
+							$film=$ddocument->initNewDdocfilm($em, $array_film);
 							//throw new UndefinedOptionsException();
 						}
 						$dlinkcontribute=$this->handle_many_to_many_relation_general(
@@ -1610,10 +1718,59 @@ class GeoController extends AbstractController
 							//throw new UndefinedOptionsException();
 							}
 						}
+						//doc to point
+						$dlinkdocloc=$this->handle_many_to_many_relation_general(
+							$request,
+							$ddocument,
+							"doc_to_loc_id_dloccenter_",
+							DLoccenter::class,
+							"pk", 
+							Dlinkdocloc::class,
+							["getIdcollection"=> "setIdcollecloc","getIdpt"=>"setIdpt" ],
+							["doc_to_loc_id_link_"=>"setPk"],
+							["setrelationidcollection"=> $ddocument]
+							
+						);
+						if($dlinkdocloc!==null)
+						{
+							if(count($dlinkdocloc)>0)
+							{
+								//print("EDIT_TEST");
+								$ddocument->initNewDLinkdocloc($em, $dlinkdocloc);
+								//reattach after update
+								
+							//throw new UndefinedOptionsException();
+							}
+						}
+						
+						
+						$ddocaerphoto=$this->handle_many_to_many_relation_general(
+							$request,
+							$ddocument,
+							"doc_to_flightplan_id_flightplan_",
+							Docplanvol::class,
+							"pk",
+							Ddocaerphoto::class,
+							Array("getFid"=>"setFid"
+							),
+							Array("doc_to_flightplan_pid_"=>"setPid","doc_to_flightplan_pk_"=>"setPk"),
+							array("setIdCollection"=>$ddocument->getIdCollection(), "setIdDoc"=> $ddocument->getIddoc())
+							);
+						if($ddocaerphoto!==null)
+						{
+							if(count($ddocaerphoto)>0)
+							{
+								//print("EDIT_TEST");
+								$ddocument->initNewDdocaerphoto($em, $ddocaerphoto);
+								//reattach after update
+								
+							//throw new UndefinedOptionsException();
+							}
+						}
 						$satellite_http=$request->get("sat_satnum",null);
 						if($satellite_http!==null)
 						{
-							print("save_sat");
+							//print("save_sat");
 							//date not handled
 							$satellites=$this->getHTTPOneToManyByIndex($request, "sat_satnum",Ddocsatellite::class,
 								[
@@ -1635,6 +1792,70 @@ class GeoController extends AbstractController
 								$ddocument->initNewDdocsatellite($em, $satellites);
 							}
 						}
+						$map_http=$request->get("map_projection",null);
+						if($map_http!==null)
+						{
+							
+							//date not handled
+							$maps=$this->getHTTPOneToManyByIndex($request, "map_projection",Ddocmap::class,
+								[
+									"map_mappk"=>"setPk",
+									"map_projection"=>"setProjection",
+									"map_sheetnumber"=>"setSheetnumber",
+									
+								],
+								["setIdcollection"=>$ddocument->getIdcollection(), "setIddoc"=>$ddocument->getIddoc(),]
+								,
+								["map_oncartesius"=>"setOncartesius",]
+								);
+							//print_r($satellites);
+							if(count($maps)>0)
+							{
+								$ddocument->initNewDdocmap($em, $maps);
+							}
+						}
+						$archive_http=$request->get("archive_set",null);
+						if($archive_http)
+						{
+							$archives=$this->getHTTPOneToManyByIndex($request, "archive_pk",Ddocarchive::class,
+								[
+									"archive_pk"=>"setPk",
+									"archive_extension"=>"setExtension",
+									"archive_sample"=>"setSample",
+									"archive_yearlow"=>"setYearlow",
+									"archive_yearhigh"=>"setYearhigh",
+									
+								],
+								["setIdcollection"=>$ddocument->getIdcollection(), "setIddoc"=>$ddocument->getIddoc(),]
+								,
+								[
+									"archive_geology"=>"setGeology",
+									"archive_geochemisty"=>"setGeochemistry",
+									"archive_geophysics"=>"setGeophysics",
+									"archive_exploration"=>"setExporation",
+									"archive_production"=>"setProduction",
+									"archive_reserves"=>"setReserves",
+									"archive_exploitation"=>"setExploitation",
+									"archive_processing"=>"setProcessing",
+									"archive_management"=>"setManagement",
+									"archive_report"=>"setReport",
+									"archive_drillingcores"=>"setDrilingcores",
+									"archive_maps"=>"setMaps",
+									"archive_paleontology"=>"setPaleontology",
+									"archive_sedimentology"=>"setSedimentology",
+									"archive_economy"=>"setEconomy",
+									"archive_sgeology"=>"setSgeology",
+									"archive_smineralogy"=>"setSmineralogy",
+									"archive_spaleontology"=>"setSpaleontology",
+									"archive_sconcentre"=>"setSconcentre",
+								]
+								);
+							if(count($archives)>0)
+							{
+								$ddocument->initNewDdocarchive($em, $archives);
+							}
+						}
+						
 						//$dlinkcontribute=$ddocument->initDLinkcontdoc($em);	
 						$em->flush();
 						//print("DONE");
@@ -1669,8 +1890,11 @@ class GeoController extends AbstractController
 			if ($rightoncollection1 == true && $rightoncollection2 == true && $rightoncollection3 == true && $rightoncollection4 == true && $rightoncollection5 == true)
 			{				
 				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
-				print("saved");	
-				
+				//print("request_tab[$current_tab]");
+				//$mode=$this->enable_read_write($request);
+				$logs=$em->getRepository(TDataLog::class)
+						 ->findContributions("ddocument", $ddocument->getPk());
+				$this->validate_form($request, $em,"ddocument",$ddocument->getPk());
 				return $this->render('@App/documents/editdoc.html.twig', array(
 					'ddocument' => $ddocument,
 					'form' => $form->createView(),
@@ -1680,7 +1904,15 @@ class GeoController extends AbstractController
 					'keywords'=>$keywords,
 					'titles'=>$ddocument->initDdoctitles($em),
 					'dlinkcontdoc'=>$ddocument->initDLinkcontdoc($em),
-					'satellites'=>$ddocument->initDdocsatellite($em)
+					'dlinkdocloc'=>$ddocument->initDLinkdocloc($em),
+					'ddocaerphoto'=>$ddocument->initDdocaerphoto($em),
+					'satellites'=>$ddocument->initDdocsatellite($em),
+					'scales'=>$ddocument->initDdocscale($em),
+					'films'=>$ddocument->initDdocfilm($em),
+					'maps'=>$ddocument->initDdocmap($em),
+					'archives'=>$ddocument->initDdocarchive($em),
+					'logs'=>$logs,
+					'read_mode'=>$this->enable_read_write($request)
 				));
 			}else{
 				return $this->render('@App/collnoaccess.html.twig');
@@ -2273,108 +2505,7 @@ class GeoController extends AbstractController
         $id = $statement->fetchAll();
 		
 		return new JsonResponse($id);
-	}
-	
-	
-	
-	
-	
-
-	
-	
-	
-	
-	
-    /*public function widget_doc_to_contribAction(Request $request)
-	{
-		$index=$request->get("index","1");
-		$ctrl_prefix=$request->get("ctrl_prefix","doc_to_contrib");
-		$default_val=$request->query->get("default_val","");
-		$tmp_contriblink=NULL;
-		$tmp_contribution=NULL;
-		if(is_numeric($default_val))
-		{
-			$tmp_contriblink=$this->getDoctrine()
-			->getRepository(Dlinkcontdoc::class)
-			 ->findOneBy(array('pk' => $default_val));
-			 if($tmp_contriblink!==null)
-			 {
-				$tmp_contribution=$this->getDoctrine()
-				->getRepository(Dcontribution::class)
-				 ->findOneBy(array('idcontribution' => $tmp_contriblink->getIdContribution()));
-				$tmp_contribution->setDescriptionDB($this->getDoctrine());
-			}
-		}
-		return $this->render('@App/contributions/detail_doc_to_contribution.html.twig', array("index"=>$index, 
-			"default_val"=>$default_val,
-			"ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontdoc"=>$tmp_contriblink, "Dcontribution"=>$tmp_contribution));		
-	}*/
-	
-	
-    /*public function widget_contrib_to_docAction(Request $request)
-	{
-		$index=$request->get("index","1");
-		$ctrl_prefix=$request->get("ctrl_prefix","contrib_to_doc");
-		$default_val=$request->query->get("default_val","");
-		$tmp_contriblink=NULL;
-		$tmp_document=NULL;
-		$tmp_titles=NULL;
-		$form=$this->createForm(SearchAllForm::class, null);
-		if(is_numeric($default_val))
-		{
-			$tmp_contriblink=$this->getDoctrine()
-			->getRepository(Dlinkcontdoc::class)
-			 ->findOneBy(array('pk' => $default_val));
-			 if($tmp_contriblink!==null)
-			 {
-					
-				$tmp_document=$this->getDoctrine()
-				->getRepository(Ddocument::class)
-				 ->findOneBy(array('iddoc' => $tmp_contriblink->getId(),
-				"idcollection"=> $tmp_contriblink->getIdcollection()
-					)
-				 );
-				
-				//$tmp_contribution->setDescriptionDB($this->getDoctrine());
-				
-			}
-		}
-		
-		return $this->render('@App/contributions/detail_contribution_to_doc.html.twig', array("index"=>$index, 
-			"default_val"=>$default_val,
-			"ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontdoc"=>$tmp_contriblink, "Ddocument"=>$tmp_document'form'=> $form->createView()));		
-	}*/
-	
-	
-	
-	
-
-	
-	/*public function widget_contribdetailAction(Request $request)
-	{
-		
-		$index=$request->get("index","1");
-		$ctrl_prefix=$request->get("ctrl_prefix","contribdetail");
-		$default_val=$request->query->get("default_val","");
-		$tmp_contriblink=NULL;
-		$tmp_contributor=NULL;
-		if($default_val!="")
-		{
-			
-			$tmp_contriblink=$this->getDoctrine()
-			->getRepository(Dlinkcontribute::class)
-			 ->findOneBy(array('pk' => $default_val));
-			$tmp_contributor=$this->getDoctrine()
-			->getRepository(Dcontributor::class)
-			 ->findOneBy(array('idcontributor' => $tmp_contriblink->getIdContributor()));
-		}
-		return $this->render('@App/contributions/detail_contributor.html.twig', array("index"=>$index, "ctrl_prefix"=>$ctrl_prefix, "default_val"=>$default_val, "Dlinkcontribute"=>$tmp_contriblink, "Dcontributor"=>$tmp_contributor));		
-	}*/
-	
-	
-	
-	
-	
+	}	
 	
 	
 	// note
@@ -2395,6 +2526,65 @@ class GeoController extends AbstractController
 		return $this->edit_general($dcontributor, $form,"Dcontributor", $request, '@App/addcontributor.html.twig', 'dcontributor',$dcontributor->getIdContributor() );
     }
 	
+	
+	
+	
+	public function addplanvolAction(Request $request)
+	{
+	    $this->set_sql_session();	
+		return $this->add_general(Docplanvol::class, DocplanvolType::class,$request,'@App/addplanvol.html.twig', 'app_edit_flightplan' );		
+	}
+	
+	public function editplanvolAction(Docplanvol $docplanvol, Request $request)
+	{	
+	//print("test");
+		$this->set_sql_session();		
+		$em = $this->getDoctrine()->getManager();
+		$form = $this->createForm(DocplanvolType::class, $docplanvol, array('entity_manager' => $em,));		
+		return $this->edit_general($docplanvol, $form,"docplanvol", $request, '@App/addplanvol.html.twig', 'docplanvol',$docplanvol->getPk()		);
+    }
+	
+	//2022
+	
+	/*public function addStratumAction(Request $request)
+	{
+		$this->set_sql_session();
+		$allow=$this->checkRightsGeneral();
+		if($allow)
+		{
+			$dloclitho=new Dloclitho();
+			$em = $this->getDoctrine()->getManager();
+			$form= $this->createForm(Dloclitho::class, $dloclitho, array('entity_manager' => $em,));
+			if ($request->isMethod('POST')) 
+			{
+				$form->handleRequest($request);
+				if ($form->isSubmitted() && $form->isValid())
+				{
+					try 
+					{
+						$descriptions= $request->get("widget_descriptions",null);
+						if($descriptions!==null)
+						{
+							foreach($descriptions as $desc)
+							{
+								$desc=new Dlocstratumdesc();
+							}
+						}
+					}
+					catch(\Doctrine\DBAL\DBALException $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+					catch(Exception $e ) 
+					{
+						$form->addError(new FormError($e->getMessage()));
+					}
+				}
+			}
+			
+			
+		}
+	}*/
 	
 	
 	

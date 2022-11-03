@@ -1,45 +1,82 @@
 {# src/AppBundle/Resources/views/documents/documentform.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
 
-{{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'document_form'}}) }}
+{% include "@App/forms/security_shift.html.twig" %}
+
+{{ read_test.form_read_mode(read_mode, form, {'attr': {'class': 'form-horizontal','id': 'document_form'}}) }}
 <!-- Nav tabs -->
-<ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="contributions-tab" data-bs-toggle="tab" data-bs-target="#contributions" type="button" role="tab" aria-controls="contributions" aria-selected="false">Contributions</button>
-  </li>
-   <li class="nav-item" role="presentation">
-    <button class="nav-link" id="keywords-tab" data-bs-toggle="tab" data-bs-target="#keywords" type="button" role="tab" aria-controls="keywords" aria-selected="false">Keywords and title</button>
-  </li>
-  <li class="nav-item" role="satellite">
-    <button class="nav-link" id="satellite-tab" data-bs-toggle="tab" data-bs-target="#satellites" type="button" role="tab" aria-controls="satellites" aria-selected="false">Satellite images</button>
-  </li>
+{% set current_tab=current_tab|default("main-tab") %}
+<h2>Document page</h2>
+{% if read_mode!="create" %}
+<h3>{{ddocument.idcollection??""}} {{ddocument.iddoc??""}} {{ddocument.numarchive??""}}</h3>
+{% endif %}
+<ul class="nav nav-tabs" id="myTab" role="tablist">  
+  {{ read_test.enable_bootstrap_tab("main-tab", current_tab,"#main", "main", "Home", "shift_mode") }}
+  {{ read_test.enable_bootstrap_tab("contributions-tab", current_tab,"#contributions", "contributions", "Contributions") }}
+  {{ read_test.enable_bootstrap_tab("location-tab", current_tab,"#location", "locations", "Geographical locations") }}
+  {{ read_test.enable_bootstrap_tab("keywords-tab", current_tab,"#keywords", "keywords", "Keywords and title") }}
+  {{ read_test.enable_bootstrap_tab("satellite-tab", current_tab,"#satellites", "satellites", "Satellite images") }}
+  {{ read_test.enable_bootstrap_tab("scale-tab", current_tab,"#scale", "scale", "Scales") }}
+  {{ read_test.enable_bootstrap_tab("film-tab", current_tab,"#film", "film", "Films") }}
+  {{ read_test.enable_bootstrap_tab("map-tab", current_tab,"#map", "map", "Maps") }}
+  {{ read_test.enable_bootstrap_tab("archive-tab", current_tab,"#archive", "archive", "Archives") }}
+  {{ read_test.enable_bootstrap_tab("flightplan-tab", current_tab,"#flightplan", "flightplan", "Flight plans") }}
+  {% if read_mode!="create" %}
+	{{ read_test.enable_bootstrap_tab("log-tab", current_tab,"#log", "log", "Logs") }}
+  {% endif %}
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
-  <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab"> 
-  
+  {{ read_test.activate_boostrap_tab("main", current_tab, "main-tab") }}
    {{ include("@App/documents/documentform_mainpart.html.twig") }}
-  </div>
-  <div class="tab-pane" id="contributions" role="tabpanel" aria-labelledby="contribution-tab">
- contri
+  {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("contributions", current_tab, "contributions-tab") }}
   {% include "@App/documents/documentform_contributions.html.twig" with { 'collection_ref' : ddocument.idcollection, 'document_ref' :  ddocument.pk, 'action':action  } %}
- </div>
- <div class="tab-pane" id="keywords" role="tabpanel" aria-labelledby="keywords-tab">
+ {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("location", current_tab, "location-tab") }}
+  {% include "@App/documents/documentform_dloccenter.html.twig" with { 'collection_ref' : ddocument.idcollection, 'document_ref' :  ddocument.pk, 'action':action  } %}
+ {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("keywords", current_tab, "keywords-tab") }}
  keys
   {% include "@App/documents/documentform_keywords.html.twig"  %}
- </div>
-  <div class="tab-pane" id="satellites" role="tabpanel" aria-labelledby="satellite-tab">
+  {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("satellites", current_tab, "satellite-tab") }}
  sat
   {% include "@App/documents/documentform_satellite.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("scale", current_tab, "scale-tab") }}
+ scale
+	{% include "@App/documents/documentform_scale.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("film", current_tab, "film-tab") }}
+ film
+	{% include "@App/documents/documentform_film.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("map", current_tab, "map-tab") }}
+  map
+	{% include "@App/documents/documentform_map.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+   {{ read_test.activate_boostrap_tab("archive", current_tab, "archive-tab") }}
+  archive
+	{% include "@App/documents/documentform_archive.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.activate_boostrap_tab("flightplan", current_tab, "flightplan-tab") }}
+  flight plan
+	{% include "@App/documents/documentform_flightplan.html.twig"  %}
+ {{ read_test.end_activate_boostrap_tab() }}
+  {% if read_mode!="create" %}
+ {{ read_test.activate_boostrap_tab("log", current_tab, "log-tab") }}
+	{% include "@App/forms/logs.html.twig" with {'logs' : logs} %}
+ {{ read_test.end_activate_boostrap_tab() }}
+ {% endif %}
  </div>
- </div>
-<div><input type="hidden" name="current_tab" id="current_tab"/><input type="submit" class="btn btn-default pull-right submitbutton" />
-				<div class="alert_message"></div>
+<div><input type="hidden" name="current_tab" id="current_tab"/>
+{{ read_test.submit_button_log(read_mode) }}
+{{ read_test.submit_read_mode(read_mode, "btn btn-default pull-right submitbutton" ) }}
+<div class="alert_message"></div>
 </div>
-{{ form_end(form) }}
+{{ read_test.form_end_read_mode(read_mode, form) }}
 
 
 
@@ -54,7 +91,8 @@
 	var sortDirection = "";
 	var source_selected;
 	var $medium;
-	var current_tab="main-tab";
+   
+	
 	
 
 	$(document).ready(function() {
@@ -159,23 +197,9 @@
 			}
 		);
 		
-		
-		$(".nav-link").click(
-			function()
-			{
-				console.log($(this).attr("id"));
-				current_tab=$(this).attr("id");
-				$("#current_tab").val(current_tab);
-			}
-		);
-		
-		{% if current_tab is defined %}
-		console.log("TAB_IS_DEFINED");
-		console.log("{{ current_tab }}");
-			{% if current_tab!='main_tab' %}
-				$("#{{ current_tab }}").click();			
-			{% endif %}
-		{% endif %}
+		current_tab="{{ current_tab }}";
+		//alert(current_tab);
+		init_tab_url(".mode_shift", current_tab);
 						
     });	
 </script>

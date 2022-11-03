@@ -1,3 +1,5 @@
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
 {% set default_val = default_val|default(null) %}
 {% set search_form = search_form|default(null) %}
 {% include "@App/forms/standalonejs.html.twig" %}
@@ -7,19 +9,18 @@
 {% else %}
 	<a id="link_doc_{{index}}" target="_blank" href="">{{ index }} : </a>
 {% endif %}
-<input type="text"  id="{{ ctrl_prefix }}_id_link_{{ index }}" name="{{ ctrl_prefix }}_id_link_{{ index }}" readonly/>
-<input type="text" class="index_contributor" id="{{ ctrl_prefix }}_id_doc_{{ index }}" name="{{ ctrl_prefix }}_id_doc_{{ index }}" readonly/>
-<textarea id="{{ ctrl_prefix }}_name_doc_{{ index }}"  name="{{ ctrl_prefix }}_name_doc_{{ index }}" readonly></textarea>
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_link_"~ index, ctrl_prefix ~"_id_link_"~ index,default_val.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_doc_"~ index, ctrl_prefix ~"_id_doc_"~ index,default_val.document.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_name_doc_"~ index, ctrl_prefix ~"_name_doc_"~ index,(default_val.document.iddoc ?? ""  ~ " " ~ default_val.document.title ?? "")|trim  ,"readonly_class") }}
 </div>
 <script type="text/javascript">
 $(document).ready(
 	function()
 	{
-		{% if not default_val is null %}
-			$("#{{ ctrl_prefix }}_id_link_{{ index }}").val("{{  default_val.pk }}");
-			$("#{{ ctrl_prefix }}_id_doc_{{ index }}").val("{{  default_val.document.pk }}");
-			$("#{{ ctrl_prefix }}_name_doc_{{ index }}").val("{{ default_val.document.iddoc}} {{ default_val.document.title}} ");
-		{% endif %}
+		$('.readonly_class').attr('readonly', true);
+		
 		
 		$("#{{ ctrl_prefix }}_id_doc_{{ index }}").click(
 			function()

@@ -1,4 +1,5 @@
 {# src/AppBundle/Resources/views/foreignkeys/template_subforms_no_ajax.html.twig #}
+{% set read_mode = read_mode|default("write") %}
 <!--pb to fx, this libraries should already be loaded-->
 <script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
 <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -16,6 +17,7 @@
 <div class="{{ ctrl_prefix }}_placeholder" >
 	
 </div>
+{{ ctrl_prefix }}
 <div class="container">
 
 <ul id="{{ ctrl_prefix }}_list">
@@ -28,9 +30,11 @@
 					<div class="row" class="widget_subform_{{ ctrl_prefix  ~ '_' ~ i_doc }}">				
 					{% include nested_template with 
 					{'index' : i_doc, 'default_val': val} %}
-					{% if delete_route !="" and fk_key_field !="" and container_pk !="" %}
-						{% set key_calc= attribute(val, fk_key_field) %}
-						<a href="{{ path(delete_route, {"pk": key_calc , "container_pk": container_pk}) }}"><img class="{{ ctrl_prefix }}_delete_fk"  src="{{ asset('pics/delete.jpg') }}" /></a>
+					{% if read_mode=="write" %}
+						{% if delete_route !="" and fk_key_field !="" and container_pk !="" %}
+							{% set key_calc= attribute(val, fk_key_field) %}
+							<a href="{{ path(delete_route, {"pk": key_calc , "container_pk": container_pk}) }}"><img class="{{ ctrl_prefix }}_delete_fk"  src="{{ asset('pics/delete.jpg') }}" /></a>
+						{% endif %}
 					{% endif %}
 					</div>
 					
@@ -44,9 +48,10 @@
 </div>
 
 
-
+{% if read_mode=="write" %}
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_add">Add</button>
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_remove">Remove</button>
+{% endif %}
 
 <script type="text/javascript">
 {% if i_doc is defined %}
@@ -58,8 +63,7 @@
 		var nb_ctrls_{{ ctrl_prefix }}=0;
 	{% endif %}
 {% endif %}
-console.log("INIT DECALAGE");
-	console.log(nb_ctrls_{{ ctrl_prefix }});
+
 
 $(document).ready(
 	function()
@@ -67,35 +71,15 @@ $(document).ready(
 		$("#b_{{ ctrl_prefix }}_add").click(
             function()
             {
-                nb_ctrls_{{ ctrl_prefix }}++;
-				current_class=nb_ctrls_{{ ctrl_prefix }};
-				$("#{{ ctrl_prefix }}_list").append('<li><div class="widget_subform_{{ ctrl_prefix  }}_'+ nb_ctrls_{{ ctrl_prefix }}.toString() +'"></div></li>');
-				jQuery.get("{{ ajax_route }}",
-					{
-						index:nb_ctrls_{{ ctrl_prefix }},
-						ctrl_prefix: '{{ ctrl_prefix }}'
-					},
-					function(result)
-					{						
-						$('.widget_subform_{{ ctrl_prefix  }}_'+ nb_ctrls_{{ ctrl_prefix }}.toString() ).html(result);
-					}
-				);
-				
-			
+				nb_ctrls_{{ ctrl_prefix }}=handle_ajax_template(nb_ctrls_{{ ctrl_prefix }}, "{{ ctrl_prefix  }}", "{{ ajax_route }}" );			
             }
         );
 		
 		$("#b_{{ ctrl_prefix }}_remove").click(
             function()
             {
-			   if(nb_ctrls_{{ ctrl_prefix }}>0)
-			   {
-				nb_ctrls_{{ ctrl_prefix }}--;
-				current_class=nb_ctrls_{{ ctrl_prefix }};
-				$('#{{ ctrl_prefix }}_list li:last-child').remove();
-				
-			   }
-			   console.log(nb_ctrls_{{ ctrl_prefix }});
+			   nb_ctrls_{{ ctrl_prefix }}=handle_remove_ajax_template(nb_ctrls_{{ ctrl_prefix }}, "{{ ctrl_prefix }}");
+			  
             }
         );
 	});

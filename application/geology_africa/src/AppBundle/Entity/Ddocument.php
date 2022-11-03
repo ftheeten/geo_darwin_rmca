@@ -513,20 +513,38 @@ class Ddocument extends GeodarwinEntity
        return $this->dlinkcontdocs;
     }
 	
+	 public function getDLinkdoclocList()
+    {
+       return $this->dlinkdocloc;
+    }
+	
+	
+	
 	
 	//foreign keys
 	protected $dkeywords;
 	protected $dlinkcontdocs;
+	protected $dlinkdocloc;
 	protected $ddoctitle;
 	protected $ddocsatellite;
+	protected $ddocscale;
+	protected $ddocfilm;
+	protected $ddocmap;
+	protected $ddocarchive;
+	protected $ddocaerphoto;
 	
     public function __construct()
     {
      
 		$this->dkeywords =  Array();
 		$this->dlinkcontdocs =  Array();
+		$this->dlinkdocloc =  Array();
 		$this->ddoctitle =  Array();
-		$this->ddocsatellite =  Array();		
+		$this->ddocsatellite =  Array();	
+        $this->ddocscale=Array();
+		$this->ddocmap=Array();
+		$this->ddocarchive=Array();
+		$this->ddocaerphoto=Array();
     }
 	
 	
@@ -542,9 +560,39 @@ class Ddocument extends GeodarwinEntity
         return $this->dlinkcontdocs;
     }
 	
+	public function getDlinkdocloc()
+    {
+        return $this->dlinkdocloc;
+    }
+	
+	public function getDdocaerphoto()
+    {
+        return $this->ddocaerphoto;
+    }
+	
 	public function getDdocttitle()
     {
         return $this->ddoctitle;
+    }
+	
+	public function getDdocscale()
+    {
+        return $this->ddocscale;
+    }
+	
+	public function getDdocfilm()
+    {
+        return $this->ddocfilm;
+    }
+	
+	public function getDdocmap()
+    {
+        return $this->ddocmap;
+    }
+	
+	public function getDdocarchive()
+    {
+        return $this->ddocarchive;
     }
 	
 	public function initDkeywords($em)
@@ -572,8 +620,7 @@ class Ddocument extends GeodarwinEntity
 	
 	public function initDLinkcontdoc($em)
 	{		
-		//$this->attachForeignkeys($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
-		//$this->dlinkcontdocs->setContributor_db($em);
+		
 		$this->attachForeignkeysAsObject($em,Dlinkcontdoc::class,"dlinkcontdocs", array("idcollection"=>$this->idcollection, "id"=>$this->iddoc), "getPk");
 		foreach($this->dlinkcontdocs as $obj)
 		{
@@ -581,6 +628,7 @@ class Ddocument extends GeodarwinEntity
 		}
 		return $this->dlinkcontdocs;
 	}
+	
 	
 	public function initNewDLinkcontdocs($em, $new_contributions)
 	{
@@ -598,6 +646,68 @@ class Ddocument extends GeodarwinEntity
 			);	
 		}
 		return $this->dlinkcontdocs;
+	}
+	
+	
+	public function initDLinkdocloc($em)
+	{		
+		
+		
+		$this->attachForeignkeysAsObject($em,Dlinkdocloc::class,"dlinkdocloc", array("idcollecdoc"=>$this->idcollection, "iddoc"=>$this->iddoc), "getPk");
+		foreach($this->dlinkdocloc as $obj)
+		{
+			
+			$obj->setDloccenter_db($em);
+		}
+		return $this->dlinkdocloc;
+	}
+	
+	
+	public function initNewDLinkdocloc($em, $new_locs)
+	{
+		
+		if(count($new_locs)>0)
+		{			
+			
+			
+			
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dlinkdocloc::class,
+				"dlinkdocloc", 			
+				"getPk", 
+				$new_locs,		
+				 array("idcollecdoc"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);
+			
+		}
+		return $this->dlinkdocloc;
+	}
+	
+	public function initDdocaerphoto($em)
+	{		
+		
+		$this->attachForeignkeysAsObject($em,Ddocaerphoto::class,"ddocaerphoto", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc), "getPk");
+		foreach($this->ddocaerphoto as $obj)
+		{
+			$obj->setplanvol_db($em);
+		}
+		return $this->ddocaerphoto;
+	}
+	
+	public function initNewDdocaerphoto($em, $new_ddocaerphoto)
+	{
+		if(count($new_ddocaerphoto)>0)
+		{			
+			$this->reattachForeignKeysAsObject(
+			$em,
+			Ddocaerphoto::class,
+			"ddocaerphoto", 			
+			"getPk", 
+			$new_ddocaerphoto,		
+			array("idcollection"=>$this->idcollection,"iddoc"=>$this->iddoc ));
+		}
+		return $this->ddocaerphoto;
 	}
 	
 	public function initDdoctitles($em)
@@ -624,6 +734,54 @@ class Ddocument extends GeodarwinEntity
 		return $this->ddoctitle;
 	}
 	
+	public function initDdocscale($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Ddocscale::class,"ddocscale", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
+		return $this->ddocscale;
+	}
+	
+	public function initNewDdocscale($em, $new_scales)
+	{		
+		if(count($new_scales)>0)
+		{	
+			$this->initDdocscale($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Ddocscale::class,
+				"ddocscale",				
+				"getScale", 
+				$new_scales, 
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddocscale;
+	}
+	
+	public function initDdocfilm($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Ddocfilm::class,"ddocfilm", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));	
+		return $this->ddocfilm;
+	}
+	
+	public function initNewDdocfilm($em, $new_films)
+	{		
+		if(count($new_films)>0)
+		{	
+			$this->initDdocfilm($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Ddocfilm::class,
+				"ddocfilm",				
+				"getFilm", 
+				$new_films, 
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddocfilm;
+	}
+	
 	public function initDdocsatellite($em)
 	{
 		
@@ -646,6 +804,54 @@ class Ddocument extends GeodarwinEntity
 			);	
 		}
 		return $this->ddocsatellite;
+	}
+	
+	public function initDdocarchive($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Ddocarchive::class,"ddocarchive", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
+		return $this->ddocarchive;
+	}
+	
+	public function initNewDdocarchive($em, $new_archive)
+	{		
+		if(count($new_archive)>0)
+		{		
+			$this->initDdocarchive($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Ddocarchive::class,
+				"ddocarchive",				
+				"getPk", 
+				$new_archive, 
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddocarchive;
+	}
+	
+	public function initDdocmap($em)
+	{
+		
+		$this->attachForeignkeysAsObject($em,Ddocmap::class,"ddocmap", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
+		return $this->ddocmap;
+	}
+	
+	public function initNewDdocmap($em, $new_map)
+	{		
+		if(count($new_map)>0)
+		{		
+			$this->initDdocmap($em);
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Ddocmap::class,
+				"ddocmap",				
+				"getPk", 
+				$new_map, 
+				array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc)
+			);	
+		}
+		return $this->ddocmap;
 	}
 	
 	//attach title
@@ -686,6 +892,20 @@ class Ddocument extends GeodarwinEntity
 		}
 		$this->title= implode("; ", $titles_elem);
 	}
+	
+	/**
+     * Set pk
+     *
+     * @param integer $pk
+     *
+     * @return Ddocument
+     */
+    public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
+    }
 	
 
 }

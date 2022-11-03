@@ -1,5 +1,10 @@
 {# src/AppBundle/Resources/views/search_all/search_results_bs.html.twig #}
-
+{% set is_modal = is_modal|default(false) %}
+{% if is_modal %}
+MODAL
+{% else %}
+NOT_MODAL
+{% endif %}
 {{ nb_results }} Record(s)
 {% include '@App/pagination.html.twig' %}
 
@@ -36,12 +41,22 @@ institutions
 	{{ doc["main_type"]}}
    </div>
    <div class="col-sm-1">
-    {% if doc["main_type"]=="sample" %}
-		<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
-	{% elseif doc["main_type"]=="georef" %}
-		<a  href="{{ path('app_edit_point', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+	{% if is_modal %}
+		{% if doc["main_type"]=="sample" %}
+			<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+		{% elseif doc["main_type"]=="georef" %}
+			<a  id="link_dloccenter_{{ doc['pk'] }}" href="{{ path('app_edit_point', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"]}}</a>
+		{% else %}
+			<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
+		{% endif %}
 	{% else %}
-		<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
+		{% if doc["main_type"]=="sample" %}
+			<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+		{% elseif doc["main_type"]=="georef" %}
+			<a  href="{{ path('app_edit_point', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+		{% else %}
+			<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
+		{% endif %}
 	{% endif %}
    </div>
    <div class="col-sm-1">
@@ -93,9 +108,9 @@ institutions
 			);
             
             {% if geojson is defined and geojson is not null %}
-            console.log('{{ geojson | raw }}');
-            getFeaturesRow('{{ geojson | raw }}')
-            console.log("done")
+            //console.log('{{ geojson | raw }}');
+            //getFeaturesRow('{{ geojson | raw }}')
+            //console.log("done")
             {% endif %}
 		}	
 	);

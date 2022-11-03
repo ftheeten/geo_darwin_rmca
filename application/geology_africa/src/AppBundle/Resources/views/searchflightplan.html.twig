@@ -1,0 +1,10 @@
+{# src/AppBundle/Resources/views/searchfligtplan.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block title %}
+	{{ parent() }} - Flight plans
+{% endblock %}
+{% block body %}
+	{% include "@App/searchflightplan_raw.html.twig" %}
+{% endblock %}

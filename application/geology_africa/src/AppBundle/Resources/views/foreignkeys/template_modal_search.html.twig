@@ -7,29 +7,36 @@
     z-index: 1000000020
 }
 </style>
-{{ index }}
-<div class="col-sm-2"><input type="button" id="add_modal{{ ctrl_suffix }}{{ index }}" name="add_modal{{ ctrl_suffix }}" value="Search" data-bs-toggle="modal" data-bs-target="#modaladd{{ ctrl_suffix }}"></input>
-{% if index== 1 %}
-<div class="modal fade modal_keyword " id="modaladd{{ ctrl_suffix }}" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" style="z-index:1000000000">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content" id="modal_add_content">
-            <div class="modal-header">
-                ADD KEYWORD               
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    {% include nested_template %}
-                    
-                </div>
-            </div>
-            <div class="modal-footer">                
-                  <button type="button" class="btn btn-secondary remove_add remove_modal" id="remove_modal" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>    
+
+{% if read_mode=="write" or read_mode=="create" %}
+<div class="row">
+<div class="col-sm-2">
+<input type="button" id="add_modal{{ ctrl_suffix }}{{ index }}" name="add_modal{{ ctrl_suffix }}" value="Search" data-bs-toggle="modal" data-bs-target="#modaladd{{ ctrl_suffix }}"></input>
+	{% if index== 1 %}
+	<div class="modal fade modal_keyword " id="modaladd{{ ctrl_suffix }}" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" style="z-index:1000000000">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content" id="modal_add_content">
+				<div class="modal-header">
+					ADD VALUE               
+				</div>
+				<div class="modal-body">
+					<div class="container">
+						{% include nested_template %}
+						
+					</div>
+				</div>
+				<div>
+					<div class="modal-footer">                
+					  <button type="button" class="btn btn-secondary remove_add remove_modal" id="remove_modal" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>    
+		</div>
+	</div>
+	{% endif %}
+</div>
 </div>
 {% endif %}
-</div>
 {% endblock %}
 {% block javascripts %}
 	<script language='javascript'>

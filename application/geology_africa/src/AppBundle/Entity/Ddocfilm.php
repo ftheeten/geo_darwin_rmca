@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ddocfilm", uniqueConstraints={@ORM\UniqueConstraint(name="ddocfilm_unique", columns={"idcollection", "iddoc", "film"})}, indexes={@ORM\Index(name="IDX_CA4AC8F231E478089F44A603", columns={"idcollection", "iddoc"})})
  * @ORM\Entity
  */
-class Ddocfilm
+class Ddocfilm extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -20,7 +20,7 @@ class Ddocfilm
      * @ORM\GeneratedValue(strategy="SEQUENCE")
      * @ORM\SequenceGenerator(sequenceName="ddocfilm_pk_seq", allocationSize=1, initialValue=1)
      */
-    private $pk;
+    protected $pk;
 
     /**
      * @var string
@@ -29,28 +29,6 @@ class Ddocfilm
      */
     private $film;
 
-    /**
-     * @var \AppBundle\Entity\Ddocument
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
-     */
-    private $idcollection;
-
-
-
-    /**
-     * Get pk
-     *
-     * @return integer
-     */
-    public function getPk()
-    {
-        return $this->pk;
-    }
 
     /**
      * Set film
@@ -76,27 +54,20 @@ class Ddocfilm
         return $this->film;
     }
 
-    /**
-     * Set idcollection
+   /**
+     * Get pk
      *
-     * @param \AppBundle\Entity\Ddocument $idcollection
-     *
-     * @return Ddocfilm
+     * @return integer
      */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
+    public function getPk()
     {
-        $this->idcollection = $idcollection;
+        return $this->pk;
+    }
+	
+	public function setPk($pk)
+    {
+        $this->pk = $pk;
 
         return $this;
-    }
-
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Ddocument
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
+    }	
 }

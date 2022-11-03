@@ -2,67 +2,65 @@
 {% extends "@App/searchlayout.html.twig" %}
 
 {% block body %}
-{{ form_start(form, {'attr': {'class': 'form-horizontal','id': 'contribution_form'}}) }}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% include "@App/forms/security_shift.html.twig" %}
+
+{{ read_test.form_read_mode(read_mode,form, {'attr': {'class': 'form-horizontal','id': 'contribution_form'}}) }}
+{{ form_row(form._token) }}
+{% set current_tab=current_tab|default("main-tab") %}
 <ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">Home</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link " id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="true">Contributors</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="document-tab" data-bs-toggle="tab" data-bs-target="#document" type="button" role="tab" aria-controls="documents" aria-selected="false">To document</button>
-  </li>   
+	{{ read_test.enable_bootstrap_tab("main-tab", current_tab,"#main", "main", "Home", "shift_mode") }}
+	{{ read_test.enable_bootstrap_tab("contributor-tab", current_tab,"#contributor", "contributor", "Contributors", "shift_mode") }}
+  	{{ read_test.enable_bootstrap_tab("document-tab", current_tab,"#document", "document", "To document", "shift_mode") }}
+	{% if read_mode!="create"%}
+	{{ read_test.enable_bootstrap_tab("log-tab", current_tab,"#log", "log", "Logs") }}	
+	{% endif %}
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
-  <div class="tab-pane active" id="main" role="tabpanel" aria-labelledby="main-tab">   
-  {% include "@App/contributions/contributionform_raw.html.twig"  %} 
-  </div>
-  <div class="tab-pane" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
-CONTRIB 
-{% if originaction =="add_beforecommit" %}
-  	Please save the main part of the contribution first
- {% else %}
-	{% include "@App/contributions/contribution_to_contributor.html.twig"  %}
- {% endif %}
- </div>
-  <div class="tab-pane" id="document" role="tabpanel" aria-labelledby="document-tab">
- {% if originaction =="add_beforecommit" %}
-  	Please save the main part of the contribution first
- {% else %}
-	{% include "@App/contributions/contribution_to_doc.html.twig"  %}
- {% endif %}
+  {{ read_test.activate_boostrap_tab("main", current_tab, "main-tab") }}
+		{% include "@App/contributions/contributionform_raw.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+ 
+   {{ read_test.activate_boostrap_tab("contributor", current_tab, "contributor-tab") }}
+
+		{% if originaction =="add_beforecommit" %}
+			Please save the main part of the contribution first
+		 {% else %}
+			{% include "@App/contributions/contribution_to_contributor.html.twig"  %}
+		 {% endif %}
+	{{ read_test.end_activate_boostrap_tab() }}
+
+  {{ read_test.activate_boostrap_tab("document", current_tab, "document-tab") }}
+		 {% if originaction =="add_beforecommit" %}
+			Please save the main part of the contribution first
+		 {% else %}
+			{% include "@App/contributions/contribution_to_doc.html.twig"  %}
+		 {% endif %}
+	{{ read_test.end_activate_boostrap_tab() }}
+	{% if read_mode!="create"%}
+	{{ read_test.activate_boostrap_tab("log", current_tab, "log-tab") }}
+		{% include "@App/forms/logs.html.twig" with {'logs' : logs} %}
+	{{ read_test.end_activate_boostrap_tab() }}
+	{% endif %}
  </div>
 
 
  </div>
+ {{ read_test.submit_button_log(read_mode) }}
 {% include "@App/forms/form_buttons.html.twig" with {'id_form': '#contribution_form' , 'delete_route': 'app_delete_contribution' } %}
-{{ form_end(form) }}
+{{ read_test.form_end_read_mode(read_mode,form) }}
 <script language="javascript">
-	var current_tab="main-tab";
+
 	$(document).ready(
 		function()
 		{
-			console.log("BLOCK_JAVASCRIPT");
-			
-			$(".nav-link").click(
-				function()
-				{
-					console.log($(this).attr("id"));
-					current_tab=$(this).attr("id");
-					$("#current_tab").val(current_tab);
-				}
-			);
-			
-			{% if current_tab is defined %}
-			console.log("TAB_IS_DEFINED");
-			console.log("{{ current_tab }}");
-				{% if current_tab!='main_tab' %}
-					$("#{{ current_tab }}").click();			
-				{% endif %}
-			{% endif %}
+				current_tab="{{ current_tab }}";
+			//alert(current_tab);
+			console.log(current_tab);
+			init_tab_url(".mode_shift", current_tab);
 		}
 		);
 

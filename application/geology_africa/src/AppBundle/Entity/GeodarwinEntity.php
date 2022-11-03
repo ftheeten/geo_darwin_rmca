@@ -10,6 +10,12 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 /** GeodarwinEntity*/
 class GeodarwinEntity
 {
+	public function getLogInformation($em, $referenced_table)
+	{
+		$tmp_logs=$em->getRepository(TDataLog::class)
+						 ->findContributions($referenced_table, $this->getPk());
+		return $tmp_logs;
+	}
 	
 	protected function attachForeignkeys($em, $class, $attribute, $mapping_params, $var_getter, $sort_criteria=NULL)
 	{
@@ -72,6 +78,7 @@ class GeodarwinEntity
 		{
 			foreach($this->$attribute as $obj)
 			{
+				
 				$signature=call_user_func(array($obj, $signatureFunction));
 				$signatures_existing[$signature]=$obj;
 				$signatures_existing_pk[$signature]=call_user_func(array($obj, $pk_fct));
@@ -79,20 +86,25 @@ class GeodarwinEntity
 		}
 		$signatures_new=Array();
 		$signatures_new_pk=Array();
-		
+		//print_r($new_array);
 		//passing object and not pk !		
 		foreach($new_array as $obj)
-		{			
+		{	
+			//print_r((array)$obj);
 			$signature=call_user_func(array($obj, $signatureFunction));			
 			$signatures_new[$signature]=$obj;
 			$signatures_new_pk[$signature]=call_user_func(array($obj, $pk_fct));			
 		}
 		
-		
-		
+		//print("<br/>_");
+		//print_r(array_keys($signatures_existing));
+		//print("<br/>_");
+		//print_r(array_keys($signatures_new));
+		//print("<br/>_");
 		$to_remove=array_diff_key($signatures_existing,$signatures_new);
-		
-		$to_add=array_diff_key($signatures_new,$signatures_existing );
+		//print_r(array_keys($to_remove));
+		//print("_");
+		$to_add=$signatures_new;//array_diff_key($signatures_new,$signatures_existing );
 		$to_edit_pk=array_intersect($signatures_existing_pk,$signatures_new_pk );
 		
 		foreach($to_remove as $key=>$obj)
@@ -113,22 +125,22 @@ class GeodarwinEntity
 		
 		foreach($to_add as $key=>$obj)
 		{	
-			//print("<br/>");
-			//print_r($obj);
+			
 			$tmp_pk=call_user_func(array($obj, $pk_fct));
+			
 			if(strlen($tmp_pk)>0)
 			{
 				if(!in_array($tmp_pk,$signatures_new_pk))
 				{
 				
-					print("persist ".$class);
+					//print("persist ".$class);
 					$em->persist($obj);
 				}
 				else
 				{
 					//print("PK=");
 					//print($obj->getPk());
-					print("merge".$class);
+					//print("merge".$class);
 					$em->merge($obj);
 				}
 				//else just edit
@@ -137,7 +149,7 @@ class GeodarwinEntity
 			else
 			{
 				//assume no pk=new
-				//print("ERROR PK NOT DETECTED!");
+			
 				//print("persist ".$class);
 				$em->persist($obj);
 			}

@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use AppBundle\Entity\GeodarwinDocForeignKey;
 
 /**
  * Ddocaerphoto
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ddocaerphoto", uniqueConstraints={@ORM\UniqueConstraint(name="DDocAerPhoto_PID_key", columns={"pid"}), @ORM\UniqueConstraint(name="ddocaerphoto_unique", columns={"idcollection", "iddoc"}), @ORM\UniqueConstraint(name="ddocaerphoto_pid_unique", columns={"pid"})}, indexes={@ORM\Index(name="IDX_A43E8A964DFB1B2F", columns={"fid"})})
  * @ORM\Entity
  */
-class Ddocaerphoto
+class Ddocaerphoto extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -32,23 +33,11 @@ class Ddocaerphoto
     /**
      * @var \AppBundle\Entity\Docplanvol
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Docplanvol")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="fid", referencedColumnName="fid")
-     * })
+     * @ORM\Column(name="fid", type="integer", nullable=false)
      */
     private $fid;
 
-    /**
-     * @var \AppBundle\Entity\Ddocument
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
-     */
-    private $idcollection;
+   
 
 
 
@@ -89,11 +78,11 @@ class Ddocaerphoto
     /**
      * Set fid
      *
-     * @param \AppBundle\Entity\Docplanvol $fid
+     * @param string $idcontribution
      *
      * @return Ddocaerphoto
      */
-    public function setFid(\AppBundle\Entity\Docplanvol $fid = null)
+    public function setFid($fid = null)
     {
         $this->fid = $fid;
 
@@ -110,27 +99,28 @@ class Ddocaerphoto
         return $this->fid;
     }
 
-    /**
-     * Set idcollection
+   
+	
+	/**
+     * Set pk
      *
-     * @param \AppBundle\Entity\Ddocument $idcollection
+     * @param integer $pk
      *
-     * @return Ddocaerphoto
+     * @return Ddocarchive
      */
-    public function setIdcollection(\AppBundle\Entity\Ddocument $idcollection = null)
+    public function setpk($pk)
     {
-        $this->idcollection = $idcollection;
+        $this->pk = $pk;
 
         return $this;
     }
-
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Ddocument
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
+	
+	public function setplanvol_db($em)
+	{
+		$tmp_cont=$em->getRepository(Docplanvol::class)
+						 ->findOneBy(array('fid' => $this->getFid()
+									));
+		
+		$this->docplanvol=$tmp_cont;
+	}
 }

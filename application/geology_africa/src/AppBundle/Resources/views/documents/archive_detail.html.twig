@@ -1,0 +1,84 @@
+{# src/AppBundle/Resources/views/documents/archive_detail.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set default_val = default_val|default(null) %}
+<div class="row">			
+		<div class="col-sm-1">{{ index }}</div>
+		
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "pk_"  ~ index, ctrl_prefix ~ "pk["  ~ index~"]", default_val.pk ?? "","archive_class" ~ index, "width:100%"   ) }}</div>
+		<div class="col-sm-3"></div>			
+</div>
+<input type="hidden" id="{{ctrl_prefix ~ "set_"  ~ index }}" name="{{ctrl_prefix ~ "set["  ~ index~"]" }}"/>
+<div class="row">
+	<div class="col-sm-1">Extension</div>
+	<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "number", ctrl_prefix ~ "extend_"  ~ index, ctrl_prefix ~ "extend["  ~ index~"]", default_val.extend ?? "","archive_class" ~ index, "width:100%" , 1  ) }}</div>
+</div>
+<div class="row">	
+	<div class="col-sm-2">Geology</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "geology_"  ~ index, ctrl_prefix ~ "geology["  ~ index~"]", default_val.geology ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Geochemistry</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "geochemistry_"  ~ index, ctrl_prefix ~ "geochemistry["  ~ index~"]", default_val.geochemistry ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Geophysics</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "geophysics_"  ~ index, ctrl_prefix ~ "geophysics["  ~ index~"]", default_val.geophysics ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Exploration</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "exploration_"  ~ index, ctrl_prefix ~ "exploration["  ~ index~"]", default_val.exploration ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Production</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "production_"  ~ index, ctrl_prefix ~ "production["  ~ index~"]", default_val.production ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Reserves</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "reserves_"  ~ index, ctrl_prefix ~ "reserves["  ~ index~"]", default_val.reserves ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Exploitation</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "exploitation_"  ~ index, ctrl_prefix ~ "exploitation["  ~ index~"]", default_val.exploitation ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Processing</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "processing_"  ~ index, ctrl_prefix ~ "processing["  ~ index~"]", default_val.processing ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Management</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "management_"  ~ index, ctrl_prefix ~ "management["  ~ index~"]", default_val.management ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Report</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "report_"  ~ index, ctrl_prefix ~ "report["  ~ index~"]", default_val.report ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Drilling cores</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "drillingcores_"  ~ index, ctrl_prefix ~ "drillingcores["  ~ index~"]", default_val.drillingcores ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Maps</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "maps_"  ~ index, ctrl_prefix ~ "maps["  ~ index~"]", default_val.maps ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Paleontology</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "paleontology_"  ~ index, ctrl_prefix ~ "paleontology["  ~ index~"]", default_val.paleontology ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Sedimentology</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "sedimentology_"  ~ index, ctrl_prefix ~ "sedimentology["  ~ index~"]", default_val.sedimentology ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	<div class="col-sm-2">Economy</div>
+	<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "economy_"  ~ index, ctrl_prefix ~ "economy["  ~ index~"]", default_val.economy ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+	
+</div>
+<div class="row">
+	<div class="col-sm-1">Sample</div>
+	<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "sample_"  ~ index, ctrl_prefix ~ "sample["  ~ index~"]", default_val.sample ?? "","archive_class" ~ index, "width:100%"  ) }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">Sgeology</div>
+<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "sgeology_"  ~ index, ctrl_prefix ~ "sgeology["  ~ index~"]", default_val.sgeology ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+<div class="col-sm-2">Smineraology</div>
+<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "ssmineralogy_"  ~ index, ctrl_prefix ~ "ssmineralogy["  ~ index~"]", default_val.smineralogy ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+<div class="col-sm-2">Sconcentre</div>
+<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~ "ssconcentre_"  ~ index, ctrl_prefix ~ "ssconcentre_["  ~ index~"]", default_val.sconcentre ?? 0,"archive_class" ~ index, "width:100%"  ) }}</div>
+</div>
+<div class="row">
+<div class="col-sm-1">Year low</div>
+	<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "number", ctrl_prefix ~ "yearlow_"  ~ index, ctrl_prefix ~ "yearlow["  ~ index~"]", default_val.yearlow ?? "","archive_class" ~ index, "width:100%" , 1  ) }}</div>
+	<div class="col-sm-1">Year high</div>
+<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "number", ctrl_prefix ~ "yearhigh_"  ~ index, ctrl_prefix ~ "yearhigh["  ~ index~"]", default_val.yearhigh ?? "","archive_class" ~ index, "width:100%" , 1  ) }}</div>
+</div>
+<script>
+$(document).ready(
+            function()
+            {				
+					$(".archive_class{{ index }}").change(
+						function()
+						{
+							console.log("changed");
+							$("#{{ctrl_prefix ~ "set_"  ~ index }}").val("on");
+						}
+					);
+					$(".archive_class{{ index }}").click(
+						function()
+						{
+							$("#{{ctrl_prefix ~ "set_"  ~ index }}").val("on");
+						}
+					);
+			});
+</script>

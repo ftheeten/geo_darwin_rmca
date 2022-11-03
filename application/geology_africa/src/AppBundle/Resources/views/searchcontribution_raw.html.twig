@@ -38,9 +38,9 @@
 </div>
 <div class="row">
      <div class="col-sm-2"></div>
-    <div class="col-sm-2"><input type="button" value="search" id="go_search"/></div>
+    <div class="col-sm-2"><input type="button" value="search" id="go_search_contrib"/></div>
 </div>
-<div id="div_results" class="row"></div>
+<div id="div_results_contrib" class="row"></div>
 </div>
 
 {% endblock %}
@@ -49,13 +49,13 @@
     {{ parent() }}
 	<script language='javascript'>
 	//important to have it outside of jquery scope 
-	var search=function(current_page, page_size)
+	var search_contrib=function(current_page, page_size)
 		{
-			search_logic(current_page, page_size,false)
+			search_logic_contrib(current_page, page_size,false)
 					
 		}
 		
-		 var search_logic=function(current_page, page_size, csv)
+		 var search_logic_contrib=function(current_page, page_size, csv)
 		{
 			criterias={}
 			criterias["current_page"]=current_page;
@@ -72,7 +72,7 @@
 			$.post("{{ path('search_contribution')}}", criterias,
 				function(data)
 				{
-					$("#div_results").html(data);
+					$("#div_results_contrib").html(data);
 				}
 			);
 		}
@@ -105,10 +105,11 @@
 				
 		
 	
-		$("#go_search").click(
+		$("#go_search_contrib").click(
 				function()
 				{
-					search(1, $("#page_size").val());
+					search=search_contrib;
+					search_contrib(1, $("#page_size").val());
 				});
 		}
 	);

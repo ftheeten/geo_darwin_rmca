@@ -190,4 +190,10 @@ class Dlinkcontribute
 		}*/
 		$this->dcontributor=$tmp_contributor;
 	}
+	
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
 }

@@ -169,7 +169,19 @@ class AutocompleteController extends Controller
 	
 	public function contribnames_autocompleteAction(Request $request)
 	{	
-       return $this->template_autocomplete("dcontributor", "people",$request->query->get("code",""), false, "people, idcontributor" );		
+       /*return $this->template_autocomplete(
+		"dcontributor", 
+		"TRIM(people||COALESCE(' (Institution:'||institut||')',''))",
+		$request->query->get("code",""), 
+		false,
+		"TRIM(people||COALESCE(' (Institution:'||institut||')','')) as people,idcontributor" );	*/
+		return $this->template_autocomplete(
+		"dcontributor", 
+		"people",
+		$request->query->get("code",""), 
+		false,
+		"people" );
+		
     }
 	
 	
@@ -225,6 +237,21 @@ class AutocompleteController extends Controller
 	public function lithostratum_autocompleteAction(Request $request)
 	{
 		return $this->template_autocomplete("dloclitho", "lithostratum",$request->query->get("code",""),false);
+	}
+	
+    public function lithostratum_standard_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("v_distinctlithostratum", "lithostratum",$request->query->get("code",""),false);
+	}
+	
+	public function map_projection_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("ddocmap", "projection",$request->query->get("code",""),false);
+	}
+	
+		public function stratumdesc_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("v_distinctdlocstratumdesc", "descript",$request->query->get("code",""),false);
 	}
 
 

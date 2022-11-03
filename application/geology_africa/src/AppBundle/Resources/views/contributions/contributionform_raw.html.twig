@@ -1,6 +1,7 @@
 {# src/AppBundle/Resources/views/contributions/contribution_form_raw.html.twig #}
 {% include "@App/forms/standalonejs.html.twig" %}
 {% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
 
 
 <div class="row">
@@ -9,30 +10,30 @@
 					{% if dcontribution.pk != "" %}
 						{{ dcontribution.idcontribution }}
 					{% else %}
-						{{ form_widget(form.idcontribution, {'attr': {'class': 'form-control inp_ContriID'}}) }}
+						{{ read_test.widget_read_mode(read_mode, form.idcontribution, {'attr': {'class': 'form-control inp_ContriID'}}) }}
 						<input type='button' id="get_idcontribution" value="Get next ID"></input>
 					{% endif %}
 	</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Type</div>
-	<div class="col-sm-3">{{ form_widget(form.datetype , {'attr': {'class': 'form-control inp_contribTypeDate'}})  }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode,form.datetype , {'attr': {'class': 'form-control inp_contribTypeDate'}}, dcontribution.datetype ?? "")  }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Name</div>
-	<div class="col-sm-3">{{ form_widget(form.name , {'attr': {'class': 'form-control inp_contribName'}})  }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode,form.name , {'attr': {'class': 'form-control inp_contribName'}}, dcontribution.name ?? "")  }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Year</div>
-	<div class="col-sm-3">{{ form_widget(form.year, {'attr': {'class': 'form-control inp_contribYear'}}) }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode,form.year, {'attr': {'class': 'form-control inp_contribYear'}}, dcontribution.year ?? "") }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Date year</div>
-	<div class="col-sm-2">{{ form_widget(form.date_year, {'attr': {'class': 'form-control inp_contribDate date_year'}}) }}</div>
+	<div class="col-sm-2">{{ read_test.widget_read_mode(read_mode,form.date_year, {'attr': {'class': 'form-control inp_contribDate date_year'}}, dcontribution.date_year ?? "") }}</div>
 	<div class="col-sm-2">Date month</div>
-	<div class="col-sm-2">{{ form_widget(form.date_month, {'attr': {'class': 'form-control inp_contribDate date_month'}}) }}</div>
+	<div class="col-sm-2">{{ read_test.widget_read_mode(read_mode,form.date_month, {'attr': {'class': 'form-control inp_contribDate date_month'}}, dcontribution.date_month ?? "") }}</div>
 	<div class="col-sm-2">Date day</div>
-	<div class="col-sm-2">{{ form_widget(form.date_day, {'attr': {'class': 'form-control inp_contribDate date_day'}}) }}</div>
+	<div class="col-sm-2">{{ read_test.widget_read_mode(read_mode,form.date_day, {'attr': {'class': 'form-control inp_contribDate date_day'}}, dcontribution.date_day ?? "") }}</div>
 </div>
 
 
@@ -58,17 +59,18 @@
 					 );
 					
 				});
-				
-				$(".inp_contribTypeDate").select2(select2_generic("{{ path('app_contribtype_autocomplete')}}","datetype","datetype" ),0);
-				
-				
-				
-				//$(".inp_contribDate").datepicker();
-				
-				{% if dcontribution.pk != "" %}
-					var newOption = new Option("{{ dcontribution.datetype }}", "{{ dcontribution.datetype }}", true, true);
-					$('.inp_contribTypeDate').append(newOption).trigger('change');
+				{% if read_mode=="write" or read_mode=="create" %}
+					$(".inp_contribTypeDate").select2(select2_generic("{{ path('app_contribtype_autocomplete')}}","datetype","datetype" ),0);
+					
+					
+					
+					//$(".inp_contribDate").datepicker();
+					
+					{% if dcontribution.pk != "" %}
+						var newOption = new Option("{{ dcontribution.datetype }}", "{{ dcontribution.datetype }}", true, true);
+						$('.inp_contribTypeDate').append(newOption).trigger('change');
 
+					{% endif %}
 				{% endif %}
 				
 			

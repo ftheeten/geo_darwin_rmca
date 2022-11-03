@@ -1,31 +1,22 @@
 {# src/AppBundle/Resources/views/foreignkeys/dkeyword.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
 
 {% set val_to_display = default_val.keyword|default(null) %}
 {% set val_pk = default_val.pk|default(null) %}
 
 <input type="hidden" name="widget_keywords_pk[]" id="keywords_pk_{{ index }}" >
-<select name="widget_keywords[]" id="keywords_{{ index }}" style="width:200px" ></select>
-
+{{ read_test.select2_read_mode(read_mode, "keywords_" ~ index , "widget_keywords[]", path('search_all_keywords_autocomplete'), "word", val_to_display, "", "width:200px")}}
 
 
 								
 <script type="text/javascript">
-var tmp_class{{ index }}="{{ index }}";
 $(document).ready(
 	function()
-	{
-		$("#keywords_{{ index }}").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
-		{% if not default_val is null %}
-		var newOption = new Option("{{ val_to_display }}", "{{ val_to_display }}", true, true);
-		$('#keywords_{{ index }}').append(newOption).trigger('change');
-		
-		$('#keywords_pk_{{ index }}').val('{{ val_pk }}');
-		{% endif %}
-		
-	 
-	}
-	
-	
-	
+	{		
+		{% if not default_val is null %}		
+			$('#keywords_pk_{{ index }}').val('{{ val_pk }}');
+		{% endif %}		 
+	}	
 );
 </script>						

@@ -3,14 +3,14 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
+use AppBundle\Entity\GeodarwinDocForeignKey;
 /**
  * Ddocarchive
  *
  * @ORM\Table(name="ddocarchive", uniqueConstraints={@ORM\UniqueConstraint(name="pk_ddoc_archives", columns={"idcollection", "iddoc"})})
  * @ORM\Entity
  */
-class Ddocarchive
+class Ddocarchive extends GeodarwinDocForeignKey
 {
     /**
      * @var integer
@@ -22,19 +22,7 @@ class Ddocarchive
      */
     private $pk;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="idcollection", type="string", nullable=false)
-     */
-    private $idcollection;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="iddoc", type="integer", nullable=false)
-     */
-    private $iddoc;
+    
 
     /**
      * @var integer
@@ -209,53 +197,7 @@ class Ddocarchive
         return $this->pk;
     }
 
-    /**
-     * Set idcollection
-     *
-     * @param string $idcollection
-     *
-     * @return Ddocarchive
-     */
-    public function setIdcollection($idcollection)
-    {
-        $this->idcollection = $idcollection;
-
-        return $this;
-    }
-
-    /**
-     * Get idcollection
-     *
-     * @return string
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
-
-    /**
-     * Set iddoc
-     *
-     * @param integer $iddoc
-     *
-     * @return Ddocarchive
-     */
-    public function setIddoc($iddoc)
-    {
-        $this->iddoc = $iddoc;
-
-        return $this;
-    }
-
-    /**
-     * Get iddoc
-     *
-     * @return integer
-     */
-    public function getIddoc()
-    {
-        return $this->iddoc;
-    }
+    
 
     /**
      * Set extend
@@ -807,5 +749,19 @@ class Ddocarchive
     public function getYearhigh()
     {
         return $this->yearhigh;
+    }
+	
+	/**
+     * Set pk
+     *
+     * @param integer $pk
+     *
+     * @return Ddocarchive
+     */
+    public function setpk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
     }
 }

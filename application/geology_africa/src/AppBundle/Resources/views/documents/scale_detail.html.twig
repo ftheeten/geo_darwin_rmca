@@ -1,0 +1,16 @@
+{# src/AppBundle/Resources/views/documents/scale_detail.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set default_val = default_val|default(null) %}
+{% set read_mode=read_mode|default("read") %}
+{% set val_to_display = default_val.scale|default(null) %}
+{% set val_pk = default_val.pk|default(null) %}
+
+
+<div class="row">			
+		<div class="col-sm-1">{{ index }}</div>
+		<div class="col-sm-5">
+		
+		{{ read_test.input_read_mode(read_mode, "text", "widget_scale_pk"  ~ index, "widget_scale_pk["  ~ index~"]", default_val.pk ?? "","", "width:100%"  ) }}
+		{{ read_test.input_read_mode(read_mode, "number", "widget_scale"~ index, "widget_scale["~ index~"]",default_val.scale ?? "","readonly_class", "width:100%", 100) }}
+		</div>
+</div>

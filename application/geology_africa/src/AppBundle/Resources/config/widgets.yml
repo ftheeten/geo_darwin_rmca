@@ -15,11 +15,41 @@ get_widget_satellite:
     defaults: 
      _controller: AppBundle:Widget:widget_satellite
     methods:  GET
+    
+get_widget_map:
+    path:     /get_widget_map
+    defaults: 
+     _controller: AppBundle:Widget:widget_map
+    methods:  GET
+    
+get_widget_archive:
+    path:     /get_widget_archive
+    defaults: 
+     _controller: AppBundle:Widget:widget_archive
+    methods:  GET
+    
+get_widget_scale:
+    path:     /get_widget_scale
+    defaults: 
+     _controller: AppBundle:Widget:widget_scale
+    methods:  GET
+    
+get_widget_film:
+    path:     /get_widget_film
+    defaults: 
+     _controller: AppBundle:Widget:widget_film
+    methods:  GET
 
 get_widget_doc_to_contrib:
     path:     /get_widget_doc_to_contrib
     defaults: 
      _controller: AppBundle:Widget:widget_doc_to_contrib
+    methods:  GET
+    
+get_widget_doc_to_dloccenter:
+    path:     /get_widget_doc_to_dloccenter
+    defaults: 
+     _controller: AppBundle:Widget:widget_doc_to_dloccenter
     methods:  GET
     
 get_widget_contrib_to_doc:
@@ -45,4 +75,10 @@ get_widget_contribdetail:
     path:     /get_widget_contribdetail
     defaults: 
      _controller: AppBundle:Widget:widget_contributordetail
+    methods:  GET
+    
+get_widget_doc_to_flightplan:
+    path:     /get_widget_doc_to_flightplan
+    defaults: 
+     _controller: AppBundle:Widget:widget_doc_to_flightplan
     methods:  GET

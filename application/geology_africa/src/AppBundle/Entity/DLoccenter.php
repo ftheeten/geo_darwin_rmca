@@ -889,7 +889,8 @@ class DLoccenter extends GeodarwinEntity
 	public function initDloclitho($em)
 	{
 		
-		$this->attachForeignkeysAsObject($em,DLoclitho::class,"dloclitho", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt));foreach($this->dloclitho as $obj)
+		$this->attachForeignkeysAsObject($em,DLoclitho::class,"dloclitho", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt));
+		foreach($this->dloclitho as $obj)
 		{
 			$obj->initDlocstratumdesc($em);
 		}		
@@ -906,12 +907,43 @@ class DLoccenter extends GeodarwinEntity
 				$em,
 				DLoclitho::class,
 				"dloclitho",				
-				"getSignature", 
+				"getPk",//"getSignature", 
 				$new_dloclitho, 
 				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt)
 			);	
 		}
 		return $this->dloclitho;
+	}
+	
+	//attach description (display in FK)
+	protected $description;
+	
+	public function setDescription($str)
+	{
+		$this->description=$str;
+		return $this;
+	}
+	
+	public function getDescription()
+	{
+		return $this->description;
+	}
+	
+	public function setDescription_db($em)
+	{
+		
+		$elem=Array();
+		$elem[]=(string)$this->getIdcollection();
+		$elem[]=(string)$this->getIdpt();
+		if($this->getFieldnum()!==NULL)
+		{
+			$elem[]=$this->getFieldnum();
+		}
+		if($this->getPlace()!==NULL)
+		{
+			$elem[]=$this->getPlace();
+		}
+		$this->description= implode("; ", $elem);
 	}
 	
 	 

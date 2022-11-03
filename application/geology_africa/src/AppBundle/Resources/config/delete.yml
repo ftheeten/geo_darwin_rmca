@@ -5,6 +5,16 @@ app_delete_contributor:
     defaults: 
      _controller: AppBundle:Delete:deletecontributor
 
+app_delete_flightplan:
+    path:     /delete/flightplan/{pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteflightplan 
+
+app_delete_ddocaerphoto:
+    path:     /delete/ddocaerphoto/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddocaerphoto     
+     
 app_delete_contribution:
     path:     /delete/contribution/{pk}
     defaults: 
@@ -16,25 +26,50 @@ app_delete_dkeyword:
      _controller: AppBundle:Delete:deletedkeyword
 
 app_delete_ddoctitle:
-
     path:     /delete/ddoctitle/{pk}/{container_pk}
     defaults: 
      _controller: AppBundle:Delete:deleteddoctitle
 
 app_delete_dlinkcontdoc:
-    path:     /delete/dlinkcontdoc/{pk}/{container_pk}/{table}
+    path:     /delete/dlinkcontdoc/{pk}/{container_pk}
     defaults: 
-     {_controller: AppBundle:Delete:deletedlinkcontdoc, table:"ddocument"}
+     {_controller: AppBundle:Delete:deletedlinkcontdoc}
+     
+app_delete_dlinkdocloc:
+    path:     /delete/dlinkdocloc/{pk}/{container_pk}
+    defaults: 
+     {_controller: AppBundle:Delete:deletedlinkdocloc}
+
 
 app_delete_dlinkcontdoc_from_contrib:
-    path:     /delete/dlinkcontdoc_contrib/{pk}/{container_pk}/{table}
+    path:     /delete/dlinkcontdoc_contrib/{pk}/{container_pk}
     defaults: 
-     {_controller: AppBundle:Delete:deletedlinkcontdoc, table:"dcontribution"}
+     {_controller: AppBundle:Delete:deletedlinkcontribution}
      
 app_delete_satellite:
     path:     /delete/ddocsatellite/{pk}/{container_pk}
     defaults: 
-     _controller: AppBundle:Delete:deletedddocsatellite
+     _controller: AppBundle:Delete:deleteddocsatellite
+     
+app_delete_map:
+    path:     /delete/ddocmap/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddocmap
+
+app_delete_archive:
+    path:     /delete/ddocarchive/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddocarchive
+     
+app_delete_scale:
+    path:     /delete/ddocscale/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddocscale
+     
+app_delete_film:
+    path:     /delete/ddocfilm/{pk}/{container_pk}
+    defaults: 
+     _controller: AppBundle:Delete:deleteddocfilm
      
 app_delete_stratum_from_point:
     path:     /delete/stratum_from_point/{pk}/{container_pk}

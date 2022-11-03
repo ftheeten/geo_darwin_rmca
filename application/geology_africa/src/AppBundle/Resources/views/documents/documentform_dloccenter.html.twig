@@ -1,0 +1,8 @@
+{% if action =="add" %}
+	Please save the main part of the document first
+{% else %}
+	{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/documents/detail_doc_to_dloccenter.html.twig" , 'ctrl_prefix' : 'doc_to_loc', 'ajax_route': path('get_widget_doc_to_dloccenter'), 'fk_values': dlinkdocloc|default(null),
+'delete_route':'app_delete_dlinkdocloc', 'container_pk':ddocument.pk, 
+'fk_key_field':'pk'
+ }  %}
+{% endif %}

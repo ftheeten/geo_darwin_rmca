@@ -1,0 +1,33 @@
+{# src/AppBundle/Resources/views/documents/flightplan_detail.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+
+<div class="row">
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk_"~ index, ctrl_prefix ~"_pk_"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+<div class="row">
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_flightplan_"~ index, ctrl_prefix ~"_id_flightplan_"~ index,default_val.docplanvol.pk ?? "","readonly_class") }}
+</div>
+<div class="row">
+	<div class="col-sm-1">fid</div>
+	<div class="col-sm-2"> 
+	{{ read_test.input_read_mode(read_mode, "text",  ctrl_prefix ~"_fid_"~ index , ctrl_prefix ~"_fid_"~ index, (default_val.docplanvol.fid??"")  ~" " ~ (default_val.docplanvol.nombloc ??"") | trim , "readonly_class")  }}
+	</div>
+	<div class="col-sm-1">pid</div>
+	<div class="col-sm-2"> 
+	{{ read_test.input_read_mode(read_mode, "text",  ctrl_prefix ~"_pid_"~ index , ctrl_prefix ~"_pid_"~ index, index , "readonly_class")  }}
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		 $('.readonly_class').attr('readonly', true);
+		
+		
+	});
+	
+</script>
+
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/searchflightplan_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_flightplan_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_fid_" ~ index , "index":index, "read_mode": read_mode,"ctrl_suffix": "doc_to_flightplan", }%}

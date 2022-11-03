@@ -96,7 +96,7 @@ class Dlinkcontdoc
     /**
      * Get idcontribution
      *
-     * @return \AppBundle\Entity\Dcontribution
+     * @return integer
      */
     public function getIdcontribution()
     {

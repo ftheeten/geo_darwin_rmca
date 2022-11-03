@@ -1,11 +1,14 @@
 {# src/AppBundle/Resources/views/search_all/searchallbs_raw.html.twig #}
 
 {% set type_filter = type_filter|default("all") %}
+{{ type_filter }}
 {% set is_modal = is_modal|default(false) %}
 {% if is_modal==false %}
 	{% use "@App/forms/standalonejs.html.twig" %}
 {% endif %}
 {% block body %}
+
+
 <div class="container">
 <div class="row">
     <div class="col-sm-2">What</div>
@@ -28,6 +31,12 @@
 		<div class="col-sm-3"><select name="collections" id="collections" style="width:100%" multiple="multiple" ></select></div>
 		<div class="col-sm-2">Id object</div>
 		<div class="col-sm-3"><select name="idobject" id="idobject" style="width:100%" multiple="multiple" ></select></div>
+	
+</div>
+<div class="row">
+	
+		<div class="col-sm-2">Stratum</div>
+		<div class="col-sm-3"><select name="stratum" id="stratum" style="width:100%" multiple="multiple" ></select></div>
 	
 </div>
 <div class="row">
@@ -95,22 +104,27 @@
 		
 		var parse_json_list=function(url, attribute, sel2)
 		 {
-			
+			//console.log("parse_json" + url);
 			var list=$.getJSON( url, function( data ) {
+				//console.log(url);
+				//console.log(data);
 				var items=[];
 				var returned=[];
 				var features=data;
+				var sel2default=[];
 				//console.log("features : ");
 				//console.log(features);
 				for(var i=0; i<features.length;i++)
 				{
 					var tmp=features[i];
 					//console.log("tmp (dans boucle) : ");
-					//console.log(tmp);
+					console.log(tmp);
 					var tmp2=tmp[attribute];
+					console.log(tmp2);
 					if(!items.includes(tmp2))
 					{
 						items.push(tmp2);
+						sel2default.push(tmp2);
 						
 					}
 				}
@@ -135,11 +149,22 @@
 				  data: returned,
 				  multiple:true
 				})
+				if(returned.length>0)
+				{
+					//console.log("default");
+					//console.log(returned);
+					$(sel2).val(sel2default).change();
+				}
 						//return returned;		
 			});			
 		 }
 
 		
+		 /*var search=function(current_page, page_size)
+		{
+			search_logic_all_docs(current_page, page_size,false)
+					
+		}*/
 	    var search_all_docs=function(current_page, page_size)
 		{
 			search_logic_all_docs(current_page, page_size,false)
@@ -160,6 +185,7 @@
 			  document.body.removeChild(element);
 		}
 		
+
 		 var search_logic_all_docs=function(current_page, page_size, csv)
 		{
 					
@@ -177,6 +203,13 @@
 					criterias["date_from"]=$("#date_from").val();
 					criterias["date_to"]=$("#date_to").val();
 					criterias["date_type"]=$("#date_type").val();
+					criterias["stratum"]=$("#stratum").val();
+					{% if is_modal==false %}
+					criterias["is_modal"]=false;
+					{% else %}
+					criterias["is_modal"]=true;
+					{% endif %}
+	
 					if(csv)
 					{
 						criterias["csv"]="true";
@@ -237,18 +270,21 @@
         $(document).ready(
             function()
             {
-               jQuery.getJSON("{{ path('app_refresh_mv')}}")
+               jQuery.getJSON("{{ path('app_refresh_mv')}}");
                 
 				{% if type_filter=="all" %}
 					parse_json_list("{{ path('search_all_object_categories')}}","main_type", "#document_type");
 				{% elseif type_filter=="document" %}
 					parse_json_list("{{ path('search_all_document_categories')}}","main_type", "#document_type");
+			    {% elseif type_filter=="dloccenter" %}
+					parse_json_list("{{ path('search_all_dloccenter_categories')}}","main_type", "#document_type");
 				{% endif %}
 				parse_json_list("{{ path('search_all_collections')}}","idcollection", "#collections");
                 $("#ac_contrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","idcontributor","people" ),2);
 				$("#ac_role").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);               
                 $("#keywords").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
 				$("#idobject").select2(select2_generic("{{ path('app_idobject_autocomplete')}}","idobject","idobject" ),0);
+				$("#stratum").select2(select2_generic("{{ path('app_lithostratum_standard_autocomplete')}}","lithostratum","lithostratum" ),0);
 				
 				$("#date_from").datepicker( 
 					{
@@ -264,6 +300,7 @@
 				$("#go_search_alldocs").click(
 				function()
 				{
+					search=search_all_docs;
 					search_all_docs(1, $("#page_size").val());
 				});
 				
@@ -273,6 +310,10 @@
 					search_logic_all_docs(1, $("#page_size").val(),true);
 				});
 				{% if is_modal==false %}
+				
+				$('#searchMapDiv').collapse({
+				  toggle: false
+				})
 				$("#searchMapDiv").on('shown.bs.collapse',
 					function()
 					{
@@ -280,7 +321,20 @@
                         {
                            $("#search_map").html("");
 						   map_loaded=true;
-						   init_map("searchmap");                           
+						   init_map("searchmap");  
+                           console.log("show");						   
+                        }                        
+                    }
+				);
+				$("#searchMapDiv").on('hide.bs.collapse',
+					function()
+					{
+                        if(map_loaded)
+                        {
+							map_loaded=false;
+							//$('#searchMapDiv').dispose();
+							console.log("hide");
+							return false;
                         }                        
                     }
 				);

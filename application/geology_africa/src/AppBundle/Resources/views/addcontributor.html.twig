@@ -7,13 +7,15 @@
 {% endblock %}
 
 {% block body %}
-{{ form_start(form, {'attr': {'id': 'form_contributor'}}) }}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% include "@App/forms/security_shift.html.twig" %}
+{{  read_test.form_read_mode(read_mode, form, {'attr': {'id': 'form_contributor'}}) }}
 
 <div class="container">
 <div class="row">
 	<div class="col-sm-2">id</div>
 	<div class="col-sm-1">
-		{{ form_widget(form.idcontributor,  {'attr':{'class':'val_next_contrib' }}) }}
+		{{ read_test.widget_read_mode(read_mode, form.idcontributor,  {'attr':{'class':'val_next_contrib' }}, Dcontributor.idcontributor ??"") }}
 		{% if originaction == "add_beforecommit" %}
 			{% include "@App/forms/get_next_id.html.twig" with {'table_name' : 'contributor', 'name_ctrl': 'bt_next_contributor', 'target_ctrl':'.val_next_contrib'}  %}
 		{% endif %}
@@ -22,30 +24,31 @@
 </div>
 <div class="row">	
 	<div class="col-sm-2">name</div>
-	<div class="col-sm-3">{{ form_widget(form.people, {'attr': {}}) }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.people, {'attr': {}}, Dcontributor.people ??"") }}</div>
 	
 	<div class="col-sm-2">title</div>
-	<div class="col-sm-1">{{ form_widget(form.peopletitre, {'attr': {'class' : 'contribtitle'}}) }}</div>
+	<div class="col-sm-1">{{ read_test.widget_read_mode(read_mode, form.peopletitre, {'attr': {'class' : 'contribtitle'}}, Dcontributor.peopletitre ?? "") }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">function</div>
-	<div class="col-sm-3">{{ form_widget(form.peoplefonction, {'attr': {'class' : 'contribfunction'}}) }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.peoplefonction, {'attr': {'class' : 'contribfunction'}}, Dcontributor.peoplefonction ?? "") }}</div>
 	
 	<div class="col-sm-2">status</div>
-	<div class="col-sm-3">{{ form_widget(form.peoplestatut, {'attr': {'class' : 'contribstatut'}}) }}</div>
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.peoplestatut, {'attr': {'class' : 'contribstatut'}}, Dcontributor.peoplestatut ?? "") }}</div>
 </div>
 <div class="row">
 	<div class="col-sm-2">Institution</div>
-	<div class="col-sm-3">{{ form_widget(form.institut, {'attr': {'class' : 'contribinstitution'}}) }}</div>	
+	<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.institut, {'attr': {'class' : 'contribinstitution'}}, Dcontributor.institut ?? "") }}</div>	
 </div>
 
 {% include "@App/forms/form_buttons.html.twig" with {'id_form': '#form_contributor' , 'delete_route': 'app_delete_contributor' } %}		
 
-{{ form_end(form) }}
+{{ read_test.form_end_read_mode(read_mode,form) }}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+	{% if read_mode == "write" or read_mode=="create" %}
     <script language='javascript'>
 		$(document).ready(
 			function()
@@ -67,6 +70,6 @@
 				
 			}
 		);
-		
+		{% endif %}
 	</script>
 {% endblock %}

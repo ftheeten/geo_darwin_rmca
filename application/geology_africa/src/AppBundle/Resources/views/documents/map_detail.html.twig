@@ -1,0 +1,20 @@
+{# src/AppBundle/Resources/views/documents/map_detail.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set default_val = default_val|default(null) %}
+<div class="row">			
+		<div class="col-sm-1">{{ index }}</div>
+		
+		<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "mappk_"  ~ index, ctrl_prefix ~ "mappk["  ~ index~"]", default_val.pk ?? "","", "width:100%"  ) }}</div>
+		<div class="col-sm-3"></div>			
+</div>
+<div class="row">
+	<div class="col-sm-3">Map projection</div>
+	<div class="col-sm-5">
+		{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~ "projection_"  ~ index , ctrl_prefix ~ "projection["  ~ index~"]" , path('app_map_projection_autocomplete'), "projection", default_val.projection ?? "", "", "width:100%") }}</div>
+<div class="col-sm-4"></div>
+	<div class="col-sm-3">Sheet number</div>
+	<div class="col-sm-5">{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~ "sheetnumber_"  ~ index, ctrl_prefix ~ "sheetnumber["  ~ index~"]", default_val.sheetnumber ?? "","", "width:100%"  ) }}</div>
+	<div class="col-sm-4"></div>
+	<div class="col-sm-3">On cartesius</div>
+	<div class="col-sm-5">{{ read_test.input_read_mode(read_mode, "checkbox", ctrl_prefix ~"oncartesius_"~ index, ctrl_prefix ~"oncartesius["~ index ~"]", default_val.oncartesius ?? 0) }}</div>
+</div>

@@ -1,0 +1,75 @@
+{# src/AppBundle/Resources/views/searchflightplan_raw.html.twig #}
+{% use "@App/forms/standalonejs.html.twig" %}
+{% block body %}
+
+<br/>
+<br/>
+<br/>
+<div class="container">
+	<div class="row">
+
+		<div class="col-sm-1">fid</div>
+		<div class="col-sm-3"><input type="text" id="fid" name="fid"></input></div>
+		<div class="col-sm-1">name bloc</div>
+		<div class="col-sm-3"><input type="text" id="nombloc" name="nombloc"></input></div>
+		<div class="col-sm-1">band id</div>
+		<div class="col-sm-3"><input type="text" id="bid" name="bid"></input></div>
+		<div class="col-sm-1">band</div>
+		<div class="col-sm-3"><input type="text" id="band" name="band"></input></div>
+    
+
+	</div>
+	<div class="row">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-2"><input type="button" value="search" id="go_search_fp"/></div>
+	</div>
+	<div id="div_results_fp" class="row"></div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+	<script language='javascript'>
+	 var search_logic_fp=function(current_page, page_size, csv)
+	{
+		criterias={}
+		criterias["current_page"]=current_page;
+        criterias["page_size"]=page_size;
+		criterias["fid"]=$("#fid").val();
+		criterias["nombloc"]=$("#nombloc").val();
+		criterias["bid"]=$("#bid").val();
+		criterias["band"]=$("#band").val();		
+	
+		console.log(criterias);
+		$.post("{{ path('search_flightplan')}}", criterias,
+			function(data)
+			{
+				$("#div_results_fp").html(data);
+			}
+		);
+	}
+	
+	
+	var search_fp=function(current_page, page_size)
+	{
+		search_logic_fp(current_page, page_size,false)
+					
+	}
+		
+	$(document).ready(
+		function()
+		{
+			console.log("loaded");
+			
+			  $("#go_search_fp").click(
+				function()
+				{
+					search=search_fp;
+					search_fp(1, $("#page_size").val());
+				});
+		}
+	);
+	</script>
+	
+{% endblock %}

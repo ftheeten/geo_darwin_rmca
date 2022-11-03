@@ -160,15 +160,7 @@ class Ddocsatellite extends GeodarwinDocForeignKey
 
 
 
-    /**
-     * Get pk
-     *
-     * @return integer
-     */
-    public function getPk()
-    {
-        return $this->pk;
-    }
+    
 
     /**
      * Set sattype
@@ -670,6 +662,24 @@ class Ddocsatellite extends GeodarwinDocForeignKey
 		$this->setDescriptionObject();
 		return $this->description;
 	}
+	
+	
+   /**
+     * Get pk
+     *
+     * @return integer
+     */
+    public function getPk()
+    {
+        return $this->pk;
+    }
+	
+	public function setPk($pk)
+    {
+        $this->pk = $pk;
+
+        return $this;
+    }	
 
    
 }

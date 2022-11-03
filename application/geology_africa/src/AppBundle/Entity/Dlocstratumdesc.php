@@ -88,6 +88,24 @@ class Dlocstratumdesc extends GeodarwinEntity
 
         return $this;
     }
+	
+	/**
+     * Set idcollectionobj
+     *
+     * @param \AppBundle\Entity\Dloclitho $litho
+     *
+     * @return Dlocstratumdesc
+     */
+    public function setIdcollectionobj(\AppBundle\Entity\Dloclitho $litho = null)
+    {
+        if( $litho !==null)
+		{
+			$this->idcollection=$litho->getIdcollection();
+			$this->idpt=$litho->getIdpt();
+			$this->idstratum=$litho->getIdpt();
+		}
+        return $this;
+    }
 
     /**
      * Get idcollection
@@ -163,5 +181,10 @@ class Dlocstratumdesc extends GeodarwinEntity
 	public function getSignature()
 	{
 		return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum()."_".$this->getDescript();
+	}
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
 	}
 }

@@ -1,22 +1,23 @@
 {# src/AppBundle/Resources/views/dloccenter/detail_point_to_stratum_description.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
 {% set default_val = default_val|default(null) %}
 
 <div class="row">			
 		<div class="col-sm-1">{{ index }} PK</div>
 		
-		<div class="col-sm-1"><input type="text" name="{{ ctrl_prefix }}_pk[{{index}}]" id="{{ ctrl_prefix }}_pk_{{ index }}" style="width:100%" readonly></input></div>
+		<div class="col-sm-1">
+		{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk_"~ index, ctrl_prefix ~"_pk["~ index ~ "]",default_val.pk ?? "","readonly_class", "width:100%") }}</div>
 		
-		<div class="col-sm-5"><input type="text" name="{{ ctrl_prefix }}_description[{{index}}]" id="{{ ctrl_prefix }}_description_{{ index }}" style="width:100%"></input></div>
+		
+		<div class="col-sm-5">
+		{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~"_description_"~ index, ctrl_prefix ~"_description["~ index ~ "]", path('app_stratumdesc_autocomplete'),"descript",default_val.descript ?? "","select2", "width:100%") }}</div>
 </div>
 
 <script type="text/javascript">
 $(document).ready(
 	function()
 	{
-		{% if not default_val is null %}
-			console.log("init");
-			$("#{{ ctrl_prefix }}_pk_{{ index }}").val("{{ default_val.pk }}");
-			$("#{{ ctrl_prefix }}_description_{{ index }}").val("{{ default_val.descript }}");
-		{% endif %}
+		$('.readonly_class').attr('readonly', true);
 	});
 </script>

@@ -301,7 +301,9 @@ class DLoclitho extends GeodarwinEntity
 	public function initDlocstratumdesc($em)
 	{
 		
-		$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum), "getPk");		
+		//$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum), "getPk");
+
+		$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=> $this->idstratum), "getPk");			
 		return $this->dlocstratumdesc;
 	}
 	
@@ -311,14 +313,22 @@ class DLoclitho extends GeodarwinEntity
 		//take description in the signature
 		if(count($new_dlocstratumdesc)>0)
 		{			
-			$this->reattachForeignKeysAsObject(
+			/*$this->reattachForeignKeysAsObject(
 				$em,
 				Dlocstratumdesc::class,
 				"dlocstratumdesc",				
 				"getSignature", 
 				$new_dlocstratumdesc, 
 				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum)
-			);	
+			);	*/
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dlocstratumdesc::class,
+				"dlocstratumdesc",				
+				"getPk",//"getSignature", 
+				$new_dlocstratumdesc, 
+				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=> $this->idstratum)
+			);
 		}
 		return $this->dlocstratumdesc;
 	}
@@ -327,7 +337,8 @@ class DLoclitho extends GeodarwinEntity
 	public function getSignature()
 	{
 		//order is important when rattaching
-		return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum()."_".$this->getTopstratum()."_".$this->getBottomstratum()."_".var_export($this->getAlternance(), true)."_".$this->getDescriptionstratum();
-		
+		return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum()."_".$this->getTopstratum()."_".$this->getBottomstratum()."_".var_export($this->getAlternance(), true)."_".$this->getDescriptionstratum()."_".$this->getLithostratum();
+		//return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum();
+		//return $this->getPk();
 	}
 }

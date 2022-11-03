@@ -29,6 +29,11 @@ app_add_document:
     defaults: 
      _controller: AppBundle:Geo:adddocument
      
+app_add_flightplan:
+    path:     /add/flightplan
+    defaults: 
+     _controller: AppBundle:Geo:addplanvol
+     
 app_add_points:
     path:     /add/points
     defaults: 
@@ -82,7 +87,12 @@ app_edit_contribution:
 app_edit_contributor:
     path:     /edit/contributor/{pk}
     defaults: 
-     _controller: AppBundle:Geo:editcontributor    
+     _controller: AppBundle:Geo:editcontributor
+
+app_edit_flightplan:
+    path:     /edit/flightplan/{pk}
+    defaults: 
+     _controller: AppBundle:Geo:editplanvol       
 
 app_edit_mineral:
     path:     /edit/mineral/{pk}
@@ -127,7 +137,12 @@ app_search_document:
 app_search_satellite:
     path:     /search/satellite
     defaults: 
-     _controller: AppBundle:Search:searchsatellite     
+     _controller: AppBundle:Search:searchsatellite
+
+app_search_flightplan:
+    path:     /search/flightplan
+    defaults: 
+     _controller: AppBundle:Search:searchflightplan        
 
 app_search_points:
     path:     /search/points
@@ -137,7 +152,7 @@ app_search_points:
 app_search_stratum:
     path:     /search/stratum
     defaults: 
-     _controller: AppBundle:Geo:searchstratum
+     _controller: AppBundle:Search:searchstratum
      
 app_search_drilling:
     path:     /search/drilling
@@ -160,10 +175,10 @@ app_search_allbs_raw:
     defaults: 
      _controller: AppBundle:Search:searchallbs_raw
 
-app_search_allbs_documents_raw:    
-    path:     /search/allbs_documents_raw
-    defaults: 
-     _controller: AppBundle:Search:searchallbs_documents_raw
+#app_search_allbs_documents_raw:    
+#    path:     /search/allbs_documents_raw
+#    defaults: 
+#     _controller: AppBundle:Search:searchallbs_documents_raw
      
 app_result_sample:
     path:     /results/sample/{queryvals}  
@@ -359,6 +374,11 @@ search_all_document_categories:
     defaults: 
      _controller: AppBundle:Geo:all_documents_categories 
      
+search_all_dloccenter_categories:
+    path:     /all_dloccenter_categories
+    defaults: 
+     _controller: AppBundle:Geo:all_dloccenter_categories 
+     
 search_all_collections:
     path:     /all_collections
     defaults: 
@@ -385,6 +405,10 @@ search_satellite:
     defaults: 
      _controller: AppBundle:Search:satellite_search
 
+search_flightplan:
+    path:    /flightplan_search
+    defaults: 
+     _controller: AppBundle:Search:flightplan_search
 
 app_search_keywords:
     path: /keywords
