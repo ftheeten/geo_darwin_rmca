@@ -532,6 +532,7 @@ class Ddocument extends GeodarwinEntity
 	protected $ddocmap;
 	protected $ddocarchive;
 	protected $ddocaerphoto;
+	protected $dlinkdocsam;
 	
     public function __construct()
     {
@@ -545,6 +546,7 @@ class Ddocument extends GeodarwinEntity
 		$this->ddocmap=Array();
 		$this->ddocarchive=Array();
 		$this->ddocaerphoto=Array();
+		$this->dlinkdocsam=Array();
     }
 	
 	
@@ -594,6 +596,11 @@ class Ddocument extends GeodarwinEntity
     {
         return $this->ddocarchive;
     }
+	
+	public function getDlinkdocsam()
+	{
+		return $this->dlinkdocsam;
+	}
 	
 	public function initDkeywords($em)
 	{		
@@ -715,6 +722,20 @@ class Ddocument extends GeodarwinEntity
 		
 		$this->attachForeignkeysAsObject($em,Ddoctitle::class,"ddoctitle", array("idcollection"=>$this->idcollection, "iddoc"=>$this->iddoc));		
 		return $this->ddoctitle;
+	}
+	
+	public function initDlinkdocsam($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkdocsam::class, 
+			"dlinkdocsam",
+			array(
+				"idcollectiondoc"=>$this->idcollection,
+				"iddoc"=>$this->iddoc
+				),
+				"getIdsample");
+		return $this->dlinkdocsam;
 	}
 	
 	public function initNewDdoctitles($em, $new_titles)
@@ -852,6 +873,22 @@ class Ddocument extends GeodarwinEntity
 			);	
 		}
 		return $this->ddocmap;
+	}
+	
+	public function initNewDlinkdocsam($em, $new_dlinkdocsam)
+	{
+		$this->initDlinkdocsam($em);
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkdocsam::class, 
+			"dlinkdocsam",
+			"getPk",
+			 $new_dlinkdocsam,
+			array(
+				"idcollectiondoc"=>$this->idcollection,
+				"iddoc"=>$this->iddoc
+				));
+		return $this->dlinkdocsam;
 	}
 	
 	//attach title

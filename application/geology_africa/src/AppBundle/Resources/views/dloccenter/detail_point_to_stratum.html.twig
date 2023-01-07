@@ -27,6 +27,7 @@
 	</div>	
 </div>
 <div class="row">	
+ 
 	<div class="col-sm-1">Stratum</div>
 
 	<div class="col-sm-2">{{ read_test.select2_read_mode(read_mode, ctrl_prefix ~"_lithostratum_" ~ index, ctrl_prefix ~"_lithostratum[" ~ index ~"]", path('app_lithostratum_autocomplete'),"lithostratum", default_val.lithostratum??"","select2","width:100%"  ) }}</div>
@@ -38,8 +39,39 @@
 	<div class="col-sm-2">{{ read_test.input_read_mode(read_mode, "number", ctrl_prefix ~"_bottomstratum_"~ index, ctrl_prefix ~"_bottomstratum["~ index ~"]",default_val.bottomstratum ?? "","", "width:100%", 0.01) }}</div>
 </div>
 <div class="row">
-	<div class="col-sm-12">Description :</div>
+	<div class="col-sm-2">Description :</div>
+	<div class="col-sm-8">{{ read_test.input_read_mode(read_mode, "textarea",
+	ctrl_prefix ~"_descriptionstratum_"~ index, ctrl_prefix ~"_descriptionstratum["~ index ~"]",default_val.descriptionstratum ?? "","", "width:100%") }}
+	</div>
 </div>
+{% if read_mode=="read"  %}
+{% if default_val.dlinklocsam|default(null) is not null and default_val.dlinklocsam is defined %}
+
+<div class="row">
+<div class="col-sm-2">Samples :</div>
+<div class="col-sm-8">
+	{% set i=1 %}
+	{% for sample in default_val.dlinklocsam %}
+		{% if sample.dsample|default(null) is not null and sample.dsample is defined %}
+		<a target="blank" href="{{ path('app_edit_samplegs', {'pk':sample.dsample.pk})}}" >Sample {{ i }}<a>
+		<ul>
+			<li>Collection sample : {{sample.dsample.idcollection??" not defined " }}</li>
+			<li>ID sample : {{sample.dsample.idsample??" not defined " }}</li>
+			<li>Field number : {{sample.dsample.fieldnum??" not defined " }}</li>
+			<li>Museum number : {{sample.dsample.museumnum??" not defined " }}</li>
+			<li>Holotype  : {{sample.dsample.holotype  ? 'Yes' : 'No'   }}</li>
+			<li>Paratype  : {{sample.dsample.paratype  ? 'Yes' : 'No'  }}</li>
+		</ul>
+		
+		<br>
+		{% set i=i+1 %}
+		{% endif %}
+	{% endfor %}
+	
+</div>
+</div>
+{% endif %}
+{% endif %}
 <div class="row">
 	<div class="col-sm-12">
 	{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/dloccenter/detail_point_to_stratum_description.html.twig" , 'ctrl_prefix' : 'point_to_stratum_description_' ~ index , 'ajax_route': path('get_widget_point_to_stratum_description', {'table':"dloccenter"}), 'fk_values': default_val.dlocstratumdesc|default(null),
@@ -53,7 +85,7 @@
 $(document).ready(
 	function()
 	{
-		//ateention dangereux pour l'insertiond eorderstratum
+		//attention dangereux pour l'insertion d orderstratum
 		$('.readonly_class').attr('readonly', true);		
 		{% if not default_val is null %}
 			{% if read_mode !="read "%}

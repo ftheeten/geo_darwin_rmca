@@ -1,0 +1,43 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+PK (link):
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk_"~ index, ctrl_prefix ~"_pk_"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+PK (dloclitho):
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_dloc_litho_pk_"~ index, ctrl_prefix ~"_pk_"~ index,default_val.dloclithos.pk ?? "","readonly_class") }}
+</div>
+
+
+<div class="col-sm-2">
+ID point:
+{% if read_mode =="read"%}
+<a target="_blank" href="{{ path('app_edit_point', {'pk':default_val.dloclithos.dloccenter.pk})}}">{{ default_val.idpt ?? "" }}</a>
+{% else %}
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_pt_"~ index, ctrl_prefix ~"_id_pt_"~ index,default_val.idpt ?? "","readonly_class") }}
+{% endif %}
+</div>
+<div class="col-sm-2">
+ID collection (locality):
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_collectionloc_"~ index, ctrl_prefix ~"_id_collectionloc_"~ index,default_val.idcollectionloc ?? "","readonly_class") }}
+</div>
+
+<div class="col-sm-2">
+ID stratum:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_stratum_"~ index, ctrl_prefix ~"_id_stratum_"~ index,default_val.idstratum ?? "","readonly_class") }}
+</div>
+
+</div>
+<div class="row">
+<div class="col-sm-8">
+Description (stratum):
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_description_stratum_"~ index, ctrl_prefix ~"_description_stratum_"~ index, "Collection :" ~  (default_val.idcollectionloc ?? "") ~ ". ID Point : " ~ (default_val.idpt ?? "") ~ ". ID stratum :" ~ (default_val.idstratum ?? "")   ~ ". Desc." ~  (default_val.dloclithos.descriptionstratum ?? ""),"readonly_class") }}
+</div>
+</div>
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/search_all/searchstratumgs_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_dloc_litho_pk_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_description_stratum_" ~ index , "index":index, "ctrl_suffix": "doc_to_loc", "form":search_form, "current_tab":"mainsearch-tab"  }%}

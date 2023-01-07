@@ -1,0 +1,6 @@
+{# src/AppBundle/Resources/views/dloccenter/point_to_document.html.twig #}
+Point TO DOC
+{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/dloccenter/detail_point_to_document.html.twig" , 'ctrl_prefix' : 'point_to_doc', 'ajax_route': path('get_widget_point_to_doc', {'table':"dloccenter"}), 'fk_values': dlinkdocloc|default(null),
+'delete_route':'app_delete_dlinkdoclocfrompoint', 'container_pk':dloccenter.pk,
+'fk_key_field':'pk'
+ }  %}

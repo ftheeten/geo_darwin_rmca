@@ -1,5 +1,6 @@
 {# src/AppBundle/Resources/views/foreignkeys/template_modal_search.html.twig #}
 {% set ctrl_suffix = ctrl_suffix|default("") %}
+{% set prefix_ctrl = prefix_ctrl|default("") %}
 {% block body %}
 
 <style>
@@ -21,7 +22,7 @@
 				</div>
 				<div class="modal-body">
 					<div class="container">
-						{% include nested_template %}
+						{% include nested_template with { "prefix_ctrl":prefix_ctrl } %}
 						
 					</div>
 				</div>
@@ -44,13 +45,7 @@
 			function()
 			{
 			
-				//$( "#modaladd" ).on('shown.bs.modal', function(){
 				
-					//global_modal_index_value="{{ id_target }}";
-					//global_modal_index_text="{{ value_target }}";
-					//console.log("show for:");
-					//console.log(global_modal_index_value);
-				//});
 				$("#add_modal{{ ctrl_suffix }}{{ index }}").click(
 					function()
 					{

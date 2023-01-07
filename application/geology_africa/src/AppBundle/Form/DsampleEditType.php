@@ -24,27 +24,27 @@ class DsampleEditType extends AbstractType {
      */
 	
     public function buildForm(FormBuilderInterface $builder, array $options)  {
-		
-
-		/* list for collections---------
 		$em = $options['entity_manager'];
-        $RAW_QUERYcoll = "SELECT codecollection FROM codecollection where zoneutilisation LIKE 'sample%';";
+
+		/* list for collections---------*/
+        $RAW_QUERYcoll = "SELECT codecollection, collection FROM codecollection where zoneutilisation LIKE 'localisation%';";
         $statementcoll = $em->getConnection()->prepare($RAW_QUERYcoll);
         $statementcoll->execute();
         $codescollection = $statementcoll->fetchAll();
 		
 		$elemcoll =array();
 		foreach($codescollection as $e) {
-			foreach($e as $ee) {
-				$elemcoll[$ee]=$ee;
-			} 
-		} */
+			//foreach($e as $ee) {
+				//$elemcoll[$ee]=$ee;
+				$elemcoll[$e['collection']]=$e['codecollection'];
+			//} 
+		} 
 		
 		/* builder---------*/
         $builder
 			->add('fieldnum') 
-			/*->add('idcollection', ChoiceType::class, array('choices'  => $elemcoll))
-			->add('idsample', IntegerType::class)*/
+			->add('idcollection', ChoiceType::class, array('choices'  => $elemcoll))
+			->add('idsample', TextType::class,array('required' => true))
 			->add('museumnum',null, array('required' => false))
 			->add('museumlocation')
 			->add('boxnumber')

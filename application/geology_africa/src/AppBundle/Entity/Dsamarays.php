@@ -51,16 +51,18 @@ class Dsamarays
     private $xray;
 
     /**
-     * @var \AppBundle\Entity\Dsample
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="idsample", referencedColumnName="idsample")
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
-
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idsample", type="integer", nullable=false)
+     */
+    private $idsample;
 
 
     /**
@@ -169,14 +171,14 @@ class Dsamarays
         return $this->xray;
     }
 
-    /**
+	/**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dsample $idcollection
+     * @param string $idcollection
      *
      * @return Dsamarays
      */
-    public function setIdcollection(\AppBundle\Entity\Dsample $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -184,12 +186,60 @@ class Dsamarays
     }
 
     /**
+     * Set idcollectionobj
+     *
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dsamarays
+     */
+    public function setIdcollectionobj(\AppBundle\Entity\Dsample $sample = null)
+    {
+        if($sample !==null)
+		{
+			 $this->idcollection = $sample->getIdCollection();
+			 $this->idsample = $sample->getIdSample();
+		}
+
+        return $this;
+    }
+
+    /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Dsample
+     * @return string
      */
     public function getIdcollection()
     {
         return $this->idcollection;
     }
+	
+	/**
+     * Set idsample
+     *
+     * @param integer
+     *
+     * @return Dsamarays
+     */
+    public function setIdsample( $idsample)
+    {
+        $this->idsample = $idsample;
+
+        return $this;
+    }
+
+    /**
+     * Get idsample
+     *
+     * @return integer
+     */
+    public function getIdsample()
+    {
+        return $this->idsample;
+    }
+	
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
 }

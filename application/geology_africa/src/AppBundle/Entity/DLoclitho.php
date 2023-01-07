@@ -297,11 +297,10 @@ class DLoclitho extends GeodarwinEntity
 	
 	//foreign keys
 	public $dlocstratumdesc;
+	public $dlinklocsam;
 	
 	public function initDlocstratumdesc($em)
-	{
-		
-		//$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum), "getPk");
+	{	
 
 		$this->attachForeignkeysAsObject($em,Dlocstratumdesc::class,"dlocstratumdesc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=> $this->idstratum), "getPk");			
 		return $this->dlocstratumdesc;
@@ -313,14 +312,7 @@ class DLoclitho extends GeodarwinEntity
 		//take description in the signature
 		if(count($new_dlocstratumdesc)>0)
 		{			
-			/*$this->reattachForeignKeysAsObject(
-				$em,
-				Dlocstratumdesc::class,
-				"dlocstratumdesc",				
-				"getSignature", 
-				$new_dlocstratumdesc, 
-				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt, "idstratum"=>$this->idstratum)
-			);	*/
+			
 			$this->reattachForeignKeysAsObject(
 				$em,
 				Dlocstratumdesc::class,
@@ -333,6 +325,43 @@ class DLoclitho extends GeodarwinEntity
 		return $this->dlocstratumdesc;
 	}
 	
+	public function initDlinklocsam($em)
+	{
+		$this->dlinklocsam=[];
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinklocsam::class, 
+			"dlinklocsam",
+			array(
+				"idcollectionloc"=>$this->idcollection,
+				"idpt"=>$this->idpt,
+				"idstratum"=>$this->idstratum,
+				),
+				"getPk");
+		foreach($this->dlinklocsam as $obj)
+		{
+			$obj->setDsample_db($em);
+		}
+		return $this->dlinklocsam;
+	}
+	
+	public function initNewDlinklocsam($em, $new_dlinklocsam)
+	{
+		$this->initDlinklocsam($em);
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinklocsam::class, 
+			"dlinklocsam",
+			"getPk",
+			 $new_dlinklocsam,
+			array(
+				"idcollectionloc"=>$this->idcollection,
+				"idpt"=>$this->idpt,
+				"idstratum"=>$this->idstratum
+				));
+		return $this->dlinklocsam;
+	}
+	
 	//ftheeten
 	public function getSignature()
 	{
@@ -341,4 +370,18 @@ class DLoclitho extends GeodarwinEntity
 		//return $this->getIdcollection()."_". $this->getIdpt()."_".$this->getIdstratum();
 		//return $this->getPk();
 	}
+	
+	public $dloccenter;
+	public function attachLoccenter($em)
+	{
+		$tmp_loc=$em->getRepository(DLoccenter::class)
+							->findOneBy(array(
+								"idcollection"=>$this->idcollection,
+								"idpt"=>$this->idpt,
+																
+							));
+		$this->dloccenter=$tmp_loc;
+	}
+	
+
 }

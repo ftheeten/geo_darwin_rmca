@@ -23,26 +23,32 @@ class Dlinkdocsam
     private $pk;
 
     /**
-     * @var \AppBundle\Entity\Ddocument
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Ddocument")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollectiondoc", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="iddoc", referencedColumnName="iddoc")
-     * })
+     * @ORM\Column(name="idcollectiondoc", type="string", nullable=false)
      */
     private $idcollectiondoc;
 
     /**
-     * @var \AppBundle\Entity\Dsample
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollectionsample", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="idsample", referencedColumnName="idsample")
-     * })
+     * @ORM\Column(name="idcollectionsample", type="string", nullable=false)
      */
     private $idcollectionsample;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="iddoc", type="integer", nullable=false)
+     */
+	private $iddoc;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idsample", type="integer", nullable=false)
+     */
+    private $idsample;
 
 
 
@@ -59,11 +65,11 @@ class Dlinkdocsam
     /**
      * Set idcollectiondoc
      *
-     * @param \AppBundle\Entity\Ddocument $idcollectiondoc
+     * @param string
      *
      * @return Dlinkdocsam
      */
-    public function setIdcollectiondoc(\AppBundle\Entity\Ddocument $idcollectiondoc = null)
+    public function setIdcollectiondoc($idcollectiondoc)
     {
         $this->idcollectiondoc = $idcollectiondoc;
 
@@ -73,34 +79,126 @@ class Dlinkdocsam
     /**
      * Get idcollectiondoc
      *
-     * @return \AppBundle\Entity\Ddocument
+     * @return string
      */
     public function getIdcollectiondoc()
     {
         return $this->idcollectiondoc;
     }
 
-    /**
-     * Set idcollectionsample
+   
+   /**
+     * Set setIdcollectionsample
      *
-     * @param \AppBundle\Entity\Dsample $idcollectionsample
+     * @param string $idcollection
      *
      * @return Dlinkdocsam
      */
-    public function setIdcollectionsample(\AppBundle\Entity\Dsample $idcollectionsample = null)
+    public function setIdcollectionsample($idcollection)
     {
-        $this->idcollectionsample = $idcollectionsample;
+        $this->setIdcollectionsample = $idcollection;
 
         return $this;
     }
 
     /**
-     * Get idcollectionsample
+     * Set idcollectionsampleobj
      *
-     * @return \AppBundle\Entity\Dsample
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dlinkdocsam
+     */
+    public function setIdcollectionsampleobj(\AppBundle\Entity\Dsample $sample = null)
+    {
+        if($sample !==null)
+		{
+			 $this->idcollectionsample = $sample->getIdCollection();
+			 $this->idsample = $sample->getIdSample();
+		}
+
+        return $this;
+    }
+
+    /**
+     * Get idcollection
+     *
+     * @return string
      */
     public function getIdcollectionsample()
     {
         return $this->idcollectionsample;
     }
+	
+	/**
+     * Set idsample
+     *
+     * @param integer
+     *
+     * @return integer
+     */
+    public function setIdsample( $idsample)
+    {
+        $this->idsample = $idsample;
+
+        return $this;
+    }
+
+    /**
+     * Get idsample
+     *
+     * @return \AppBundle\Entity\Dsample
+     */
+    public function getIdsample()
+    {
+        return $this->idsample;
+    }
+	
+   /**
+     * Set iddoc
+     *
+     * @param integer $iddoc
+     *
+     * @return Dlinkdocsam
+     */
+    public function setIddoc( $iddoc = null)
+    {
+        $this->iddoc = $iddoc;
+
+        return $this;
+    }
+
+    /**
+     * Get iddoc
+     *
+     * @return integer
+     */
+    public function getIddoc()
+    {
+        return $this->iddoc;
+    }
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
+	
+	//document
+	public $document;
+	
+	public function getDocument()
+	{
+		return $this->document;
+	}
+	
+	public function setDocument_db($em)
+	{
+		$tmp_doc=$em->getRepository(Ddocument::class)
+						 ->findOneBy(array('iddoc' => $this->getIddoc(),
+									"idcollection"=> $this->getIdcollectiondoc()));
+		if($tmp_doc !==null)
+		{
+			$tmp_doc->setTitle_db($em);
+		}
+		$this->document=$tmp_doc;
+	}
 }

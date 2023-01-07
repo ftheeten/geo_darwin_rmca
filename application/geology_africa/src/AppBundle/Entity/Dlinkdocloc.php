@@ -165,7 +165,7 @@ class Dlinkdocloc
      *
      * @param \AppBundle\Entity\Ddocument $idcollection
      *
-     * @return Dkeyword
+     * @return Dlinkdocloc
      */
 	 
     public function setrelationidcollection(\AppBundle\Entity\Ddocument $doc = null)
@@ -175,6 +175,24 @@ class Dlinkdocloc
 
         return $this;
     }
+	
+	//custom_mapping ftheeten
+	/**
+     * Set relationidloc
+     *
+     * @param \AppBundle\Entity\DLoccenter $idloc
+     *
+     * @return Dlinkdocloc
+     */
+	 
+	  public function setrelationidloc(\AppBundle\Entity\DLoccenter $loc = null)
+    {
+        $this->idcollecloc=$loc->getIdcollection();
+		$this->idpt=$loc->getIdpt();
+
+        return $this;
+    } 
+	
 	//document
 	public $document;
 	

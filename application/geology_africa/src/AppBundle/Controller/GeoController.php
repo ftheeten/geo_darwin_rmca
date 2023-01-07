@@ -115,95 +115,7 @@ class GeoController extends AbstractController
 		}
 	}
 	
-	public function edit_general($obj, $form, $name_twig_class, Request $request, $twig, $name_twig_classm)
-	{
-		$collection_rights=$this->check_collection_rights_general();
-		if ($collection_rights == true)
-		{		
-		
-			$em = $this->getDoctrine()->getManager();	
-			$this->set_sql_session();
-			if (!$obj) 
-			{
-				throw $this->createNotFoundException('No document found' );
-			}
-			elseif($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-			{
-				
-				if ($request->isMethod('POST')) 
-				{				
-					
-					$form->handleRequest($request);
-					if ($form->isSubmitted() && $form->isValid()) 
-					{					
-						try 
-						{						
-							$em = $this->getDoctrine()->getManager();
-							$em->flush();
-							$this->addFlash('success','DATA RECORDED IN DATABASE!');  
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-							'read_mode'=>$this->enable_read_write($request)));
-							
-						}catch(\Doctrine\DBAL\DBALException $e ) {
-							
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-							'read_mode'=>$this->enable_read_write($request)));
-						}
-						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
-							$form->addError(new FormError($e->getMessage()));	
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-							'read_mode'=>$this->enable_read_write($request)));						
-						}
-						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-							'read_mode'=>$this->enable_read_write($request)));						
-						}
-						catch(Exception $e ) {
-							$form->addError(new FormError($e->getMessage()));
-							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-							'read_mode'=>$this->enable_read_write($request)));						
-						}
-						finally
-						{
-							
-						}
-						
-					}
-					elseif ($form->isSubmitted() && !$form->isValid() )
-					{
-						$form->addError(new FormError("Other validation error"));
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-						'read_mode'=>$this->enable_read_write($request)));
-					}
-					elseif (!$form->isSubmitted())
-					{					
-						return $this->render($twig, array($name_twig_class => $object,'id'=> $id_param,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
-						'read_mode'=>$this->enable_read_write($request)));
-					}
-				}
-				else
-				{
-					//print("issue");
-				}
-				
-				
-			}
-			//print("test");
-
-			return $this->render($twig, array(
-				$name_twig_class => $obj,
-				'form' => $form->createView(),
-				'origin'=>'edit',
-				'originaction'=>'edit',
-				'read_mode'=>$this->enable_read_write($request)));
-		}
-		else
-		{
-			return $this->render('@App/collnoaccess.html.twig');
-		}
-	}	
+	
 	
 	public function checkRightsGeneral($controller_name='AppBundle\Controller\GeoController')
 	{
@@ -844,38 +756,7 @@ class GeoController extends AbstractController
 		}
     }
 		
-	public function getusercoll_right($coll,$rights){          
-		$em = $this->getDoctrine()->getManager();
-		$username = $this->getUser()->getUsername();
-		$found=0;
-		
-		$RAW_QUERY = "SELECT 
-							uc.collection_id as ID_Collection, 
-							uc.user_id as ID_User,  
-							zoneutilisation,  
-							username,  
-							uc.role as role
-				FROM codecollection c
-				left join fos_user_collections uc on c.pk = uc.collection_id
-				left join duser u on u.id = uc.user_id
-				WHERE uc.collection_id = ANY ('{".$coll."}'::int[])
-				AND username = '".$username."';";
-		$statement = $em->getConnection()->prepare($RAW_QUERY);
-		$statement->execute();
-		$arrayusercoll = $statement->fetchAll();
-		foreach($arrayusercoll as $arrayusercoll_obj){
-			foreach($rights as $rights_obj){
-				if ($arrayusercoll_obj['role'] == $rights_obj){
-					//print_r($rights_obj);
-					$found=1;
-					break;
-				}
-			}
-		}
-		if ($found==1){
-			return true;
-		}else{return false;}
-	}
+
 	
 	public function editsampleAction(Dsample $dsample, Request $request){				
 		if (!$dsample) {
@@ -1440,7 +1321,8 @@ class GeoController extends AbstractController
 									"point_to_stratum_alternance"=>"setAlternance",
 									"point_to_stratum_topstratum"=>"setTopstratum"
 									,
-									"point_to_stratum_bottomstratum"=>"setBottomstratum"
+									"point_to_stratum_bottomstratum"=>"setBottomstratum",
+									"point_to_stratum_descriptionstratum"=>"setDescriptionstratum"
 									
 								],
 								["setIdcollection"=>$dloccenter->getIdcollection(), "setIdpt"=>$dloccenter->getIdpt(),]
@@ -1483,6 +1365,46 @@ class GeoController extends AbstractController
 								}
 								
 							}
+							//documents
+							$dlinkdocument=$this->handle_many_to_many_relation_general(
+							$request,
+							$dloccenter,
+							"point_to_doc_id_doc_",
+							Ddocument::class,
+							"pk",
+							Dlinkdocloc::class,
+							Array("getIddoc"=>"setIddoc", "getIdcollection"=>"setIdCollecdoc"),
+							//important map PK of link, that must be on the HTML FORM
+							Array("point_to_doc_id_link_"=>"setPk"),	
+							array("setrelationidloc"=>$dloccenter)
+							);
+							if($dlinkdocument!==null)
+							{
+								$dloccenter->initNewDLinkdocloc($em, $dlinkdocument);
+							}
+							//contribution
+							$dlinkcontribute=$this->handle_many_to_many_relation_general(
+							$request,
+							$dloccenter,
+							"point_to_contrib_id_contrib_",
+							Dcontribution::class,
+							"pk",
+							Dlinkcontloc::class,
+							Array("getIdcontribution"=>"setIdcontribution"),
+							Array(),
+							array("setIdPtObj"=>$dloccenter)
+							);
+							if($dlinkcontribute!==null)
+							{
+								if(count($dlinkcontribute)>0)
+								{
+									
+									$dloccenter->initNewDLinkcontloc($em, $dlinkcontribute);
+									//reattach after update
+									
+								//throw new UndefinedOptionsException();
+								}
+							}
 						}
 						$em->flush();
 						//drilling
@@ -1518,13 +1440,15 @@ class GeoController extends AbstractController
 				$logs=$em->getRepository(TDataLog::class)
 						 ->findContributions("dloccenter", $dloccenter->getPk());
 				//$this->validate_form($request, $em,"dloccenter",$dloccenter->getPk());
-				$current_tab=$this->get_request_var($request, "current_tab", "main-tab");
+				$current_tab=$this->get_request_var($request, "current_tab");
 				return $this->render('@App/dloccenter/editpoint.html.twig', array(
 						'latcoord' => $latarr,
 						'longcoord' => $longarr,
 						'dloccenter' => $dloccenter,
 						'point_form' => $form->createView(),
-						'dloclitho'	=>	$dloccenter->initDloclitho($em),					
+						'dloclitho'	=>	$dloccenter->initDloclitho($em),
+                        'dlinkdocloc' => $dloccenter->initDLinkdocloc($em),	
+						'dlinkcontloc' => $dloccenter->initDLinkcontloc($em),							
 						'origin'=>'edit',
 						'originaction'=>'edit',
 						'current_tab'=>$current_tab,
@@ -2544,49 +2468,49 @@ class GeoController extends AbstractController
 		return $this->edit_general($docplanvol, $form,"docplanvol", $request, '@App/addplanvol.html.twig', 'docplanvol',$docplanvol->getPk()		);
     }
 	
-	//2022
 	
-	/*public function addStratumAction(Request $request)
-	{
+	
+    
+	
+	public function editmineralgsAction(Lminerals $mineral, Request $request)
+	{  
+	
 		$this->set_sql_session();
-		$allow=$this->checkRightsGeneral();
-		if($allow)
-		{
-			$dloclitho=new Dloclitho();
-			$em = $this->getDoctrine()->getManager();
-			$form= $this->createForm(Dloclitho::class, $dloclitho, array('entity_manager' => $em,));
-			if ($request->isMethod('POST')) 
-			{
-				$form->handleRequest($request);
-				if ($form->isSubmitted() && $form->isValid())
-				{
-					try 
-					{
-						$descriptions= $request->get("widget_descriptions",null);
-						if($descriptions!==null)
-						{
-							foreach($descriptions as $desc)
-							{
-								$desc=new Dlocstratumdesc();
-							}
-						}
-					}
-					catch(\Doctrine\DBAL\DBALException $e ) 
-					{
-						$form->addError(new FormError($e->getMessage()));
-					}
-					catch(Exception $e ) 
-					{
-						$form->addError(new FormError($e->getMessage()));
-					}
-				}
-			}
-			
-			
+		if (!$dsample) {
+			throw $this->createNotFoundException('No location found' );
 		}
-	}*/
-	
-	
+		else
+		{
+			$em = $this->getDoctrine()->getManager();
+			$this->set_sql_session();
+			
+			$rightoncollection = $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('4,15,26',['Curator','Validator','Encoder','Collection_manager']); //'Viewer'
+			if ($rightoncollection == true)
+			{
+				$logs=$em->getRepository(TDataLog::class)
+						 ->findContributions("lmineral", $mineral->getPk());
+				
+				$current_tab=$this->get_request_var($request, "current_tab");
+
+				return $this->render("@App/mineral/editmineral.html.twig", array(
+						'limineral' => $mineral,
+						'sample_form' => $form->createView(),
+						'origin'=>'edit',
+						'originaction'=>'edit',
+						'current_tab'=>$current_tab,
+						'logs'=>$logs,
+						'read_mode'=>$this->enable_read_write($request)
+				
+				));
+			}
+			else
+			{
+				return $this->render('@App/collnoaccess.html.twig');
+			}
+		}
+	}
 	
 	
 }
+
+

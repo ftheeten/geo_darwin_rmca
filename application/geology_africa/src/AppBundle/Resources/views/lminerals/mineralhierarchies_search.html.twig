@@ -1,0 +1,72 @@
+{# src/AppBundle/Resources/views/lminerals/mineralhierarchies_search.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block title %}
+	{{ parent() }} - All
+{% endblock %}
+{% block body %}
+<br/>
+<div class="container">
+    <div class="row">
+		<div class="col-sm-1">Name of hierarchy</div>
+		<div class="col-sm-2"><input type="text" id="hierarch_name" name="hierarch_name"></div>
+		<div class="col-sm-1">Author</div>
+		<div class="col-sm-2"><select  id="hierarch_author" name="hierarch_author">
+			<option value="">All</option>
+			{% for auth in authors %}
+			<option value="{{ auth.author }}">{{ auth.author }}</option>
+			{% endfor %}
+		</select></div>
+		
+	</div>
+	<div class="col-sm-2"><input type="button" id="submit_hiearch_raw" name="submit_hiearch_raw" value="search"></input></div>
+	</div>
+	
+	<div id="div_results_hiearchs" class="row"></div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+var search_all_hierarchies=function(current_page, page_size)
+{
+	search_logic_all_hierarchies(current_page, page_size,false)
+					
+}
+
+var search_logic_all_hierarchies=function(current_page, page_size, csv)
+{
+	var criterias={}
+	criterias["name"]=$("#hierarch_name").val();
+	criterias["author"]=$("#hierarch_author").val();
+	criterias["current_page"]=current_page;
+    criterias["page_size"]=page_size;
+	$.post("{{ path('app_result_mineralhierarchiesgs')}}", criterias,
+				function(data)
+				{
+					console.log("DISPLAY");
+					$("#div_results_hiearchs").html(data);
+							
+				}
+			);
+}
+		
+$(document).ready(
+		
+		function()
+		{
+			$("#submit_hiearch_raw").click(
+				function()
+				{
+					search=search_all_hierarchies;
+					search_all_hierarchies(1, $("#page_size").val());
+
+				}
+			);
+		});
+
+</script>
+{% endblock %}

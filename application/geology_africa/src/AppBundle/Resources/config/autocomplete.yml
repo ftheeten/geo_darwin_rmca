@@ -65,7 +65,20 @@ app_Minformula_autocomplete:
     defaults: 
      _controller: AppBundle:Autocomplete:Minformula_autocomplete
     methods:  GET
+   
+app_fieldnumber_autocomplete:
+    path:     /get_fieldnumber/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Fieldnumber_autocomplete
+    methods:  GET
+
     
+app_museumnumber_autocomplete:
+    path:     /get_museumnumber/
+    defaults: 
+     _controller: AppBundle:Autocomplete:Museumnumber_autocomplete
+    methods:  GET
+   
 app_museumloc_autocomplete:
     path:     /get_museumloc/
     defaults: 
@@ -169,3 +182,21 @@ app_stratumdesc_autocomplete:
     defaults:
      _controller: AppBundle:Autocomplete:stratumdesc_autocomplete
     methods:  GET    
+    
+app_place_autocomplete:
+    path:     /get_place
+    defaults: 
+     _controller: AppBundle:Autocomplete:place_autocomplete
+    methods:  GET
+
+app_country_autocomplete:
+    path:     /get_country
+    defaults: 
+     _controller: AppBundle:Autocomplete:country_autocomplete
+    methods:  GET
+    
+app_idsample_autocomplete:
+    path:     /get_idsample
+    defaults: 
+     _controller: AppBundle:Autocomplete:idsample_autocomplete
+    methods:  GET

@@ -1,0 +1,154 @@
+{# src/AppBundle/Resources/views/lminerals/mineral_search_raw_kern.html.twig #}
+
+
+
+{% set is_modal = is_modal|default(false) %}
+{% if is_modal==false %}
+	{% use "@App/forms/standalonejs.html.twig" %}
+{% endif %}
+{% block body %}
+    {% set reload_var ='false' %}
+
+	
+
+
+<div class="container">
+    <div class="row">
+	 <div class="col-sm-1">Mineral</div>
+    <div class="col-sm-2"><select name="search_min_raw" id="search_min_raw" class="search_min_raw" style="width:100%"  ></select> </div>
+	<div class="col-sm-1">Rank</div>
+	<div class="col-sm-2">
+		<select name="search_rank_raw" id="search_rank_raw" style="width:100%"  >
+		{% for val, label in ranks %}
+			<option value="{{ val }}">{{  label }}</option>
+		{% endfor %}
+		</select>
+	</div>
+	 <div class="col-sm-1">Include child elements</div><div class="col-sm-1"><input type="checkbox" name="min_child" id="min_child" checked/></div>
+	</div>
+	{% if hierarchies is defined and hierarchies is not null  %}
+	<div class="row">
+		 <div class="col-sm-1">Hierarchy</div>
+		 <div class="col-sm-2"><select name="search_hierarch_raw" id="search_hierarch_raw" style="width:100%"  >
+			<option value="">All</option>
+			{% for item in hierarchies %}
+				<option value="{{item.pk}}">{{item.name}}</option>
+			{% endfor %}		 
+		 </select> </div>
+	</div>
+	{% else %}
+	<div class="row">
+		<div class="col-sm-1">Hierarchy</div>
+		<div class="col-sm-2"><input type="hidden" name="search_hierarch_raw" id="search_hierarch_raw" readonly="readonly" >
+		<input type="text" name="search_hierarch_display" id="search_hierarch_display" readonly="readonly" >
+		</div>
+	 </div>
+	{% endif %}
+	{% if is_modal %}
+	 
+	 {% endif %}
+	 <div class="row">
+	<div class="col-sm-2"><input type="button" id="submit_min_raw" name="submit_min_raw" value="search"></input></div>
+	</div>
+	
+	<div id="div_results_min" class="row"></div>
+</div>
+{% endblock %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+		var search_all_mins=function(current_page, page_size)
+		{
+			search_logic_all_mins(current_page, page_size,false)
+					
+		}
+		
+		var search_logic_all_mins=function(current_page, page_size, csv)
+		{
+			var criterias={}
+			criterias["min"]=$("#search_min_raw").val();
+			criterias["rank"]=$("#search_rank_raw").val();
+			criterias["child_min"]=false;
+			criterias["place"]=$("#place").val();
+			criterias["hierarchy"]=$("#search_hierarch_raw").val();
+			
+			{% if is_modal %}
+			criterias["is_modal"]=true;
+			{% else %}
+			criterias["is_modal"]=false;
+			{% endif %}
+			
+			if ($('#min_child').is(":checked"))
+			{
+			   criterias["child_min"]=true;
+			}
+			{% if is_modal==false %}
+				criterias["is_modal"]=false;
+			{% else %}
+				criterias["is_modal"]=true;
+			{% endif %}	
+			criterias["current_page"]=current_page;
+            criterias["page_size"]=page_size;
+			console.log(criterias);
+			$.post("{{ path('app_result_mineralgs')}}", criterias,
+				function(data)
+				{
+					$("#div_results_min").html(data);							
+				}
+			);
+		}
+$(document).ready(
+		
+		function()
+		{	
+			console.log("init");
+			var params_select_2=select2_generic("{{ path('search_all_minerals_full_autocomplete')}}","word","word" );
+			
+			
+			params_select_2["dropdownParent"]=$("#modal_add_content");
+			
+			$(".search_min_raw").select2(params_select_2,2);
+			
+			
+			$("#submit_min_raw").click(
+				function()
+				{
+					console.log("click");
+					search=search_all_mins;
+					search_all_mins(1, $("#page_size").val());
+
+				}
+			);
+		}
+		
+		);
+		
+		{% if is_modal %}
+
+			onElementInserted('body', '.modal_link', function(element) {  
+				console.log("modal_link");
+					$(element).click(
+						function(e)
+						{
+							console.log("click_modal");
+							e.preventDefault();
+							//var key=  $(element).attr('data-modal-key');
+							//console.log(key);
+							var val=  $(element).attr('data-modal-value');
+							//console.log(val);
+							
+							
+							$(".inp_mparent ").val(val);
+							//to simulate change event
+							// and update information such as link
+							$("#close_min_modal").click();
+							
+							console.log("CLOSED");						
+							return false;
+						}	
+					)});
+					
+{% endif %}
+</script>
+{% endblock %}

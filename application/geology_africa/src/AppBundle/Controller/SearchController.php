@@ -70,7 +70,10 @@ class SearchController extends AbstractController
      public function searchallbsAction(Request $request)
 	 {    
         $form=$this->createForm(SearchAllForm::class, null);
-		return $this->render('@App/search_all/searchallbs.html.twig',array('form' => $form->createView()));  
+		return $this->render('@App/search_all/searchallbs.html.twig',array(
+			'form' => $form->createView(),
+			"hierarchies"=>$this->get_hierarchy_mineral()
+			));  
 	}
 	
 	 /*public function searchallbs_documents_rawAction(Request $request)
@@ -83,7 +86,9 @@ class SearchController extends AbstractController
 	{
     
         $form=$this->createForm(SearchAllForm::class, null);
-		return $this->render('@App/searchallbs_raw.html.twig',array('form' => $form->createView()));  
+		return $this->render('@App/searchallbs_raw.html.twig',array(
+			'form' => $form->createView(),
+			"hierarchies"=>$this->get_hierarchy_mineral()));  
 	}
     
 	public function contribution_searchAction(Request $request)
@@ -209,7 +214,7 @@ class SearchController extends AbstractController
 			}
 		}
 		
-		$query_or_builder=Array();
+		//$query_or_builder=Array();
 			
 		foreach($params_sql_or_group as $key=>$params_sql_or)
 		{
@@ -264,7 +269,7 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				'pages_count' => ceil($count_all / $page_size)
 			);
 			
-			return $this->render('@App/search_results_contributions.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
+			return $this->render('@App/contributions/search_results_contributions.html.twig', array("results"=>$results, "pagination"=>$pagination, "page_size"=>$page_size, "nb_results"=>$count_all));
 		}
 		else
 		{
@@ -395,7 +400,7 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			$params_sql_or_group["institute"]=$params_sql_or;
 		}
 		
-		$query_or_builder=Array();
+		//$query_or_builder=Array();
 			
 		foreach($params_sql_or_group as $key=>$params_sql_or)
 		{
@@ -540,7 +545,7 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			}
 		}
 		
-		$query_or_builder=Array();
+		//$query_or_builder=Array();
 			
 		foreach($params_sql_or_group as $key=>$params_sql_or)
 		{
@@ -587,7 +592,17 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 		return $this->render('@App/no_results_bs.html.twig');
 	}
 	
+	public function main_search_stratumAction(Request $request)
+	{
+		return $this->main_search_logic($request, "stratum");
+	}
+	
 	public function main_searchAction(Request $request)
+	{
+		return $this->main_search_logic($request);
+	}
+	
+	public function main_search_logic(Request $request, $mode="all")
     {
 	
 		$order=$request->get("order","idcollection, idobject");
@@ -622,6 +637,11 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			if(strtolower($request->get("csv","false"))=="true")
 			{
 				$display_csv=true;
+			}
+			$main_fk="a.pk";
+			if($mode=="stratum")
+			{
+				$main_fk="a.dloccenter_pk";
 			}
 			
 			if($request->request->has("doc_type"))
@@ -666,7 +686,7 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 					foreach($contribs as $contrib)
 					{		
 						
-						$sql_tmp="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE contr.idcontributor=".$this->gen_pdo_name($idx_param)." AND a.pk=contr.pk"
+						$sql_tmp="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE TRIM(REPLACE(LOWER(contr.people),'',''))=TRIM(REPLACE(LOWER(".$this->gen_pdo_name($idx_param)."),'','')) AND ".$main_fk."=contr.pk"
 						;
 						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
 						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
@@ -696,9 +716,9 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 					foreach($contribs as $contrib)
 					{
 						
-						$params_sql_or[]="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE contr.idcontributor=".$this->gen_pdo_name($idx_param)." AND a.pk=contr.pk)";
+						$params_sql_or[]="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE TRIM(REPLACE(LOWER(contr.people),'',''))=TRIM(REPLACE(LOWER(".$this->gen_pdo_name($idx_param)."),'',''))  AND ".$main_fk."=contr.pk)";
 						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$contrib;
-						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_INT;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
 						$idx_param++;
 					}
 					$params_sql_or_group["contributor"]=$params_sql_or;
@@ -730,7 +750,8 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				foreach($keywords as $keyword)
 				{
 					$keyword=strtolower($keyword);
-					$params_sql_or[]="EXISTS (SELECT keyw.main_pk FROM tv_keyword_hierarchy_to_object keyw WHERE path_word  ~* ".$this->gen_pdo_name($idx_param."reg")." AND a.pk=keyw.main_pk)
+					
+					$params_sql_or[]="EXISTS (SELECT keyw.main_pk FROM tv_keyword_hierarchy_to_object keyw WHERE path_word  ~* ".$this->gen_pdo_name($idx_param."reg")." AND ".$main_fk."=keyw.main_pk)
                      OR col_1_value ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
                     OR col_2_value  ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
                     OR col_3_value  ILIKE '%'||".$this->gen_pdo_name($idx_param)."||'%'
@@ -750,18 +771,53 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			{
 				$params_sql_or=Array();
 				$wkt_search=$request->get("wkt_search");
-                if(strlen(trim($wkt_search)))
+                if(strlen(trim($wkt_search))>0)
                 {
                     $params_sql_or[]="(ST_INTERSECTS(ST_SETSRID(ST_Point(coord_long, coord_lat),4326), ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326)) 
-					OR 
-					ST_INTERSECTS(geom, ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326)) 
+					OR fk_localitie in (select pk from dloccenter WHERE
+					ST_INTERSECTS(geom, ST_GEOMFROMTEXT(".$this->gen_pdo_name($idx_param).",4326))) 
 					)";
                     $params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$wkt_search;
                     $params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
                    
 					$params_sql_or_group["wkt_search"]=$params_sql_or;
+					$idx_param++;
                 }			
             }
+			
+			if($request->request->has("place"))
+			{
+				$places=$request->get("place");
+				$params_sql_or=Array();
+				foreach($places as $place)
+				{
+					$place=strtolower($place);
+					$params_sql_or[]="fk_localitie in (select pk from dloccenter WHERE
+					place ~* ".$this->gen_pdo_name($idx_param).")";
+					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$place;
+					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+                    
+					$idx_param++;
+				}
+				$params_sql_or_group["places"]=$params_sql_or;
+			}
+			
+			if($request->request->has("country"))
+			{
+				$countries=$request->get("country");
+				$params_sql_or=Array();
+				foreach($countries as $country)
+				{
+					$country=strtolower($country);
+					$params_sql_or[]="fk_localitie in (select pk from dloccenter WHERE
+					country ~* ".$this->gen_pdo_name($idx_param).")";
+					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$country;
+					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+                    
+					$idx_param++;
+				}
+				$params_sql_or_group["countries"]=$params_sql_or;
+			}
 			
 			if($request->request->has("date_from"))
 			{
@@ -774,8 +830,8 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				   $year_from=substr($date_from, 0,4);
 				  
 				   $date_point="EXISTS(SELECT idpt FROM dloccenter loc WHERE date>=:datefrom AND loc.pk=b.fk_localitie)";
-				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year>=:year_from AND a.pk=contr.pk)";
-				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date>=:datefrom AND a.pk=contr.pk)";
+				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year>=:year_from AND ".$main_fk."=contr.pk)";
+				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date>=:datefrom AND ".$main_fk."=contr.pk)";
 				   if($date_type=="ALL")
 				   {
 						$params_sql_or[]=$date_point;
@@ -820,8 +876,8 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 				   $year_to=substr($date_to, 0,4);
 				  
 				   $date_point="EXISTS(SELECT idpt FROM dloccenter loc WHERE date<=:dateto AND loc.pk=b.fk_localitie)";
-				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year<=:year_to AND a.pk=contr.pk)";
-				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date<=:dateto AND a.pk=contr.pk)";
+				   $contribution_year="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE year<=:year_to AND ".$main_fk."=contr.pk)";
+				   $contribution_day="EXISTS (SELECT contr.pk FROM v_all_contributions_to_object contr WHERE date<=:dateto AND ".$main_fk."=contr.pk)";
 				   if($date_type=="ALL")
 				   {
 						$params_sql_or[]=$date_point;
@@ -859,29 +915,222 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			if($request->request->has("stratum"))
 			{
 				$stratum_array=$request->get("stratum");
-				$params_sql_or=Array();
-				foreach($stratum_array as $stratum)
+				
+				if(is_array($stratum_array))
 				{
-					$stratum=strtolower($stratum);
-					$params_sql_or[]="EXISTS(
-					
-					SELECT dloclitho.idpt FROM dloclitho INNER JOIN dloccenter ON 
-					dloclitho.idcollection=dloccenter.idcollection 
-					AND
-					dloclitho.idpt=dloccenter.idpt 
-					WHERE LOWER(TRIM(lithostratum))= LOWER(TRIM(".$this->gen_pdo_name($idx_param).")) 
-					AND dloccenter.pk=b.fk_localitie 
-					
-					)";                                          
-                   
-					$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$stratum;
-					$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
-					$idx_param++;
+					$params_sql_or=Array();
+					foreach($stratum_array as $stratum)
+					{
+						$stratum=strtolower($stratum);
+						if($mode=="all")
+						{
+							$params_sql_or[]="EXISTS(
+							
+							SELECT dloclitho.idpt FROM dloclitho INNER JOIN dloccenter ON 
+							dloclitho.idcollection=dloccenter.idcollection 
+							AND
+							dloclitho.idpt=dloccenter.idpt 
+							WHERE LOWER(TRIM(lithostratum))= LOWER(TRIM(".$this->gen_pdo_name($idx_param).")) 
+							AND dloccenter.pk=b.fk_localitie 
+							
+							)";                                          
+						}
+						elseif($mode=="stratum")
+						{
+							$params_sql_or[]=" LOWER(TRIM(lithostratum))= LOWER(TRIM(".$this->gen_pdo_name($idx_param)."))";                 
+						}
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$stratum;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+					}
+					$params_sql_or_group["stratum"]=$params_sql_or;
 				}
-				$params_sql_or_group["stratum"]=$params_sql_or;
+			}//
+			//sample
+			if($request->request->has("sample_mineral"))
+			{
+				
+				$idminerals_tmp=$request->get("sample_mineral",[]);
+				$idminerals=[];
+				foreach($idminerals_tmp as $val)
+				{
+					$tmp=explode(',',$val);
+					
+					if(array_reduce($tmp, function ($result, $item) { return $result && is_numeric($item); }, true))
+					{
+						$idminerals=array_merge($idminerals, $tmp);
+					}
+				}
+				$hierarchy=$request->get("sample_hierarchy","");
+				$has_child=$request->get("sample_mineral_children","false");
+				if(count($idminerals)>0)
+				{
+					if(trim($has_child)=="true")
+					{
+						$params_sql_or=Array();
+						$idminerals=array_map(function($value) { return '/'.$value."/"; },$idminerals );
+						$list_pattern=implode("|", $idminerals);
+						$sql_tmp="EXISTS (SELECT d.pk FROM v_dsample_to_min d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE hierarch_min_desc ~* ".$this->gen_pdo_name($idx_param)." AND d.pk=b.fk_sample )";		
+						//$params_sql_or_group[]=$sql_tmp;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$list_pattern;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$idx_param++;
+						$params_sql_or[]=$sql_tmp;
+						$params_sql_or_group["mineral"]=$params_sql_or;
+					
+					}
+					else
+					{
+						$params_sql_or=Array();
+						$sql_tmp="EXISTS (SELECT d.pk FROM v_dsample_to_min d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE idmineral =ANY ('{".implode(",",$idminerals)."}')  AND d.pk=b.fk_sample )";
+						$params_sql_or[]=$sql_tmp;
+						$params_sql_or_group["mineral"]=$params_sql_or;
+						
+						
+					}
+					
+				}
+			}
+			//sample fieldnum
+			if($request->request->has("sample_fieldnum"))
+			{
+				$field_nums=$request->get("sample_fieldnum",[]);
+				if(count($field_nums)>0)
+				{
+					$params_sql_or=Array();
+					foreach($field_nums as $val)
+					{
+						$sql_tmp="EXISTS (SELECT d.pk FROM dsample d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE fieldnum =".$this->gen_pdo_name($idx_param)."  AND d.pk=b.fk_sample )";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$val;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$params_sql_or[]=$sql_tmp;
+						$idx_param++;
+					}
+					$params_sql_or_group["fieldnum"]=$params_sql_or;
+				}
+			}
+			//sample museumnum
+			if($request->request->has("sample_museumnum"))
+			{
+				$field_nums=$request->get("sample_museumnum",[]);
+				if(count($field_nums)>0)
+				{
+					$params_sql_or=Array();
+					foreach($field_nums as $val)
+					{
+						$sql_tmp="EXISTS (SELECT d.pk FROM dsample d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE museumnum =".$this->gen_pdo_name($idx_param)."  AND d.pk=b.fk_sample )";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$val;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$params_sql_or[]=$sql_tmp;
+						$idx_param++;
+					}
+					$params_sql_or_group["museumnum"]=$params_sql_or;
+				}
+			}
+			//sample museumlocation
+			if($request->request->has("sample_museumlocation"))
+			{
+				$field_nums=$request->get("sample_museumlocation",[]);
+				if(count($field_nums)>0)
+				{
+					$params_sql_or=Array();
+					foreach($field_nums as $val)
+					{
+						$sql_tmp="EXISTS (SELECT d.pk FROM dsample d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE museumlocation =".$this->gen_pdo_name($idx_param)."  AND d.pk=b.fk_sample )";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$val;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$params_sql_or[]=$sql_tmp;
+						$idx_param++;
+					}
+					$params_sql_or_group["samplelocation"]=$params_sql_or;
+				}
+			}
+			//sample boxnumber
+			if($request->request->has("sample_boxnumber"))
+			{
+				$field_nums=$request->get("sample_boxnumber",[]);
+				if(count($field_nums)>0)
+				{
+					$params_sql_or=Array();
+					foreach($field_nums as $val)
+					{
+						$sql_tmp="EXISTS (SELECT d.pk FROM dsample d INNER JOIN
+							dsamminerals e ON  d.idcollection=e.idcollection AND  d.idsample=e.idsample
+							 WHERE boxnumber =".$this->gen_pdo_name($idx_param)."  AND d.pk=b.fk_sample )";
+						$params_pdo[$this->gen_pdo_name($idx_param)]["value"]=$val;
+						$params_pdo[$this->gen_pdo_name($idx_param)]["type"]=\PDO::PARAM_STR;
+						$params_sql_or[]=$sql_tmp;
+						$idx_param++;
+					}
+					$params_sql_or_group["boxnumber"]=$params_sql_or;
+				}
+			}
+			$params_sample_checkboxes=Array();
+			//sample slim plates
+			if($request->request->has("has_slimplate"))
+			{
+				$holotype=$request->get("has_slimplate","false");
+				if($holotype=="true")
+				{
+					
+					$sql_tmp="EXISTS (SELECT d.pk FROM dsample d WHERE slimplate=true  AND d.pk=b.fk_sample )";
+					$params_sample_checkboxes[]=$sql_tmp;
+					
+				}
 			}
 			
-			$query_or_builder=Array();
+			//sample chemical analysis
+			if($request->request->has("has_chemicalanalysis"))
+			{
+				$holotype=$request->get("has_chemicalanalysis","false");
+				if($holotype=="true")
+				{
+					
+					$sql_tmp="EXISTS (SELECT d.pk FROM dsample d WHERE chemicalanalysis=true  AND d.pk=b.fk_sample )";
+					$params_sample_checkboxes[]=$sql_tmp;
+					
+				}
+			}
+			//sample holotype
+			if($request->request->has("is_holotype"))
+			{
+				$holotype=$request->get("is_holotype","false");
+				if($holotype=="true")
+				{
+					
+					$sql_tmp="EXISTS (SELECT d.pk FROM dsample d WHERE holotype=true  AND d.pk=b.fk_sample )";
+					$params_sample_checkboxes[]=$sql_tmp;
+					
+				}
+			}
+			//sample holotype
+			if($request->request->has("is_paratype"))
+			{
+				$paratype=$request->get("is_paratype","false");
+				if($paratype=="true")
+				{
+					
+					$sql_tmp="EXISTS (SELECT d.pk FROM dsample d WHERE paratype=true  AND d.pk=b.fk_sample )";
+					$params_sample_checkboxes[]=$sql_tmp;
+					
+				}
+			}
+			if(count($params_sample_checkboxes)>0)
+			{
+				$params_sql_or_group["samplecheckboxes"]=$params_sample_checkboxes;
+			}
+			
+			//$query_or_builder=Array();
 			
 			foreach($params_sql_or_group as $key=>$params_sql_or)
 			{
@@ -900,17 +1149,32 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 			
 			$em = $this->container->get('doctrine')->getEntityManager();
 			
-								
-		    $RAW_QUERY="WITH main_q AS (SELECT DISTINCT a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, string_agg(contributors,';' ) contributors, string_agg(institutions,';' ) institutions, coord_long, coord_lat 
-			FROM public.mv_rmca_main_objects_description a
-			LEFT JOIN public.mv_rmca_merge_all_objects_vertical_expand b
-			ON a.pk=b.main_pk
-			LEFT JOIN mv_all_contributions_to_object_agg_merge c
-			ON a.pk=c.pk
-			".$query_where.'
-			GROUP BY a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, coord_long, coord_lat
-			)
-            SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY '.$order.' '.$order_dir;
+			if($mode=="all")
+			{
+				$RAW_QUERY="WITH main_q AS (SELECT DISTINCT a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, string_agg(DISTINCT contributors,';' ) contributors, string_agg(DISTINCT institutions,';' ) institutions, coord_long, coord_lat 
+				FROM public.mv_rmca_main_objects_description a
+				LEFT JOIN public.mv_rmca_merge_all_objects_vertical_expand b
+				ON a.pk=b.main_pk
+				LEFT JOIN mv_all_contributions_to_object_agg_merge c
+				ON a.pk=c.pk
+				".$query_where.'
+				GROUP BY a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, coord_long, coord_lat
+				)
+				SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY '.$order.' '.$order_dir;
+			}
+			elseif($mode=="stratum")
+			{
+				$RAW_QUERY="WITH main_q AS (SELECT DISTINCT a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, string_agg(contributors,';' ) contributors, string_agg(institutions,';' ) institutions, coord_long, coord_lat , dloccenter_pk
+				FROM public.v_rmca_main_objects_description_litho a
+				LEFT JOIN public.mv_rmca_merge_all_objects_vertical_expand b
+				ON a.dloccenter_pk=b.main_pk
+				LEFT JOIN mv_all_contributions_to_object_agg_merge c
+				ON a.dloccenter_pk=c.pk AND relation_type='point'
+				".$query_where.'
+				GROUP BY a.pk, main_type, col_1_name, col_1_value, col_2_name, col_2_value, col_3_name, col_3_value, col_4_name, col_4_value, idobject, idcollection, coord_long, coord_lat, dloccenter_pk
+				)
+				SELECT *, count(*) OVER() AS full_count FROM main_q ORDER BY '.$order.' '.$order_dir;
+			}
 			if(!$display_csv)
 			{
 				$RAW_QUERY.=' OFFSET :offset LIMIT :limit';
@@ -1048,7 +1312,7 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
     }
 	
 	public function searchdocumentAction(Request $request){
-		return $this->render('@App/searchdocument.html.twig');
+		return $this->render('@App/search_all/searchallbs_documents.html.twig');
     }
 	
     public function searchsatelliteAction(Request $request){
@@ -1062,6 +1326,11 @@ FROM dcontribution  LEFT JOIN dlinkcontribute ON dcontribution.idcontribution=dl
 	public function searchstratumAction(Request $request){
 		return $this->render('@App/searchstratum.html.twig');
     }
+	
+    public function searchstratumgsAction(Request $request){
+		return $this->render('@App/search_all/searchstratumgs.html.twig');
+    }
+	
 	
 	public function searchdrillingAction(Request $request){
 		return $this->render('@App/searchdrilling.html.twig');

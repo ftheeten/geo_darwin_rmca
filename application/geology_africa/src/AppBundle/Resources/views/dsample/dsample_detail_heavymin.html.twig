@@ -1,0 +1,28 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Id link:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk"~ index, ctrl_prefix ~"_pk"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Weight hm:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_hm"~ index, ctrl_prefix ~"_weight_hm"~ index,default_val.weighthm ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight sample:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_sample"~ index, ctrl_prefix ~"_weight_sample"~ index,default_val.weighthm ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+Weight sample:
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_observation_hm"~ index, ctrl_prefix ~"_observation_hm"~ index,default_val.observationhm ?? "","readonly_class") }}
+</div>
+</div>

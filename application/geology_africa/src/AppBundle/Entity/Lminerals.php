@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Lminerals
  *
- * @ORM\Table(name="lminerals", uniqueConstraints={@ORM\UniqueConstraint(name="lminerals_unique", columns={"idmineral"})})
+ * @ORM\Table(name="lminerals", uniqueConstraints={@ORM\UniqueConstraint(name="lminerals_unique", columns={"idmineral"})}, indexes={@ORM\Index(name="fki_fk_mineral_to_hierarch", columns={"fk_hierarchy"})})
  * @ORM\Entity
  */
 class Lminerals
@@ -270,4 +270,72 @@ class Lminerals
 	{
 		return "test";
 	}*/
+	
+	/**
+     * @var LmineralsHierarchy
+     *
+     * @ORM\ManyToOne(targetEntity="LmineralsHierarchy", inversedBy="lminerals")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="fk_hierarchy", referencedColumnName="pk")
+     * })
+     */
+    protected $lmineralshierarchy;
+	
+	
+    /**
+     * Get lmineralshierarchy
+     *
+     * @return LmineralsHierarchy
+     */
+	 
+	public function getLmineralshierarchy()
+	{
+		return $this->lmineralshierarchy;
+	}
+	
+	/**
+     * Set lmineralshierarchy
+     *
+     * @param LmineralsHierarchy $lmineralshierarchy
+     *
+     * @return lmineralshierarchy
+     */
+    public function setLmineralshierarchy($lmineralshierarchy)
+    {
+        $this->lmineralshierarchy = $lmineralshierarchy;
+
+        return $this;
+    }
+	
+	//foreign key
+	
+	protected $dsamminerals;
+	
+	public function initDsamminerals($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamminerals::class, 
+			"dsamminerals",
+			array(
+				"idmineral"=>$this->idmineral,				
+				),
+				"getIdmineral");
+		return $this->dsamminerals;
+	}
+	
+	public function initNewDsamminerals($em, $new_dsamminerals)
+	{
+		$this->initDsamminerals($em);
+		$this->reattachForeignkeysAsObject(
+			$em, 
+			Dsamminerals::class, 
+			"dsamminerals",
+			"getPk",
+			 $new_dsamminerals,
+			array(
+				"idmineral"=>$this->idmineral				
+				));
+		return $this->dsamminerals;
+	}
 }

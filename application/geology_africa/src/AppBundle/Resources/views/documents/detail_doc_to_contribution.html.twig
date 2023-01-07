@@ -15,6 +15,18 @@
 {{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_contrib_"~ index, ctrl_prefix ~"_id_contrib_"~ index,default_val.contribution.pk ?? "","readonly_class") }}
 
 {{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_description_contrib_"~ index, ctrl_prefix ~"_description_contrib_"~ index,(default_val.contribution.idcontribution ?? ""  ~ " " ~ default_val.contribution.description ?? "")|trim  ,"readonly_class") }}
+
+{% if read_mode=="read" %}
+{% set tmp_date=default_val.contribution.date?? "" %}
+{% if tmp_date!="" %}
+{% set formated_date=tmp_date|date('Y-m-d') %}
+{% else %}
+{% set formated_date="" %}
+{% endif %}
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_date_"~ index, ctrl_prefix ~"_id_date_"~ index,formated_date,"readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_year_contrib_"~ index, ctrl_prefix ~"_year_contrib_"~ index,(default_val.contribution.year ?? "")|trim  ,"readonly_class") }}
+{% endif %}
 </div>
 <script type="text/javascript">
 $(document).ready(

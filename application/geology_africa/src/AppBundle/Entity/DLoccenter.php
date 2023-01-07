@@ -880,10 +880,14 @@ class DLoccenter extends GeodarwinEntity
 	
 	//foreign keys
 	protected $dloclitho;
+	protected $dlinkdocloc;
+	public $dlinkcontloc;
 	
 	public function __construct()
     {     
-		$this->dloclitho =  Array();		
+		$this->dloclitho =  Array();
+		$this->dlinkdocloc =  Array();	
+		$this->dlinkcontloc =  Array();				
     }
 	
 	public function initDloclitho($em)
@@ -893,6 +897,7 @@ class DLoccenter extends GeodarwinEntity
 		foreach($this->dloclitho as $obj)
 		{
 			$obj->initDlocstratumdesc($em);
+			$obj->initDlinklocsam($em);			
 		}		
 		return $this->dloclitho;
 	}
@@ -910,7 +915,8 @@ class DLoccenter extends GeodarwinEntity
 				"getPk",//"getSignature", 
 				$new_dloclitho, 
 				array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt)
-			);	
+			);
+			
 		}
 		return $this->dloclitho;
 	}
@@ -944,6 +950,81 @@ class DLoccenter extends GeodarwinEntity
 			$elem[]=$this->getPlace();
 		}
 		$this->description= implode("; ", $elem);
+	}
+	
+	public function getDlinkdocloc()
+    {
+        return $this->dlinkdocloc;
+    }
+	
+	public function initDLinkdocloc($em)
+	{		
+		
+		
+		$this->attachForeignkeysAsObject($em,Dlinkdocloc::class,"dlinkdocloc", array("idcollecloc"=>$this->idcollection, "idpt"=>$this->idpt), "getPk");
+		foreach($this->dlinkdocloc as $obj)
+		{
+			
+			$obj->setDocument_db($em);
+		}
+		return $this->dlinkdocloc;
+	}
+	
+	
+	public function initNewDLinkdocloc($em, $new_locs)
+	{
+		
+		if(count($new_locs)>0)
+		{			
+			
+			
+			
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dlinkdocloc::class,
+				"dlinkdocloc", 			
+				"getPk", 
+				$new_locs,		
+				 array("idcollecdoc"=>$this->idcollection, "idpt"=>$this->idpt)
+			);
+			
+		}
+		return $this->dlinkdocloc;
+	}
+	
+	
+	public function initDLinkcontloc($em)
+	{		
+		
+		
+		$this->attachForeignkeysAsObject($em,Dlinkcontloc::class,"dlinkcontloc", array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt), "getPk");
+		foreach($this->dlinkcontloc as $obj)
+		{
+			$obj->setDcontribution_db($em);
+		}
+		return $this->dlinkcontloc;
+	}
+	
+	
+	public function initNewDLinkcontloc($em, $new_conts)
+	{
+		
+		if(count($new_conts)>0)
+		{			
+			
+			
+			
+			$this->reattachForeignKeysAsObject(
+				$em,
+				Dlinkcontloc::class,
+				"dlinkcontloc", 			
+				"getPk", 
+				$new_conts,		
+				 array("idcollection"=>$this->idcollection, "idpt"=>$this->idpt)
+			);
+			
+		}
+		return $this->dlinkcontloc;
 	}
 	
 	 

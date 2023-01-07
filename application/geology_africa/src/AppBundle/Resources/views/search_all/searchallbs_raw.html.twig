@@ -1,98 +1,118 @@
 {# src/AppBundle/Resources/views/search_all/searchallbs_raw.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
 
 {% set type_filter = type_filter|default("all") %}
 {{ type_filter }}
 {% set is_modal = is_modal|default(false) %}
+{% set prefix_ctrl = prefix_ctrl|default("") %}
+{% set current_tab=current_tab|default("mainsearch-tab") %}
+{% set current_tab=prefix_ctrl~current_tab %}
 {% if is_modal==false %}
 	{% use "@App/forms/standalonejs.html.twig" %}
 {% endif %}
 {% block body %}
 
+<ul class="nav nav-tabs" id="{{prefix_ctrl}}myTab" role="tablist">
+	{{ read_test.enable_bootstrap_tab(prefix_ctrl~"mainsearch-tab", current_tab,"#"~prefix_ctrl~"mainsearch", prefix_ctrl~"mainsearch", "Home", "shift_mode") }}
+    {{ read_test.enable_bootstrap_tab(prefix_ctrl~"locationsearch-tab", current_tab,"#"~prefix_ctrl~"locationsearch", prefix_ctrl~"locationsearch", "Geographical locations") }}
+    {{ read_test.enable_bootstrap_tab(prefix_ctrl~"datesearch-tab", current_tab,"#"~prefix_ctrl~"datesearch", prefix_ctrl~"datesearch", "Date") }}
+	{{ read_test.enable_bootstrap_tab(prefix_ctrl~"stratumsearch-tab", current_tab,"#"~prefix_ctrl~"stratumsearch", prefix_ctrl~"stratum", "Stratum") }}
+	{{ read_test.enable_bootstrap_tab(prefix_ctrl~"samplesearch-tab", current_tab,"#"~prefix_ctrl~"samplesearch", prefix_ctrl~"samplesearch", "Sample info") }}
+	
+</ul> 
 
+
+<div class="tab-content">
+{{ read_test.activate_boostrap_tab(prefix_ctrl~"mainsearch", current_tab, prefix_ctrl~"mainsearch-tab") }}
 <div class="container">
-<div class="row">
-    <div class="col-sm-2">What</div>
-    <div class="col-sm-3"><select name="document_type" id="document_type" style="width:100%" multiple="multiple" ></select>
-    </div>
-    <div class="col-sm-2">keywords</div>
-    <div class="col-sm-3"><select name="keywords" id="keywords" style="width:100%" multiple="multiple" ></select>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-2">Contributors</div>
-    <div class="col-sm-3"><select name="ac_contrib" id="ac_contrib" style="width:100%" multiple="multiple" ></select></div>
-	<div class="col-sm-2">role</div>	
-	<div class="col-sm-3"><select name="ac_role" id="ac_role" style="width:100%" multiple="multiple" ></select></div>
-</div>
+	<div class="row">
+		<div class="col-sm-2">What</div>
+		<div class="col-sm-3">
+		{% if type_filter=="stratum" %}
+			<i>Stratum</i>
+		{% elseif type_filter=="sample" %}
+			<i>Sample</i>
+		{% else %}
+		<select name="{{prefix_ctrl}}document_type" id="{{prefix_ctrl}}document_type" style="width:100%" multiple="multiple" ></select>
+		{% endif %}
+		</div>
+		<div class="col-sm-2">keywords</div>
+		<div class="col-sm-3"><select name="{{prefix_ctrl}}keywords" id="{{prefix_ctrl}}keywords" style="width:100%" multiple="multiple" ></select>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Contributors</div>
+		<div class="col-sm-3"><select name="{{prefix_ctrl}}ac_contrib" id="{{prefix_ctrl}}ac_contrib" style="width:100%" multiple="multiple" ></select></div>
+		<div class="col-sm-2">role</div>	
+		<div class="col-sm-3"><select name="{{prefix_ctrl}}ac_role" id="{{prefix_ctrl}}ac_role" style="width:100%" multiple="multiple" ></select></div>
+	</div>
 
-<div class="row">
-	
-		<div class="col-sm-2">Collection</div>
-		<div class="col-sm-3"><select name="collections" id="collections" style="width:100%" multiple="multiple" ></select></div>
-		<div class="col-sm-2">Id object</div>
-		<div class="col-sm-3"><select name="idobject" id="idobject" style="width:100%" multiple="multiple" ></select></div>
-	
+	<div class="row">
+		
+			<div class="col-sm-2">Collection</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}collections" id="{{prefix_ctrl}}collections" style="width:100%" multiple="multiple" ></select></div>
+			<div class="col-sm-2">Id object</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}idobject" id="{{prefix_ctrl}}idobject" style="width:100%" multiple="multiple" ></select></div>
+		
+	</div>
+
 </div>
-<div class="row">
-	
-		<div class="col-sm-2">Stratum</div>
-		<div class="col-sm-3"><select name="stratum" id="stratum" style="width:100%" multiple="multiple" ></select></div>
-	
-</div>
-<div class="row">
-	
-		 <div class="col-md-2">
-			Date from 
-		</div>
-		<div class="col-md-3">
-		<input type="text" name="date_from" id="date_from"/>
-		</div>
-		 <div class="col-md-2">
-			Date from 
-		</div>
-		<div class="col-md-3">
-		<input type="text" name="date_to" id="date_to"/>
-		</div>
-</div>
-<div class="row">
-		<div class="col-md-2">
-			Type of date
-		</div>
-		<div class="col-md-2">
-			<select id="date_type" name="date_type">
-				<option value="ALL">All</option>
-				<option value="contribution_year">contribution (year)</option>
-				<option value="contribution_day">contribution (day)</option>
-				<option value="locality">locality</option>
-			</select>
-		</div>
-	
-</div>
-{% if is_modal==false %}
-<div class="row">
-	<div class="col-sm-12">
-	  <button id="display_map" class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#searchMapDiv" aria-expanded="false" aria-controls="searchMapDiv">
-			Toggle map
-	</button>
-	</div>	
-	  <div class="collapse" id="searchMapDiv" >
-	  <div class="col-sm-12" >
-		{{ include("@App/openlayers/search_map.html.twig")  }}
-	 </div>
-	 <div class="col-sm-12">{{ form_widget(form.wkt_search, {'attr': {'class': 'wkt_search form-control' }}) }}</div>
+{{ read_test.end_activate_boostrap_tab() }}
+{{ read_test.activate_boostrap_tab(prefix_ctrl~"locationsearch", current_tab, prefix_ctrl~"locationsearch-tab") }}
+	{% include "@App/search_all/searchallbs_raw_map.html.twig"  %} 
+{{ read_test.end_activate_boostrap_tab() }}
+{{ read_test.activate_boostrap_tab(prefix_ctrl~"stratumsearch", current_tab, prefix_ctrl~"stratumsearch-tab") }}
+	{% include "@App/search_all/searchallbs_raw_stratum.html.twig"  %} 
+{{ read_test.end_activate_boostrap_tab() }}
+{{ read_test.activate_boostrap_tab(prefix_ctrl~"samplesearch", current_tab, prefix_ctrl~"samplesearch-tab") }}
+	{% include "@App/search_all/searchallbs_raw_sample.html.twig"  %} 
+{{ read_test.end_activate_boostrap_tab() }}
+{{ read_test.activate_boostrap_tab(prefix_ctrl~"datesearch", current_tab, prefix_ctrl~"datesearch-tab") }}
+<div class="container">
+	<div class="row">
+		
+			 <div class="col-md-2">
+				Date from 
+			</div>
+			<div class="col-md-3">
+			<input type="text" name="{{prefix_ctrl}}date_from" id="{{prefix_ctrl}}date_from"/>
+			</div>
+			 <div class="col-md-2">
+				Date from 
+			</div>
+			<div class="col-md-3">
+			<input type="text" name="{{prefix_ctrl}}date_to" id="{{prefix_ctrl}}date_to"/>
+			</div>
+	</div>
+	<div class="row">
+			<div class="col-md-2">
+				Type of date
+			</div>
+			<div class="col-md-2">
+				<select id="{{prefix_ctrl}}date_type" name="{{prefix_ctrl}}date_type">
+					<option value="ALL">All</option>
+					<option value="contribution_year">contribution (year)</option>
+					<option value="contribution_day">contribution (day)</option>
+					<option value="locality">locality</option>
+				</select>
+			</div>
+		
 	</div>
 </div>
-{% endif %}
-
-<div class="row">
-     <div class="col-sm-2"></div>
-    <div class="col-sm-2"><input type="button" value="search" id="go_search_alldocs"/></div>
-    <div class="col-sm-2"><input type="button" value="get csv" id="get_csv"/></div>
+{{ read_test.end_activate_boostrap_tab() }}
 </div>
 
+<div class="container">
+	<div class="row">
+		 <div class="col-sm-2"></div>
+		<div class="col-sm-2"><input type="button" value="search" id="{{prefix_ctrl}}go_search_alldocs"/></div>
+		<div class="col-sm-2"><input type="button" value="get csv" id="{{prefix_ctrl}}get_csv"/></div>
+	</div>
 
+
+
+	<div id="{{prefix_ctrl}}div_results_searchall" class="row"></div>
 </div>
-<div id="div_results_searchall" class="row"></div>
 {%endblock%}
 {% block javascripts %}
     {{ parent() }}
@@ -101,6 +121,7 @@
 	    var global_sort={};
         var map_loaded=false;
 		var global_csv=false;
+		var current_tab="{{ current_tab }}";
 		
 		var parse_json_list=function(url, attribute, sel2)
 		 {
@@ -189,21 +210,66 @@
 		 var search_logic_all_docs=function(current_page, page_size, csv)
 		{
 					
-					console.log("SEARCH_CALLED");
+					
 					criterias={}
 					criterias["current_page"]=current_page;
                     criterias["page_size"]=page_size;
-					criterias["doc_type"]=$("#document_type").val();
-					criterias["collections"]=$("#collections").val();
-					criterias["idobject"]=$("#idobject").val();
-					criterias["contributor"]=$("#ac_contrib").val();
-					criterias["role"]=$("#ac_role").val();
-                    criterias["keywords"]=$("#keywords").val();
+					{% if type_filter=="sample" %}
+						criterias["doc_type"]=["sample"];
+					{% else %}
+						criterias["doc_type"]=$("#{{prefix_ctrl}}document_type").val();
+					{% endif %}
+					criterias["collections"]=$("#{{prefix_ctrl}}collections").val();
+					criterias["idobject"]=$("#{{prefix_ctrl}}idobject").val();
+					criterias["contributor"]=$("#{{prefix_ctrl}}ac_contrib").val();
+					criterias["role"]=$("#{{prefix_ctrl}}ac_role").val();
+                    criterias["keywords"]=$("#{{prefix_ctrl}}keywords").val();
 					criterias["wkt_search"]=$(".wkt_search").val();
-					criterias["date_from"]=$("#date_from").val();
-					criterias["date_to"]=$("#date_to").val();
-					criterias["date_type"]=$("#date_type").val();
-					criterias["stratum"]=$("#stratum").val();
+					criterias["date_from"]=$("#{{prefix_ctrl}}date_from").val();
+					criterias["date_to"]=$("#{{prefix_ctrl}}date_to").val();
+					criterias["date_type"]=$("#{{prefix_ctrl}}date_type").val();
+					criterias["stratum"]=$("#{{prefix_ctrl}}searchstratum").val();
+					criterias["country"]=$("#{{prefix_ctrl}}country").val();
+					criterias["place"]=$("#{{prefix_ctrl}}place").val();
+					
+					criterias["sample_mineral"]=$("#{{prefix_ctrl}}searchsample_mineral").val();
+					criterias["sample_hierarchy"]=$("#{{prefix_ctrl}}searchsample_hierarch").val();
+					criterias["sample_mineral_children"]=false;
+					if ($('#{{prefix_ctrl}}searchsample_mineral_children').is(":checked"))
+					{
+						criterias["sample_mineral_children"]=true;
+					}
+									
+					criterias["sample_fieldnum"]=$("#{{prefix_ctrl}}searchsamplefieldnumber").val();
+					criterias["sample_museumnum"]=$("#{{prefix_ctrl}}searchsamplemuseumnumber").val();
+					criterias["sample_museumlocation"]=$("#{{prefix_ctrl}}searchsamplemuseumlocation").val();
+					criterias["sample_boxnumber"]=$("#{{prefix_ctrl}}searchsampleboxnumber").val();
+					var has_slimplate=false;
+					if($("#{{prefix_ctrl}}searchsampleslimplate").is(":checked"))
+					{
+						has_slimplate=true;
+					}
+					var has_chemicalanalysis=false;
+					if($("#{{prefix_ctrl}}searchsamplechemicalanalysis").is(":checked"))
+					{
+						has_chemicalanalysis=true;
+					}
+					var is_holotype=false;
+					if($("#{{prefix_ctrl}}searchsampleholotype").is(":checked"))
+					{
+						is_holotype=true;
+					}
+					var is_paratype=false;
+					if($("#{{prefix_ctrl}}searchsampleparatype").is(":checked"))
+					{
+						is_paratype=true;
+					}
+					
+					criterias["has_slimplate"]=has_slimplate;
+					criterias["has_chemicalanalysis"]=has_chemicalanalysis;
+					criterias["is_holotype"]=is_holotype;
+					criterias["is_paratype"]=is_paratype;
+					
 					{% if is_modal==false %}
 					criterias["is_modal"]=false;
 					{% else %}
@@ -225,7 +291,12 @@
 						criterias["order_dir"]=global_sort[Object.keys(global_sort)[0]];
 					}
 					console.log(criterias);
-					$.post("{{ path('search_main')}}", criterias,
+					{% if type_filter=="stratum" %}
+					var url_search="{{ path('search_main_spec_stratum')}}";
+					{% else %}
+					var url_search="{{ path('search_main')}}";
+					{% endif %}
+					$.post(url_search, criterias,
 						function(data)
 						{
 							console.log("DATA");
@@ -236,7 +307,7 @@
 							else
 							{
 								console.log("DISPLAY");
-								$("#div_results_searchall").html(data);
+								$("#{{prefix_ctrl}}div_results_searchall").html(data);
 							}
 						}
 					);
@@ -261,7 +332,7 @@
 				global_sort[sort]="ASC";
 			}
 			
-			search_all_docs(1, $("#page_size").val());
+			search_all_docs(1, $("#{{prefix_ctrl}}page_size").val());
 		}
 		
 
@@ -270,63 +341,130 @@
         $(document).ready(
             function()
             {
+			    console.log("init_search_all");
                jQuery.getJSON("{{ path('app_refresh_mv')}}");
                 
 				{% if type_filter=="all" %}
-					parse_json_list("{{ path('search_all_object_categories')}}","main_type", "#document_type");
+					parse_json_list("{{ path('search_all_object_categories')}}","main_type", "#{{prefix_ctrl}}document_type");
 				{% elseif type_filter=="document" %}
-					parse_json_list("{{ path('search_all_document_categories')}}","main_type", "#document_type");
+					console.log("IS_DOC");
+					console.log("#{{prefix_ctrl}}document_type");
+					parse_json_list("{{ path('search_all_document_categories')}}","main_type", "#{{prefix_ctrl}}document_type");
 			    {% elseif type_filter=="dloccenter" %}
-					parse_json_list("{{ path('search_all_dloccenter_categories')}}","main_type", "#document_type");
+					parse_json_list("{{ path('search_all_dloccenter_categories')}}","{{prefix_ctrl}}main_type", "#document_type");
 				{% endif %}
-				parse_json_list("{{ path('search_all_collections')}}","idcollection", "#collections");
-                $("#ac_contrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","idcontributor","people" ),2);
-				$("#ac_role").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);               
-                $("#keywords").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
-				$("#idobject").select2(select2_generic("{{ path('app_idobject_autocomplete')}}","idobject","idobject" ),0);
-				$("#stratum").select2(select2_generic("{{ path('app_lithostratum_standard_autocomplete')}}","lithostratum","lithostratum" ),0);
+				{% if type_filter=="sample" %}
+					parse_json_list("{{ path('search_all_collections_samples')}}","idcollection", "#{{prefix_ctrl}}collections");
+				{% else %}
+					parse_json_list("{{ path('search_all_collections')}}","idcollection", "#{{prefix_ctrl}}collections");
+                {% endif %}
+				$("#{{prefix_ctrl}}ac_contrib").select2(select2_generic("{{ path('app_contribnames_autocomplete')}}","people","people" ),2);
+				$("#{{prefix_ctrl}}ac_role").select2(select2_generic("{{ path('app_contribrole_autocomplete')}}","contributorrole","contributorrole" ),0);               
+                $("#{{prefix_ctrl}}keywords").select2(select2_generic("{{ path('search_all_keywords_autocomplete')}}","word","word" ),0);
+				$("#{{prefix_ctrl}}idobject").select2(select2_generic("{{ path('app_idobject_autocomplete')}}","idobject","idobject" ),0);
+				$("#{{prefix_ctrl}}searchstratum").select2(select2_generic("{{ path('app_lithostratum_standard_autocomplete')}}","lithostratum","lithostratum" ),0);
 				
-				$("#date_from").datepicker( 
+				$("#{{prefix_ctrl}}place").select2(select2_generic("{{ path('app_place_autocomplete')}}","place","place" ),0);
+				$("#{{prefix_ctrl}}country").select2(select2_generic("{{ path('app_country_autocomplete')}}","country","country" ),0);
+				
+				//special select2 for minerals
+				$("#{{prefix_ctrl}}searchsample_mineral").select2({
+                        minimumInputLength: 2,
+                        ajax:
+                        {
+                            url:"{{ path('search_all_minerals_full_autocomplete')}}",
+                            dataType: 'json',
+                            data: function(param)
+                            {
+                                global_pattern= param.term;
+								
+								var hierarch=$("#{{prefix_ctrl}}searchsample_hierarch").val();
+								
+                                return {
+									
+                                    code: param.term,
+									hierarch: hierarch,
+									getpk: true
+                                };
+                            }
+                            ,
+                            processResults: function(result)
+                            {
+                                returned=Array();
+                          
+								
+                                if(result.length>0)
+                                {
+									
+                                   
+                                    for(var i=0; i<result.length; i++ )
+                                    {
+                                        returned.push({"id": result[i]["id"] , "text":result[i]["word"] });
+                                    }
+                                    
+                                    
+                                }
+                                return {"results":returned};
+                            }
+                        }
+                    
+                    },2);
+				
+				
+				$("#{{prefix_ctrl}}searchsamplefieldnumber").select2(select2_generic("{{ path('app_fieldnumber_autocomplete')}}","fieldnum","fieldnum" ),0);
+				
+				$("#{{prefix_ctrl}}searchsamplemuseumnumber").select2(select2_generic("{{ path('app_museumnumber_autocomplete')}}","museumnum","museumnum" ),0);
+				
+				
+				$("#{{prefix_ctrl}}searchsamplemuseumlocation").select2(select2_generic("{{ path('app_museumloc_autocomplete')}}","museumlocation","museumlocation" ),0);
+				
+				$("#{{prefix_ctrl}}searchsampleboxnumber").select2(select2_generic("{{ path('app_box_autocomplete')}}","boxnumber","boxnumber" ),0);
+				
+				$("#{{prefix_ctrl}}date_from").datepicker( 
 					{
 						format: 'yyyy-mm-dd'
 					}
 				);
-				$("#date_to").datepicker( 
+				$("#{{prefix_ctrl}}date_to").datepicker( 
 					{
 						format: 'yyyy-mm-dd'
 					}
 				);
 				
-				$("#go_search_alldocs").click(
+				$("#{{prefix_ctrl}}go_search_alldocs").click(
 				function()
 				{
+					console.log("go_search_alldocs click");
 					search=search_all_docs;
-					search_all_docs(1, $("#page_size").val());
+					search_all_docs(1, $("#{{prefix_ctrl}}page_size").val());
 				});
 				
-				$("#get_csv").click(
+				$("#{{prefix_ctrl}}get_csv").click(
 				function()
 				{
-					search_logic_all_docs(1, $("#page_size").val(),true);
+					search_logic_all_docs(1, $("#{{prefix_ctrl}}page_size").val(),true);
 				});
+				
+				console.log("loaded");
+				
 				{% if is_modal==false %}
 				
-				$('#searchMapDiv').collapse({
+				$('#{{prefix_ctrl}}searchMapDiv').collapse({
 				  toggle: false
 				})
-				$("#searchMapDiv").on('shown.bs.collapse',
+				$("#{{prefix_ctrl}}searchMapDiv").on('shown.bs.collapse',
 					function()
 					{
                         if(!map_loaded)
                         {
-                           $("#search_map").html("");
+                           $("#{{prefix_ctrl}}search_map").html("");
 						   map_loaded=true;
 						   init_map("searchmap");  
                            console.log("show");						   
                         }                        
                     }
 				);
-				$("#searchMapDiv").on('hide.bs.collapse',
+				$("#{{prefix_ctrl}}searchMapDiv").on('hide.bs.collapse',
 					function()
 					{
                         if(map_loaded)
@@ -338,7 +476,10 @@
                         }                        
                     }
 				);
-				{% endif %}		
+				{% endif %}	
+
+				
+							
             }		
         );
 

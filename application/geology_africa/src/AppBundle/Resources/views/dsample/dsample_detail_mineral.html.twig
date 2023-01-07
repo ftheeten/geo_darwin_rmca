@@ -1,0 +1,25 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Id link:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk_"~ index, ctrl_prefix ~"_pk_"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Id Mineral:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_mineral_"~ index, ctrl_prefix ~"_id_mineral_"~ index,default_val.lminerals.pk ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Mineral:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_mname_"~ index, ctrl_prefix ~"_id_mname_"~ index,default_val.lminerals.mname ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Grade:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_grade_"~ index, ctrl_prefix ~"_id_grade_"~ index,default_val.grade ?? "","readonly_class") }}
+</div>
+</div>
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/lminerals/mineral_search_raw_kern_sample.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_mineral_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_id_mname_" ~ index , "index":index, "ctrl_suffix": "", "read_mode": read_mode }%}

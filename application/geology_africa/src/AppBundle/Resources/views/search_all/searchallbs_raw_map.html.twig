@@ -1,0 +1,24 @@
+<div class="container">
+	
+	<div class="row">
+			<div class="col-sm-2">Country</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}country" id="{{prefix_ctrl}}country" style="width:100%" multiple="multiple" ></select></div>
+		
+			<div class="col-sm-2">Place</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}place" id="{{prefix_ctrl}}place" style="width:100%" multiple="multiple" ></select></div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+			  <button id="{{prefix_ctrl}}display_map" class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#searchMapDiv" aria-expanded="false" aria-controls="searchMapDiv">
+					Toggle map
+			</button>
+			</div>	
+			  <div class="collapse" id="{{prefix_ctrl}}searchMapDiv" >
+			  <div class="col-sm-12" >
+				{{ include("@App/openlayers/search_map.html.twig")  }}
+			 </div>
+			 <div class="col-sm-12"><input type="text" id="{{prefix_ctrl}}wkt_search" name="{{prefix_ctrl}}wkt_search" class="wkt_search form-control form-control"></div>
+			</div>
+		</div>
+	
+</div>

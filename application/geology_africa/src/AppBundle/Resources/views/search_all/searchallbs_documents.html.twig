@@ -1,0 +1,10 @@
+{# src/AppBundle/Resources/views/search_all/searchallbs_documents.html.twig #}
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block title %}
+	{{ parent() }} - All
+{% endblock %}
+{% block body %}
+<br/>
+{% include "@App/search_all/searchallbs_raw.html.twig" with {'type_filter' : 'document', 'is_modal': true, "current_tab":"mainsearch-tab"} %}
+{% endblock %}

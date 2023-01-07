@@ -1,0 +1,9 @@
+{% if originaction !="edit" %}
+	Please save the main part of point data first
+{% else %}
+
+{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/dsample/dsample_detail_contrib.html.twig" , 'ctrl_prefix' : 'sample_to_contrib', 'ajax_route': path('get_widget_sample_to_contrib'), 'fk_values': dlinkcontsam|default(null),
+'delete_route':'app_delete_contrib_from_sample', 'container_pk':dsample.pk, 
+'fk_key_field':'pk'
+ }  %}
+{% endif %}

@@ -1,0 +1,14 @@
+{# src/AppBundle/Resources/views/dsample/dsampleform_granulo.html.twig #}
+{% if action =="add" %}
+	Please save the main part of the document first
+{% else %}
+
+Sample to a-rays
+<div class="row">
+
+{% include "@App/foreignkeys/template_subforms_noajax.html.twig" with {'nested_template':"@App/dsample/dsample_detail_aray.html.twig" , 'ctrl_prefix' : 'sample_detail_aray', 'ajax_route': path('get_widget_sample_to_aray'), 'fk_values': dsamarays|default(null),
+'delete_route':'app_delete_aray_from_sample', 'container_pk':dsample.pk,
+'fk_key_field':'pk'
+ }  %}
+</div>
+{% endif %}

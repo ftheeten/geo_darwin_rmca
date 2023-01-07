@@ -64,6 +64,12 @@ get_widget_point_to_stratum:
      _controller: AppBundle:Widget:widget_point_to_stratum
     methods:  GET
     
+get_widget_point_to_doc:
+    path:     /get_widget_point_to_doc
+    defaults: 
+     _controller: AppBundle:Widget:widget_point_to_doc
+    methods:  GET
+    
 get_widget_point_to_stratum_description:
     path:     /get_widget_point_to_stratum_description
     defaults: 
@@ -81,4 +87,58 @@ get_widget_doc_to_flightplan:
     path:     /get_widget_doc_to_flightplan
     defaults: 
      _controller: AppBundle:Widget:widget_doc_to_flightplan
+    methods:  GET
+    
+get_widget_sample_to_mineral:
+    path: get_widget_sample_to_mineral
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_mineral
+    methods:  GET
+    
+get_widget_sample_to_granulo:
+    path: get_widget_sample_to_granulo
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_granulo
+    methods:  GET
+    
+get_widget_sample_to_heavymin:
+    path: get_widget_sample_to_heavymin
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_heavymin
+    methods:  GET
+    
+get_widget_sample_to_aray:
+    path: get_widget_sample_to_aray
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_aray
+    methods:  GET
+    
+get_widget_sample_to_slimplate:
+    path: get_widget_sample_to_slimplate
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_slimplate
+    methods:  GET
+    
+get_widget_sample_to_loc:
+    path: get_widget_sample_to_loc
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_loc
+    methods:  GET
+    
+get_widget_sample_to_contrib:
+    path: get_widget_sample_to_contrib
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_contrib
+    methods:  GET
+    
+get_widget_sample_to_doc:
+    path: get_widget_sample_to_doc
+    defaults: 
+     _controller: AppBundle:Widget:widget_sample_to_doc
+    methods:  GET
+    
+get_widget_point_to_contrib:
+    path:     /get_widget_point_to_contrib
+    defaults: 
+     _controller: AppBundle:Widget:widget_point_to_contrib
     methods:  GET

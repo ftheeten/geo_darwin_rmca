@@ -1,0 +1,177 @@
+{# src/AppBundle/Resources/views/lminerals/mineral_search_raw_kern.html.twig #}
+
+{% block body %}
+    {% set reload_var ='false' %}
+   
+
+    <div class="container">
+    <div class="row">
+    <div class="col-sm-2"><select name="search_min_raw" id="search_min_raw" style="width:100%"  ></select> </div>
+    <div class="col-sm-2"><input type="button" id="submit_min_raw" name="submit_min_raw" value="search"></input></div>
+    <div class="col-sm-2"><input type="button" id="root_min_raw" name="root_min_raw" value="root"></input></div>
+    </div>
+    <div class="row">
+    <div class="col-sm-12"><div id="word_path_raw"></div></div>
+    <div class="col-sm-12"><div id="tree_raw"></div></div>
+    </div>
+    </div>
+
+    <script type="text/javascript">
+    var ft_url_raw="{{ path('app_search_minerals_fancytreejs')}}";
+	
+    {% if checkbox|default('true')=="false" %}
+		var global_checkbox_raw=false;
+	{% else %}
+		var global_checkbox_raw=true;
+		var checkbox_p=get_param( "checkbox", document.location.search );
+           
+            if(checkbox_p.length>0)
+            {                
+                if(checkbox_p.toLowerCase()=="false")
+                {
+                    global_checkbox_raw=false;
+                }
+            }
+	{% endif %}
+
+    var reload_tree_raw=function(keyw, expand_first=false)
+    {       
+         var newSourceOption = {
+             url: ft_url_raw,
+              type: 'POST',
+              data: {
+                checkbox: global_checkbox_raw,
+                keyword: keyw,
+				children_only:true,
+				expanded:false,
+                expand_first_level:expand_first
+               },
+               dataType: 'json'
+               };
+         var tree = $('#tree_raw').fancytree('getTree');
+         tree.reload(newSourceOption);
+		 
+		 if(keyw.length>0)
+		 {
+			var url_path="{{ path('app_search_minerals_pathjs')}}";
+			$.getJSON( url_path, {keyword:keyw}, function( data ) {
+				console.log(data);
+				var path_text="";
+				for(var i=0; i< data.length; i++)
+				{
+					var path_text=path_text+"/";
+					var path_text=path_text+"<a href=\"javascript:reload_tree_raw('"+ data[i]["word"]+ "', true);\">"+ data[i]["word"]+"</a>";
+				}
+				$("#word_path_raw").html(path_text);
+			});
+		}
+		else
+		{
+			 $("#word_path_raw").html("/");
+		}
+		
+		 var newOption = new Option(keyw, keyw, true, true);
+		$('#search_min_raw').append(newOption).trigger('change');
+    }   
+    
+    
+
+    var init_tree_raw=function(keyw, checkbox, click_callback)
+    {
+        console.log("CALL");
+         console.log(keyw);
+        
+            
+            if(keyw.length>0)
+            {
+                ft_url_sub=ft_url_raw+"?keyword="+keyw;
+            }
+            else
+            {
+                 ft_url_sub=ft_url_raw+"?expanded=false";
+            }
+            console.log(ft_url_sub)
+			if(!checkbox)
+            {
+                ft_url_sub=ft_url_sub+"&checkbox=false";
+                global_checkbox_raw=false;
+            }
+            $("#tree_raw").fancytree(
+			{
+              checkbox: global_checkbox_raw,
+              selectMode: 3,
+              source: {
+                url:
+                  ft_url_sub,
+                   cache: false
+              },
+              select: function(event, data) {
+                console.log("expanded");
+              },
+              click: click_callback ,
+			  init:function(event, data)
+			  {
+				console.log("loaded");				
+               
+               }			 			  
+            });
+    }
+    
+    
+			  
+	$(document).ready(
+
+		function()
+		{	
+		    console.log("CALL_FT");
+			var param_array=select2_generic_full("{{ path('search_all_minerals_full_autocomplete')}}","word","word" );
+			{% if modal_bs|default('')!="" %}			
+			param_array["dropdownParent"]=$("{{ modal_bs }}");
+			{% endif %}
+            $("#search_min_raw").select2(param_array,0, false);
+            var keyw_main_raw=get_param( "keyword", document.location.search );
+            
+            
+            
+            if(keyw_main_raw.length>0)
+            {
+                console.log("INIT_GET");
+                $("#search_min_raw").val(keyw_main_raw);
+                init_tree_raw($("#search_min_raw").val(), global_checkbox_raw, click_callback_fancytree);
+            }
+            else
+            {
+                init_tree_raw("", global_checkbox_raw, click_callback_fancytree);
+            }
+            
+            $("#submit_min_raw").click(
+                function()
+                {
+                   reload_tree_raw($("#search_min_raw").val());
+                }
+            );
+			
+			$("#root_min_raw").click(
+                function()
+                {
+                   reload_tree_raw("");
+				   $("#root_min_raw").val("");
+				  
+                }
+            );
+			
+			$("#search_min_raw").keypress(function(event) {
+            if (event.keyCode === 13) {
+                $("#search_min_raw").click();
+            }
+		    }); 
+            
+            
+
+                    
+        }
+      );
+	  
+	  
+</script>
+{% endblock %}

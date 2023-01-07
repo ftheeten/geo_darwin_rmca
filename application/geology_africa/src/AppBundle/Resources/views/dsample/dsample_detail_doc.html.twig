@@ -1,0 +1,41 @@
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% set default_val = default_val|default(null) %}
+<div class="row">
+{% if not default_val is null %}
+	<a id="link_doc_{{index}}" target="_blank" href="{{ path('app_edit_doc',{ 'pk' : default_val.document.pk }) }}">{{ index }} : {{default_val.document.pk}}</a>
+{% else %}
+	<a id="link_doc_{{index}}" target="_blank" href="">{{ index }} : </a>
+{% endif %}
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_link_"~ index, ctrl_prefix ~"_id_link_"~ index,default_val.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_doc_"~ index, ctrl_prefix ~"_id_doc_"~ index,default_val.document.pk ?? "","readonly_class") }}
+
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_name_doc_"~ index, ctrl_prefix ~"_name_doc_"~ index,(default_val.document.iddoc ?? ""  ~ " " ~ default_val.document.title ?? "")|trim  ,"readonly_class") }}
+</div>
+<script type="text/javascript">
+$(document).ready(
+	function()
+	{
+		console.log("doc from sample loaded");
+		$('.readonly_class').attr('readonly', true);
+		
+		
+		$("#{{ ctrl_prefix }}_id_doc_{{ index }}").click(
+			function()
+			{
+				var new_key=$("#{{ ctrl_prefix }}_id_doc_{{ index }}").val();
+				console.log("changed_data");
+				var url=$("#link_doc_{{index}}").attr("href");
+				console.log(url);
+				var url_elems=url.split("/");
+				url_elems[url_elems.length-1]=new_key;
+				url=url_elems.join("/");
+				$("#link_doc_{{index}}").attr("href", url);
+				$("#link_doc_{{index}}").text("{{ index }} : "+new_key);
+			}
+		);
+	});
+	
+</script>
+{% include "@App/foreignkeys/template_modal_search.html.twig" with {'nested_template' : "@App/search_all/searchallbs_documents_raw.html.twig", "is_modal":true, "id_target": "#" ~ ctrl_prefix ~  "_id_doc_" ~index , "value_target": "#" ~  ctrl_prefix ~  "_name_doc_" ~ index , "index":index, "ctrl_suffix": "point_to_doc", "prefix_ctrl":"sample_to_doc" }%}

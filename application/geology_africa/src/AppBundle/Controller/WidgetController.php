@@ -13,8 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use AppBundle\Entity\Codecollection;
 use AppBundle\Entity\Dsample;
 use AppBundle\Entity\Dsamminerals;
-use AppBundle\Entity\Dsammagsusc;
 use AppBundle\Entity\Dsamgranulo;
+use AppBundle\Entity\Dsammagsusc;
 use AppBundle\Entity\Lminerals;
 use AppBundle\Entity\LPrecision;
 use AppBundle\Entity\LMedium;
@@ -28,6 +28,8 @@ use AppBundle\Entity\Ddocmap;
 use AppBundle\Entity\Ddocarchive;
 use AppBundle\Entity\Dsamheavymin;
 use AppBundle\Entity\Dsamheavymin2;
+use AppBundle\Entity\Dsamarays;
+use AppBundle\Entity\Dsamslimplate;
 use AppBundle\Entity\Dcontribution;
 use AppBundle\Entity\Dcontributor;
 use AppBundle\Entity\Dlinkcontribute;
@@ -38,6 +40,10 @@ use AppBundle\Entity\Dlinkdocloc;
 use AppBundle\Entity\Dlocdrilling; 
 use AppBundle\Entity\DLoclitho;
 use AppBundle\Entity\Dkeyword;
+use AppBundle\Entity\Dlinklocsam;
+use AppBundle\Entity\Dlinkdocsam;
+use AppBundle\Form\SearchAllForm;
+
 
 
 class WidgetController extends AbstractController
@@ -197,6 +203,25 @@ class WidgetController extends AbstractController
 			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));		
 	}
 	
+    public function widget_point_to_docAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","point_to_doc");		
+		//$form=$this->createForm(SearchAllForm::class, null);		
+		return $this->render('@App/dloccenter/detail_point_to_document.html.twig', array("index"=>$index,
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));		
+	}
+	
+	public function widget_point_to_contribAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","point_to_contrib");		
+		//$form=$this->createForm(SearchAllForm::class, null);		
+		return $this->render('@App/dloccenter/detail_point_to_contribution.html.twig', array("index"=>$index,
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));		
+	}
+	
+	
 	public function widget_point_to_stratum_descriptionAction(Request $request)
 	{
 		$index=$request->get("index","1");
@@ -249,8 +274,89 @@ class WidgetController extends AbstractController
 		$ctrl_prefix=$request->get("ctrl_prefix","doc_to_flightplan");		
 		//$form=$this->createForm(SearchAllForm::class, null);		
 		return $this->render('@App/documents/flightplan_detail.html.twig', array("index"=>$index, 
-			//"default_val"=>$default_val,
 			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));	
 	}
+	
+	public function widget_sample_to_mineralAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_dsammineral");
+		return $this->render('@App/dsample/dsample_detail_mineral.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+	public function widget_sample_to_granuloAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_granulo");
+		return $this->render('@App/dsample/dsample_detail_granulo.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+	public function widget_sample_to_heavyminAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_heavymin");
+		return $this->render('@App/dsample/dsample_detail_heavymin.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+    public function widget_sample_to_arayAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_aray");
+		return $this->render('@App/dsample/dsample_detail_aray.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+	public function widget_sample_to_slimplateAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_slimplate");
+		return $this->render('@App/dsample/dsample_detail_slimplate.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+	public function widget_sample_to_locAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_dlinklocsam");
+		$search_form=$this->createForm(SearchAllForm::class, null);	
+		return $this->render('@App/dsample/dsample_detail_loc.html.twig',
+			array(
+				"index"=>$index, 
+				"ctrl_prefix"=>$ctrl_prefix, 
+				'read_mode'=>$this->enable_read_write($request, "write"),
+				'search_form'=>$search_form->createView(),
+				));			
+		
+	}
+	
+	public function widget_sample_to_contribAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_dlinkcontsam");
+		return $this->render('@App/dsample/dsample_detail_contrib.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write")));			
+		
+	}
+	
+	public function widget_sample_to_docAction(Request $request)
+	{
+		$index=$request->get("index","1");
+		$ctrl_prefix=$request->get("ctrl_prefix","sample_detail_dlinkdocsam");
+		$search_form=$this->createForm(SearchAllForm::class, null);	
+		return $this->render('@App/dsample/dsample_detail_doc.html.twig', array("index"=>$index, 
+			"ctrl_prefix"=>$ctrl_prefix, 'read_mode'=>$this->enable_read_write($request, "write"),
+			'search_form'=>$search_form->createView(),));			
+		
+	}
+	
+	
 
 }

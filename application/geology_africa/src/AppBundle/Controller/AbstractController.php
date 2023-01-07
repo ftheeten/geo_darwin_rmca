@@ -60,6 +60,125 @@ class AbstractController extends Controller
 		}
 	}
 	
+	    public function getusercoll_right($coll,$rights)
+		{          
+		$em = $this->getDoctrine()->getManager();
+		$username = $this->getUser()->getUsername();
+		$found=0;
+		
+		$RAW_QUERY = "SELECT 
+							uc.collection_id as ID_Collection, 
+							uc.user_id as ID_User,  
+							zoneutilisation,  
+							username,  
+							uc.role as role
+				FROM codecollection c
+				left join fos_user_collections uc on c.pk = uc.collection_id
+				left join duser u on u.id = uc.user_id
+				WHERE uc.collection_id = ANY ('{".$coll."}'::int[])
+				AND username = '".$username."';";
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		$statement->execute();
+		$arrayusercoll = $statement->fetchAll();
+		foreach($arrayusercoll as $arrayusercoll_obj){
+			foreach($rights as $rights_obj){
+				if ($arrayusercoll_obj['role'] == $rights_obj){
+					//print_r($rights_obj);
+					$found=1;
+					break;
+				}
+			}
+		}
+		if ($found==1){
+			return true;
+		}else{return false;}
+	}
+
+	public function edit_general($obj, $form, $name_twig_class, Request $request, $twig, $controller_name='AppBundle\Controller\GeoController', $array_options=Array())
+	{
+		$collection_rights=$this->check_collection_rights_general($controller_name);
+		if ($collection_rights == true)
+		{		
+			$options=array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request));
+			if(count($array_options)>0)
+			{
+				$options=array_merge($options, $array_options);
+			}
+			$em = $this->getDoctrine()->getManager();	
+			$this->set_sql_session();
+			if (!$obj) 
+			{
+				throw $this->createNotFoundException('No document found' );
+			}
+			elseif($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+			{
+				
+				if ($request->isMethod('POST')) 
+				{				
+					
+					$form->handleRequest($request);
+					if ($form->isSubmitted() && $form->isValid()) 
+					{					
+						
+						try 
+						{						
+							$em = $this->getDoctrine()->getManager();
+							$em->flush();
+							$this->addFlash('success','DATA RECORDED IN DATABASE!');  
+							return $this->render($twig,$options );
+							
+						}catch(\Doctrine\DBAL\DBALException $e ) {
+							
+							$form->addError(new FormError($e->getMessage()));
+							
+							return $this->render($twig, $options);
+						}
+						catch(\Doctrine\DBAL\DBALException\UniqueConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));	
+							return $this->render($twig, $options);						
+						}
+						catch(\Doctrine\DBAL\DBALException\ConstraintViolationException $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, array($name_twig_class => $obj,'form' => $form->createView(),'origin'=>'edit','originaction'=>'edit',
+							'read_mode'=>$this->enable_read_write($request)));						
+						}
+						catch(Exception $e ) {
+							$form->addError(new FormError($e->getMessage()));
+							return $this->render($twig, $options);						
+						}
+						finally
+						{
+							
+						}
+						
+					}
+					elseif ($form->isSubmitted() && !$form->isValid() )
+					{
+						$form->addError(new FormError("Other validation error"));
+						return $this->render($twig, $options);
+					}
+					elseif (!$form->isSubmitted())
+					{					
+						return $this->render($twig, $options);
+					}
+				}
+				else
+				{
+					//print("issue");
+				}
+				
+				
+			}
+			//print("test");
+			
+			return $this->render($twig,$options);
+		}
+		else
+		{
+			return $this->render('@App/collnoaccess.html.twig');
+		}
+	}
 	
 	protected function get_request_var(Request $request, $name_var, $default="")
 	{
@@ -76,9 +195,9 @@ class AbstractController extends Controller
 		return $returned;
 	}
 	
-	protected function check_collection_rights_general()
+	protected function check_collection_rights_general($controller_name='AppBundle\Controller\GeoController')
 	{
-		return $this->container->get('AppBundle\Controller\GeoController')->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']);
+		return $this->container->get($controller_name)->getusercoll_right('1,2,3,7,9',['Curator','Validator','Encoder','Collection_manager']);
 	}
 	
 	protected function enable_read_write(Request $request, $default="read", $variable="mode")
@@ -137,6 +256,12 @@ class AbstractController extends Controller
 				$sql_table="dcontribution";
 				$field="idcontribution";
 			}
+			elseif($table=="dsample")
+			{
+				$sql_table="dsample";
+				$field="idsample";
+			}
+			
 			
 			
 			else
@@ -172,6 +297,16 @@ class AbstractController extends Controller
 			{
 				$sql_table="docplanvol";
 				$field="fid::integer";
+			}
+			elseif($table=="lminerals")
+			{
+				$sql_table="lminerals";
+				$field="idmineral";
+			}
+			elseif($table=="dsample")
+			{
+				$sql_table="dsample";
+				$field="idsample";
 			}
 			$em = $this->container->get('doctrine')->getEntityManager();
 			$RAW_QUERY="SELECT COALESCE(MAX(COALESCE(".$field.",0))+ 1,1) as next_id FROM ".$sql_table." ;";
@@ -238,6 +373,23 @@ class AbstractController extends Controller
         $codes = $statement->fetchAll();        
         return new JsonResponse($codes);
     }
+	
+	protected function get_sample_collections()
+	{
+		
+		$RAW_QUERY = "SELECT  DISTINCT dsample.idcollection, collection FROM dsample INNER JOIN codecollection ON idcollection=codecollection ORDER BY idcollection;";
+		$em = $this->getDoctrine()->getManager();	
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		$statement->execute();
+		$data = $statement->fetchAll();
+		return $data;
+	}
+	
+	public function all_collections_samplesAction(Request $request)
+	{
+		$data=$this->get_sample_collections();
+		 return new JsonResponse($data);
+	}
 	
 	public function pdo_param_string($request, $field, $sql_field, &$params_sql_or, &$params_pdo, &$params_sql_or_group, &$idx_param, $type, $comp="LIKE", $suffix="||'%'")
 	{
@@ -525,4 +677,15 @@ public function handle_many_to_many_detail_general(Request $request, $index, $ta
 			return $this->render('@App/collnoaccess.html.twig');
 		}
     }
+	
+	protected function get_hierarchy_mineral()
+	{
+		
+		$RAW_QUERY = "SELECT * FROM lminerals_hierarchy ORDER BY pk";
+		$em = $this->getDoctrine()->getManager();	
+		$statement = $em->getConnection()->prepare($RAW_QUERY);
+		$statement->execute();
+		$data = $statement->fetchAll();
+		return $data;
+	}
 }

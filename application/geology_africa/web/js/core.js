@@ -1,5 +1,7 @@
 		var global_modal_index_value="";
 		var global_modal_index_text="";
+		var current_tab="main-tab";
+		var search=null;
 		
 		var select2_generic=function(url, key, val, minlen)
 		{
@@ -114,6 +116,128 @@
         var results = regex.exec( url );
         return results == null ? "" : results[1];
     }
+	
+	 var get_all_params=function(url)
+    {       
+		console.log(url);
+        var regexS = /(?<=&|\?)([^=]*=[^&#]*)/;
+        var regex = new RegExp( regexS,'g' );
+        var results = url.match(regex);
+        if(results==null)
+        {
+            return {};
+        }
+        else
+        {
+            returned={};
+            for(i=0;i<results.length;i++)
+            {
+                var tmp=results[i];                
+                var regexS2="([^=]+)=([^=]+)";
+                var regex2 = new RegExp( regexS2 );
+                var results2 = regex2.exec(tmp );                
+                returned[results2[1]]=results2[2];
+            }
+            return returned;
+        }   
+    }
+	
+	var replace_param=function(url, param, value)
+	{
+		var get_params=get_all_params(url);
+		var base_url=url.split("?");
+		get_params[param]=value;
+		var new_params=Array();
+		for(key in get_params)
+		{
+			new_params.push(key+"="+get_params[key]);
+		}
+		return base_url[0]+"?"+new_params.join("&");
+	}
+	
+	
+	var init_tab_url=function(p_class, current_tab)
+	{
+		console.log(p_class);
+		var tmp_url=$(p_class).attr("href");
+		console.log(tmp_url);
+		if(typeof  tmp_url!=="undefined")
+		{
+			
+			tmp_url=replace_param(tmp_url,"current_tab",current_tab );
+			$(p_class).attr("href",tmp_url );
+		}
+	}
+	
+	var handle_ajax_template=function(counter, prefix, url )
+	{
+		counter++;
+		
+		$("#"+prefix+"_list").append('<li><div class="widget_subform_'+ prefix +'_'+ counter.toString() +'"></div></li>');
+		jQuery.get(url,
+					{
+						index:counter,
+						ctrl_prefix: prefix
+					},
+					function(result)
+					{						
+						$('.widget_subform_'+ prefix+'_'+ counter.toString() ).html(result);
+					}
+				);
+		return counter;
+	}
+	
+	var handle_remove_ajax_template=function(counter, prefix)
+	{
+		if(counter>0)
+		{
+			counter--;
+			$('#'+prefix+'_list li:last-child').remove();
+		}
+		return counter;
+			
+	}
+	
+	$(document).ready(
+		function()
+		{
+			$(".mode_shift").click(
+				function()
+				{					
+					init_tab_url(".mode_shift", current_tab);
+				}
+			);
+			
+			$(".nav-link").click(
+				function()
+				{
+					current_tab=$(this).attr("id");
+					init_tab_url(".mode_shift", current_tab);
+				}
+			);
+			
+			$("#choose_log").change(
+				function()
+				{					
+					var tmp=$(this).val();
+					console.log(tmp);
+					if(tmp=="")
+					{
+						$(".typelog").show();
+					}
+					else
+					{
+						$(".typelog").hide();
+						$("."+tmp).show();
+					}
+				}
+			);
+			
+			$(".spinner-border").hide();
+			
+			
+		}
+	);
 	
 
 

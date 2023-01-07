@@ -1,0 +1,106 @@
+{# src/AppBundle/Resources/views/lminerals/mineralform.html.twig #}
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block javascript %}
+ {{ parent() }}
+{% endblock %}
+
+{% block body %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% include "@App/forms/security_shift.html.twig" %}
+
+{{ read_test.form_read_mode(read_mode, form, {'attr': {'class': 'form-horizontal','id': 'mineral_form'}}) }}
+{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+
+
+<style>
+
+</style>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-1">ID mineral</div>
+		<div class="col-sm-3">
+		<input type="hidden" name="mode" id="mode" value="read"/>
+		{% if lmineral.pk != "" %}
+					{{lmineral.idmineral}}
+		{% else %}
+			{{ read_test.widget_read_mode(read_mode, form.idmineral,  {'attr':{'class': 'form-control inp_Idmineral'}},lmineral.idmineral ) }}
+			{% if originaction=='add_beforecommit' %}
+				{% include "@App/forms/get_next_id.html.twig" with {"name_ctrl" : "id_new_mineral", "table_name":"lminerals", target_ctrl:".inp_Idmineral"}   %}
+			{% endif  %}					
+		{% endif %}
+		</div>
+		
+		<div class="col-sm-1">Name</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.mname, {'attr': {'class': 'form-control inp_mname'}}, lmineral.mname ??"" ) }}</div>
+		
+		<div class="col-sm-1">Rank</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.rank, {'attr': {'class': 'form-control inp_mrank'}}, lmineral.rank ??"" ) }}</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-1">Formula</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.mformula, {'attr': {'class': 'form-control inp_mformula'}}, lmineral.mformula ??"" ) }}</div>
+		<div class="col-sm-1">Parent</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.mparent, {'attr': {'class': 'form-control inp_mparent'}}, lmineral.mparent ??"" ) }}
+		
+		{% if read_mode=="write" or read_mode=="create" %}
+		<input type="button" id="add_modal_mineralhierarch" name="add_modal_mineralhierarch" value="Search" data-bs-toggle="modal" data-bs-target="#modalhierarchy"></input>
+		{% endif %}
+		</div>
+		<div class="col-sm-1">Classification</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.lmineralshierarchy, {'attr': {'class': 'form-control inp_mhierarchy'}}, lmineral.lmineralshierarchy ??"" ) }}
+		
+		</div>
+	</div>
+	{% if read_mode=="write" or read_mode=="create" %}
+		
+			<div class="modal fade" id="modalhierarchy"   data-bs-backdrop="static" style="z-index:900000000000;">
+			  <div class="modal-dialog modal-xl" >
+				<div class="modal-content" >
+				  <div class="modal-header">
+					<h5 class="modal-title">Find parent</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+					<div class="container">
+								{% include "@App/lminerals/mineral_search_raw.html.twig" with { 'is_modal':true, 'ranks':ranks} %}
+						</div>
+				  </div>
+				  <div class="modal-footer" style="z-index:900000000000;">
+					<button type="button" id="close_min_modal" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					
+				  </div>
+				</div>
+			  </div>
+			</div>
+
+		
+	{% endif %}
+</div>
+<script language="JavaScript">
+$(document).ready(
+	function()
+	{
+		$("#add_modal_mineralhierarch").click(
+			function()
+			{
+				console.log("click");
+				$("#search_hierarch_raw").val($(".inp_mhierarchy").val());
+				$("#search_hierarch_display").val($(".inp_mhierarchy option:selected").text());
+			}
+		);
+	}
+);
+</script>
+
+ {{ read_test.submit_button_log(read_mode) }}
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#mineral_form' , 'delete_route': 'app_delete_mineral' } %}
+{{ read_test.form_end_read_mode(read_mode, form) }}
+	
+{% endblock %}
+
+
+	
+
+

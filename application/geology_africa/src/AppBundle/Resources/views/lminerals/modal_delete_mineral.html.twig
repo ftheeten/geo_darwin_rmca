@@ -1,0 +1,40 @@
+<div class="modal fade modal_mineral" id="modaldelete" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" style="z-index:1000000000">
+ <div class="modal-dialog" role="document">
+        <div class="modal-content" id="modal_delete_content">
+            <div class="modal-header">
+                <div class="validation_message">
+                 DELETE mineral
+                 {{ include("@App/validation_errors.html.twig",{'local_form' : form_delete})  }}
+                </div> 
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12" id="parent_for_add">
+                            Parent : 
+                            {% if mode=="creation" %}
+                                {% set default_parent = parent %}
+                            {% else %}
+                                {% set default_parent = '' %}
+                            {% endif %}                        
+                             {{ form_widget(form_delete.mname, {'attr': {'class': 'minw_parent', 'value':default_parent, 'readonly':true}}) }}
+                             {{ form_widget(form_delete.callback_action, {'attr': {'class': 'callback_delete_action', 'value': 'record_deletion', 'readonly':true}}) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12" id="parent_for_add">
+                            Value : 
+                             {{ form_widget(form_delete.mname, {'attr': {'class': 'minw_delete_value', 'readonly':true}}) }}
+							  {{ form_widget(form_delete.wordson_edit, {'attr': {'class': 'minw_edit_value', 'readonly':true}}) }}
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            <div class="modal-footer">
+                  <input type="submit" class="createButton reenable_modal" />
+                  <button type="button" class="btn btn-secondary remove_add dismiss_modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+ </div>
+</div>

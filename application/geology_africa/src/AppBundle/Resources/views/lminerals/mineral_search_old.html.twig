@@ -1,0 +1,452 @@
+{# src/AppBundle/Resources/views/lminerals/mineral_search_old.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+{% block fancytree %}
+
+
+{% endblock %}
+{% block body %}
+ {% set reload_var ='false' %}
+    {{ form_start(form, {'attr': {'class': 'modal_form','id': 'mineral_form', 'autocomplete': 'off'}}) }}
+	<div class="container">
+    <div class="row">
+    <div class="col-sm-2"><select name="search_min" id="search_min" style="width:100%"  ></select> </div>
+    <div class="col-sm-2"><input type="button" id="submit_min" name="submit_min" value="search"></input></div>
+    <div class="col-sm-2"><input type="button" id="root_min" name="root_min" value="root"></input></div>
+    <div class="col-sm-2"><input type="button" id="add_root" name="add_root" value="add_root_mineral" data-bs-toggle="modal" data-bs-target="#modaladd"></input></div>
+    </div>
+    <div class="row">
+    <div class="col-sm-12"><div id="word_path"></div></div>
+    <div class="col-sm-12"><div id="tree"></div></div>
+    </div>
+    </div>
+	 </div>
+	{{ include("@App/lminerals/modal_add_mineral.html.twig") }}
+	{{ include("@App/lminerals/modal_search_mineral.html.twig") }}
+	{{ form_end(form) }}
+	{{ form_start(form_delete, {'attr': {'class': 'modal_form','id': 'mineral_form_delete'}}) }}
+        {{ include("@App/lminerals/modal_delete_mineral.html.twig") }}
+    {{ form_end(form_delete) }}
+	
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <link href="{{asset('js/fancytree/dist/skin-win8/ui.fancytree.css')}}" rel="stylesheet" />
+    <script src="{{asset('js/fancytree/dist/jquery.fancytree-all-deps.min.js')}}"></script>
+    <script type="text/javascript">
+    var ft_url="{{ path('app_search_minerals_fancytreejs')}}";
+	
+	 var show_validation_msg=true;
+    var global_checkbox=true;
+    var root_mode=false;
+	
+	{% if is_parent %}
+		var is_parent_element=true;
+	{% else %}
+		var is_parent_element=false;
+	{% endif %}
+	
+	
+
+    var reload_tree=function(keyw, expand_first=false)
+    {            
+         var newSourceOption = {
+             url: ft_url,
+              type: 'POST',
+              data: {
+                checkbox: global_checkbox,
+                keyword: keyw,
+				children_only:true,
+				expanded:false,
+                expand_first_level:expand_first
+               },
+               dataType: 'json'
+               };
+         var tree = $('#tree').fancytree('getTree');
+         tree.reload(newSourceOption);
+		 
+		 if(keyw.length>0)
+		 {
+			var url_path="{{ path('app_search_minerals_pathjs')}}";
+			$.getJSON( url_path, {keyword:keyw}, function( data ) {
+				console.log(data);
+				var path_text="";
+				for(var i=0; i< data.length; i++)
+				{
+					var path_text=path_text+"/";
+					var path_text=path_text+"<a href=\"javascript:reload_tree('"+ data[i]["word"]+ "',true);\">"+ data[i]["word"]+"</a>";
+				}
+				$("#word_path").html(path_text);
+			});
+		}
+		else
+		{
+			 $("#word_path").html("/");
+		}
+		
+		 var newOption = new Option(keyw, keyw, true, true);
+		$('#search_min').append(newOption).trigger('change');
+    }
+	
+    onElementInserted('body', '.btn-explore', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("explore");
+						var val=$(this).attr('value');
+						reload_tree(val);   
+						$("#search_min").val(val);
+					}	
+				)
+    });
+    
+    onElementInserted('body', '.btn-delete', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("delete");
+						var val=$(this).attr('value');
+                        console.log(val);
+                        $(".minw_delete_value").val(val);
+					}	
+				)
+    });
+    
+    onElementInserted('body', '.btn-add', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+                        root_mode=false;  
+						console.log("add");
+						var val=$(this).attr('value');
+                        $(".minw_parent").val(val);
+						$(".minw_add_value").val("")
+                        $(".callback_add_action").val("record_creation");
+                        $("#change_parent").hide();
+					}	
+				)
+    });
+
+    
+    onElementInserted('body', '.btn-move', function(element) {
+        ///console.log(element);
+        $(element).click(
+					function()
+					{
+						console.log("move");                        
+						var val=$(this).attr('value');
+                        var val_array=val.split("_PARENT_");
+                       
+						if(val_array.length==2)
+                        {
+							console.log("DISPLAY_VALUE");
+							var val_array_2=val_array[1].split("_RANK_");
+							if(val_array_2.length==2)
+							{
+								
+								value_min=val_array_2[0];
+								remaining=val_array_2[1];
+								var val_array_3=remaining.split("_FORMULA_");
+								var formula=""
+								if(val_array_3.length==1||val_array_3.length==2)
+								{
+									
+									var rank=val_array_3[0];
+									if(val_array_3.length==2)
+									{
+										formula=val_array_3[1];
+									}
+									console.log(val);
+									console.log(val_array);
+									//.display value of existing
+									$(".minw_parent").val(val_array[0]);
+									$(".minw_add_value").val(value_min);
+									$(".minw_edit_value").val(value_min);
+									$(".callback_add_action").val("record_edition");
+									 $("#change_parent").show();
+									if(val_array[0]==value_min)
+									{
+										is_parent_element=true;
+									}
+									else
+									{
+										is_parent_element=false;
+									}
+								}
+							}
+                        }
+                        else
+                        {
+                            $(".minw_parent").val("ERROR");
+                            $(".minw_add_value").val("ERROR");
+							$(".minw_edit_value").val("ERROR");
+                            $(".callback_add_action").val("ERROR");
+                        }
+                    }	
+				)
+    });   
+        
+    
+    
+
+    var init_tree=function(keyw, checkbox)
+    {
+        console.log("CALL");
+         console.log(keyw);
+        
+            
+            if(keyw.length>0)
+            {
+                ft_url_sub=ft_url+"?keyword="+keyw;
+            }
+            else
+            {
+                 ft_url_sub=ft_url+"?expanded=false";
+            }
+            if(!checkbox)
+            {
+                ft_url_sub=ft_url_sub+"&checkbox=false";
+                global_checkbox=false;
+            }
+            console.log(ft_url_sub)
+			
+            $("#tree").fancytree(
+			{
+              checkbox: global_checkbox,
+              selectMode: 3,
+              source: {
+                url:
+                  ft_url_sub,
+                   cache: false
+              },
+              select: function(event, data) {
+                console.log("expanded");
+              },
+              click: function(event, data) {
+                var node = data.node;
+                var val=node["key"];
+			    console.log("Selected");
+				console.log(val);                
+              },
+			  init:function(event, data)
+			  {
+				console.log("loaded");				
+               
+               }
+			  ,
+			  renderNode: function (event, data) {
+					var node = data.node;
+					var $nodeSpan = $(node.span);
+
+					// check if span of node already rendered
+					if (!$nodeSpan.data('rendered')) {
+
+						
+						var addButton = $('<button  type="button" class="btn btn-add" value="'+node.key+'"  data-bs-toggle="modal" data-bs-target="#modaladd">add node</button>');
+						console.log("DISPLAY_NODE");
+						console.log(node);
+						
+						var rank="";
+						if(node.data["rank"]!==undefined)
+						{
+													rank=node.data["rank"];
+						}
+						var m_formula="";
+						if(node.data["m_formula"]!==undefined)
+						{
+							m_formula=node.data["m_formula"];
+						}
+						var value_tree=node.data["mparent"] + "_PARENT_" +node.key+"_RANK_"+rank+"_FORMULA_"+m_formula;
+						console.log(value_tree);
+						var moveButton = $('<button type="button" class="btn btn-move" value="'+ value_tree+'" data-bs-toggle="modal" data-bs-target="#modaladd" >modify</button>');
+                        var deleteButton = $('<button type="button" class="btn btn-delete" value="'+node.key+'" data-bs-toggle="modal" data-bs-target="#modaldelete"  >delete node</button>');
+						
+						
+						$nodeSpan.append(addButton);
+						$nodeSpan.append(moveButton);
+                        $nodeSpan.append(deleteButton);
+						
+						deleteButton.hide();
+						addButton.hide();
+						moveButton.hide();
+
+						$nodeSpan.hover(function () {
+							// mouse over							
+							deleteButton.show();
+							addButton.show();
+							moveButton.show();
+
+						}, function () {
+
+							// mouse out							
+							deleteButton.hide();
+							addButton.hide();
+							moveButton.hide();
+						})
+
+						// span rendered
+						$nodeSpan.data('rendered', true);
+                        
+					}
+				}
+            });
+    }
+    
+
+	$(document).ready(
+
+		function()
+		{	
+            $("#search_min").select2(select2_generic_full("{{ path('search_all_minerals_full_autocomplete')}}","word","word" ),0, false);
+            var keyw_main=get_param( "keyword", document.location.search );
+            var checkbox_p=get_param( "checkbox", document.location.search );
+            checkbox=true;
+            console.log("check");
+            console.log(checkbox_p.toLowerCase());
+            if(checkbox_p.length>0)
+            {                
+                if(checkbox_p.toLowerCase()=="false")
+                {
+                     console.log("set_false");
+                    checkbox=false;
+                }
+            }
+            
+            console.log(checkbox);
+            if(keyw_main.length>0)
+            {
+                console.log("INIT_GET");
+                $("#search_min").val(keyw_main);
+                init_tree($("#search_min").val(),checkbox);
+            }
+            else
+            {
+                init_tree("",checkbox);
+            }
+            
+            $("#submit_min").click(
+                function()
+                {
+                   reload_tree($("#search_min").val());
+                }
+            );
+			
+			$("#root_miny").click(
+                function()
+                {
+                   reload_tree("");
+				   $("#search_min").val("");
+				  
+                }
+            );
+			
+			$("#search_min").keypress(function(event) {
+            if (event.keyCode === 13) {
+			    console.log("submit");
+                $("#submit_min").click();
+            }
+			 });
+			 
+			 
+			 $("#search_min").change(function(event) {
+            
+			    console.log("submit");
+               //reload_tree($("#search_key").val());
+            
+			 });
+			 
+             
+             {% if modal_mode=="show_add" %}
+			        console.log("RECURS");
+					 console.log("{{ parent }}");
+                   $("#modaladd").modal('show');
+				   $(".minw_parent").val("{{ parent }}");
+             {% endif %}
+             {% if modal_mode=="show_delete" %}
+                   $("#modaldelete").modal('show');
+             {% endif %}
+             
+			//to remove ?
+            $('.modal_form').on('submit', function() {
+				$().on(
+					'hide-bs-modal', function(e)
+					{
+						console.log("A");
+						/*$(".modal_keyword").on('hide.bs.modal',
+							function(e)
+							{
+							console.log("B");
+								e.preventDefault();
+							}
+						);*/
+					}
+				);
+			});
+        
+        $(".remove_add").click(
+            function()
+            {                
+                $(".minw_parent").val("");
+                $(".minw_value").val("");
+				//bug because modal in modal
+				$('.modal-backdrop').remove();
+            }
+        );
+        
+        
+        $("#b_change_parent").click(
+                function()
+                {
+                    console.log("browse");
+                }
+            );
+			
+		$("#b_set_root").click(
+                function()
+                {
+                     $(".minw_parent").val($(".minw_add_value").val()); 
+                }
+            );
+        
+
+        
+        {% if callback_action=="display_new_data" and term|length > 0 %}
+                                   
+               var option = new Option("{{ term }}", "{{ term }}", true, true);                  
+               $("#search_min").append(option).trigger('change');
+               reload_tree("{{ term }}"); 
+                $(".minw_value").val("");               
+         {% endif %}
+            
+            
+            
+        }
+      );
+      
+       $("#add_root").click(
+					function()
+					{			
+                        root_mode=true;                  
+                        $(".callback_add_action").val("record_creation");
+						$(".minw_add_value").val("")
+                        $("#change_parent").hide();
+					}	
+				);
+                
+       $(".minw_add_value").change(
+            function()
+            {
+                if(root_mode||is_parent_element)
+                {
+                   $(".minw_parent").val($(".minw_add_value").val()); 
+                }
+            }
+       );          
+	  
+	
+</script>
+{% endblock %}

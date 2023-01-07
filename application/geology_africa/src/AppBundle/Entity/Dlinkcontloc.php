@@ -23,34 +23,25 @@ class Dlinkcontloc
     private $pk;
 
     /**
-     * @var \AppBundle\Entity\Dloccenter
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dloccenter",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
 
     /**
-     * @var \AppBundle\Entity\Dcontribution
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dcontribution",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcontribution", referencedColumnName="idcontribution")
-     * })
+     * @ORM\Column(name="idcontribution", type="integer", nullable=false)
      */
     private $idcontribution;
 
 	/**
-     * @var \AppBundle\Entity\Dloccenter
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dloccenter",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="id", referencedColumnName="idpt")
-     * })
+     * @ORM\Column(name="idpt", type="integer", nullable=false)
      */
-    private $id;
+    private $idpt;
 	
     /**
      * Get pk
@@ -61,15 +52,22 @@ class Dlinkcontloc
     {
         return $this->pk;
     }
+	
+	 public function setPk($val)
+    {
+        $this->pk=$val;
+		return $this;
+    }
+	
 
  /**
      * Set idcontribution
      *
-     * @param \AppBundle\Entity\Dcontribution $idcontribution
+     * @param integer $idcontribution
      *
      * @return Dlinkcontloc
      */
-    public function setIdcontribution(\AppBundle\Entity\Dcontribution $idcontribution = null)
+    public function setIdcontribution( $idcontribution = null)
     {
         $this->idcontribution = $idcontribution;
 
@@ -79,58 +77,82 @@ class Dlinkcontloc
     /**
      * Get idcontribution
      *
-     * @return \AppBundle\Entity\Dcontribution
+     * @return integer
      */
     public function getIdcontribution()
     {
         return $this->idcontribution;
     }
 	
-	    /**
-     * Set id
+	/**
+     * Set idptobj
      *
-     * @param \AppBundle\Entity\Dloccenter $id
+     * @param \AppBundle\Entity\Dloccenter $obj
      *
      * @return Dlinkcontloc
      */
-    public function setId(\AppBundle\Entity\Dloccenter $id = null)
+    public function setIdPtObj(\AppBundle\Entity\Dloccenter $obj = null)
     {
-        $this->id = $id;
+		if($obj!==null)
+		{
+			$this->idpt = $obj->getIdpt();
+			$this->idcollection = $obj->getIdcollection();
+		}
+        return $this;
+    }
+	
+	/**
+     * Set idpt
+     *
+     * @param integer $idpt
+     *
+     * @return Dlinkcontloc
+     */
+    public function setIdpt($id = null)
+    {
+        $this->idpt = $id;
 
         return $this;
     }
 
     /**
-     * Get id
+     * Get idpt
      *
      * @return \AppBundle\Entity\Dloccenter
      */
-    public function getId()
+    public function getIdpt()
     {
-        return $this->id;
+        return $this->idpt;
     }
 
     /**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dloccenter $idcollection
+     * @param integer $idcollection
      *
      * @return Dlinkcontloc
      */
-    public function setIdcollection(\AppBundle\Entity\Dloccenter $idcollection = null)
+    public function setIdcollection( $idcollection = null)
     {
         $this->idcollection = $idcollection;
 
         return $this;
     }
+	
+	public $dcontribution;
+	
+	public function setDcontribution_db($em)
+	{
+		$tmp_cont=$em->getRepository(Dcontribution::class)
+							->findOneBy(array(
+								"idcontribution"=>$this->idcontribution,	
+																
+							));	
+		if($tmp_cont!==null)
+		{
+			$tmp_cont->setDescriptionDB($em);
+		}
+		$this->dcontribution=$tmp_cont;
+	}
 
-    /**
-     * Get idcollection
-     *
-     * @return \AppBundle\Entity\Dloccenter
-     */
-    public function getIdcollection()
-    {
-        return $this->idcollection;
-    }
 }

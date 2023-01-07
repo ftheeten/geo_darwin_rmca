@@ -23,34 +23,28 @@ class Dlinkcontsam
     private $pk;
 
     /**
-     * @var \AppBundle\Entity\Dsample
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
-
-    /**
-     * @var \AppBundle\Entity\Dcontribution
+	
+	/**
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dcontribution",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcontribution", referencedColumnName="idcontribution")
-     * })
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     */
+    private $id;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idcontribution", type="integer", nullable=false)
      */
     private $idcontribution;
 
-	/**
-     * @var \AppBundle\Entity\Dsample
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="id", referencedColumnName="idsample")
-     * })
-     */
-    private $id;
+
+	
 
     /**
      * Get pk
@@ -62,14 +56,14 @@ class Dlinkcontsam
         return $this->pk;
     }
 
-    /**
+     	/**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dsample $idcollection
+     * @param string $idcollection
      *
      * @return Dlinkcontsam
      */
-    public function setIdcollection(\AppBundle\Entity\Dsample $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -77,23 +71,77 @@ class Dlinkcontsam
     }
 
     /**
+     * Set idcollectionobj
+     *
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dlinkcontsam
+     */
+    public function setIdcollectionobj(\AppBundle\Entity\Dsample $sample = null)
+    {
+        if($sample !==null)
+		{
+			 $this->idcollection = $sample->getIdCollection();
+			 $this->id = $sample->getIdSample();
+		}
+
+        return $this;
+    }
+
+    /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Dsample
+     * @return string
      */
     public function getIdcollection()
     {
         return $this->idcollection;
     }
+	
+	/**
+     * Set id
+     *
+     * @param integer
+     *
+     * @return Dsamgranulo
+     */
+    public function setId( $idsample)
+    {
+        $this->id = $idsample;
 
+        return $this;
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+	
+	
+	public function setIdsample($id)
+	{
+		$this->setId($id);
+	}
+	
+	public function getIdsample()
+	{
+		return $this->getId();
+	}
+		
+	
     /**
      * Set idcontribution
      *
-     * @param \AppBundle\Entity\Dcontribution $idcontribution
+     * @param integer $idcontribution
      *
-     * @return Dlinkcontsam
+     * @return Dlinkcontloc
      */
-    public function setIdcontribution(\AppBundle\Entity\Dcontribution $idcontribution = null)
+    public function setIdcontribution( $idcontribution )
     {
         $this->idcontribution = $idcontribution;
 
@@ -103,34 +151,33 @@ class Dlinkcontsam
     /**
      * Get idcontribution
      *
-     * @return \AppBundle\Entity\Dcontribution
+     * @return integer
      */
     public function getIdcontribution()
     {
         return $this->idcontribution;
     }
 	
-	    /**
-     * Set id
-     *
-     * @param \AppBundle\Entity\Dsample $id
-     *
-     * @return DLinkContSam
-     */
-    public function setId(\AppBundle\Entity\Dsample $id = null)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get id
-     *
-     * @return \AppBundle\Entity\Dsample
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
+	
+	public $dcontribution=[];
+	
+	public function setDcontribution_db($em)
+	{
+		$tmp_cont=$em->getRepository(Dcontribution::class)
+							->findOneBy(array(
+								"idcontribution"=>$this->idcontribution,	
+																
+							));	
+		if($tmp_cont!==null)
+		{
+			$tmp_cont->setDescriptionDB($em);
+		}
+		$this->dcontribution=$tmp_cont;
+	}
+	
+	
 }

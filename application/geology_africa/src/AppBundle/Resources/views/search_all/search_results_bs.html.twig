@@ -1,10 +1,6 @@
 {# src/AppBundle/Resources/views/search_all/search_results_bs.html.twig #}
 {% set is_modal = is_modal|default(false) %}
-{% if is_modal %}
-MODAL
-{% else %}
-NOT_MODAL
-{% endif %}
+
 {{ nb_results }} Record(s)
 {% include '@App/pagination.html.twig' %}
 
@@ -37,23 +33,30 @@ institutions
 </div>
 {% for doc in results %}
 <div class="row" style="border-style:solid; margin: 1px;">
+
    <div class="col-sm-1">
 	{{ doc["main_type"]}}
    </div>
    <div class="col-sm-1">
 	{% if is_modal %}
+
 		{% if doc["main_type"]=="sample" %}
-			<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+			<a  href="{{ path('app_edit_samplegs', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
 		{% elseif doc["main_type"]=="georef" %}
 			<a  id="link_dloccenter_{{ doc['pk'] }}" href="{{ path('app_edit_point', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"]}}</a>
+		{% elseif doc["main_type"]=="lithostratum" %}
+			<a  id="link_dloccenter_{{ doc['pk'] }}" href="{{ path('app_edit_point', {'pk':doc['dloccenter_pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_3_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"]}}</a>
 		{% else %}
 			<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
 		{% endif %}
 	{% else %}
+	Not modal
 		{% if doc["main_type"]=="sample" %}
 			<a  href="{{ path('app_edit_sample', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
 		{% elseif doc["main_type"]=="georef" %}
 			<a  href="{{ path('app_edit_point', {'pk':doc['pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
+		{% elseif doc["main_type"]=="lithostratum" %}
+			<a  href="{{ path('app_edit_point', {'pk':doc['dloccenter_pk']})}}" target="_blank">{{ doc["idobject"]}}</a>
 		{% else %}
 			<a id="link_doc_{{ doc['pk'] }}"  href="{{ path('app_edit_doc', {'pk':doc['pk']})}}" class="modal_link" data-modal-key="{{ doc['pk'] }}" data-modal-value="{{ doc['idobject'] ~ (" " ~ doc["col_2_value"]?? " no title ") }}" target="_blank">{{ doc["idobject"] }} </a>
 		{% endif %}

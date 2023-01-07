@@ -2,14 +2,16 @@
 {% import "@App/forms/read_test.html.twig" as read_test  %}
 {% set read_mode=read_mode|default("read") %}
 {% include "@App/forms/security_shift.html.twig" %}
-{% set current_tab=current_tab|default("main-tab") %}
+{% set current_tab=current_tab|default("mainpoint-tab") %}
 
 {% if read_mode!="create" %}
 <h2>{{ dloccenter.idcollection??""}} {{ dloccenter.idpt??""}}</h2>
 {% endif %}
 <ul class="nav nav-tabs" id="myTab" role="tablist">
-    {{ read_test.enable_bootstrap_tab("main-tab", current_tab,"#main", "main", "Home", "shift_mode") }}
-    {{ read_test.enable_bootstrap_tab("stratum-tab", current_tab,"#stratum", "stratum", "Stratum", "shift_mode") }}
+    {{ read_test.enable_bootstrap_tab("mainpoint-tab", current_tab,"#maintabpoint", "maintabpoint", "Home", "shift_mode") }}
+    {{ read_test.enable_bootstrap_tab("stratumpoint-tab", current_tab,"#stratumtab", "stratumtab", "Stratum", "shift_mode") }}
+	 {{ read_test.enable_bootstrap_tab("documentpoint-tab", current_tab,"#documenttab", "documenttab", "Documents", "shift_mode") }}
+	{{ read_test.enable_bootstrap_tab("contributionpoint-tab", current_tab,"#contributiontab", "contributiontab", "Contributions", "shift_mode") }}
 	{% if read_mode!="create" %}
 	{{ read_test.enable_bootstrap_tab("log-tab", current_tab,"#log", "log", "Logs") }}	
 	{% endif %}
@@ -20,7 +22,7 @@
 <div class="tab-content">
 {% include "@App/validation_errors.html.twig" with {'local_form' : point_form}  %}
 
-  {{ read_test.activate_boostrap_tab("main", current_tab, "main-tab") }}
+  {{ read_test.activate_boostrap_tab("maintabpoint", current_tab, "mainpoint-tab") }}
 	<table class="ui-front table_edit">
 		<TR>
 			<TH class="title_table_edit" width="100%" colspan = "6">
@@ -154,8 +156,14 @@
 		</TR>
 	</Table>
 	{{ read_test.end_activate_boostrap_tab() }}
-	{{ read_test.activate_boostrap_tab("stratum", current_tab, "stratum-tab") }}
+	{{ read_test.activate_boostrap_tab("stratumtab", current_tab, "stratumpoint-tab") }}
 	 {% include "@App/dloccenter/point_to_stratum.html.twig"  %}
+	{{ read_test.end_activate_boostrap_tab() }}
+	{{ read_test.activate_boostrap_tab("documenttab", current_tab, "documentpoint-tab") }}
+	 {% include "@App/dloccenter/point_to_document.html.twig"  %}
+	{{ read_test.end_activate_boostrap_tab() }}
+	{{ read_test.activate_boostrap_tab("contributiontab", current_tab, "contributionpoint-tab") }}
+	 {% include "@App/dloccenter/point_to_contribution.html.twig"  %}
 	{{ read_test.end_activate_boostrap_tab() }}
 	{% if read_mode!="create" %}
 	 {{ read_test.activate_boostrap_tab("log", current_tab, "log-tab") }}

@@ -27,7 +27,7 @@ class AutocompleteController extends Controller
 			
 			if(strlen($searched)>0)
 			{
-				$RAW_QUERY = "SELECT DISTINCT ".$key_field." FROM ".$tablename." where ".$fieldname." ~* :func ". $suffix_searched." ORDER BY ".$fieldname." LIMIT :limit;"; 
+				$RAW_QUERY = "SELECT DISTINCT ".$key_field." FROM ".$tablename." where ".$fieldname."::varchar ~* :func ". $suffix_searched." ORDER BY ".$fieldname." LIMIT :limit;"; 
             }
 			elseif($where!==null)
 			{
@@ -132,6 +132,19 @@ class AutocompleteController extends Controller
 		
 		$num = strtolower($_GET['code']);		
         return $this->template_autocomplete( "lminerals", "mformula", $num);
+    }
+	
+	public function Fieldnumber_autocompleteAction(Request $request)
+	{
+		$num = strtolower($_GET['code']);
+		return $this->template_autocomplete( "dsample", "fieldnum", $num);
+    }
+	
+	
+	public function Museumnumber_autocompleteAction(Request $request)
+	{
+		$num = strtolower($_GET['code']);		
+		return $this->template_autocomplete( "dsample", "museumnum", $num);
     }
 	
 	public function Museumloc_autocompleteAction(Request $request)
@@ -249,10 +262,27 @@ class AutocompleteController extends Controller
 		return $this->template_autocomplete("ddocmap", "projection",$request->query->get("code",""),false);
 	}
 	
-		public function stratumdesc_autocompleteAction(Request $request)
+	public function stratumdesc_autocompleteAction(Request $request)
 	{
 		return $this->template_autocomplete("v_distinctdlocstratumdesc", "descript",$request->query->get("code",""),false);
 	}
+	
+	public function place_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("v_distinct_place", "place",$request->query->get("code",""),false);
+	}
+	
+    public function country_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("v_distinct_country", "country",$request->query->get("code",""),false);
+	}
+	
+	public function idsample_autocompleteAction(Request $request)
+	{
+		return $this->template_autocomplete("dsample", "idsample",$request->query->get("code",""),false);
+	}
+
+
 
 
 }

@@ -44,15 +44,18 @@ class Dsamslimplate
     private $platevariousinfo;
 
     /**
-     * @var \AppBundle\Entity\Dsample
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="idsample", referencedColumnName="idsample")
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idsample", type="integer", nullable=false)
+     */
+    private $idsample;
 
 
 
@@ -138,14 +141,14 @@ class Dsamslimplate
         return $this->platevariousinfo;
     }
 
-    /**
+   	/**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dsample $idcollection
+     * @param string $idcollection
      *
      * @return Dsamslimplate
      */
-    public function setIdcollection(\AppBundle\Entity\Dsample $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -153,12 +156,67 @@ class Dsamslimplate
     }
 
     /**
+     * Set idcollectionobj
+     *
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dsamslimplate
+     */
+    public function setIdcollectionobj(\AppBundle\Entity\Dsample $sample = null)
+    {
+        if($sample !==null)
+		{
+			 $this->idcollection = $sample->getIdCollection();
+			 $this->idsample = $sample->getIdSample();
+		}
+
+        return $this;
+    }
+
+    /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Dsample
+     * @return string
      */
     public function getIdcollection()
     {
         return $this->idcollection;
     }
+	
+	/**
+     * Set idsample
+     *
+     * @param integer
+     *
+     * @return Dsamslimplate
+     */
+    public function setIdsample( $idsample)
+    {
+        $this->idsample = $idsample;
+
+        return $this;
+    }
+
+    /**
+     * Get idsample
+     *
+     * @return integer
+     */
+    public function getIdsample()
+    {
+        return $this->idsample;
+    }
+	
+	
+	/**
+     * Get pk
+     *
+     * @return integer
+     */
+    
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
 }

@@ -1,0 +1,35 @@
+{# src/AppBundle/Resources/views/lminerals/search_results_dample.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+
+<br/>
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1">pk</div>
+	<div class="col-sm-1">
+	 Collection ID
+   </div>
+   <div class="col-sm-1">
+	 Sample ID
+   </div>
+   <div class="col-sm-1">
+	 Field Num
+   </div>
+   <div class="col-sm-1">
+	 Museum Num
+   </div>
+   <div class="col-sm-4">
+	 Minerals
+   </div>
+</div>
+{% for sample in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+<div class="col-sm-1"><a target="_blank" href="{{ path('app_edit_samplegs', {'pk':sample['pk'] }) }}"   >{{ sample['pk'] }}</a></div>
+<div class="col-sm-1">{{ sample['idcollection'] }}</div>
+<div class="col-sm-1">{{ sample['idsample'] }}</div>
+<div class="col-sm-1">{{ sample['fieldnum'] }}</div>
+<div class="col-sm-1">{{ sample['museumnum'] }}</div>
+<div class="col-sm-4">{{ sample['min_desc'] }}</div>						
+</div>
+{%  endfor %}

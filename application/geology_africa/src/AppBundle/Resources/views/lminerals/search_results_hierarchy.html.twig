@@ -1,0 +1,34 @@
+{# src/AppBundle/Resources/views/lminerals/search_results_hierarchy.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+
+
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+
+<br/>
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1">pk</div>
+	<div class="col-sm-2">
+	 Name
+   </div>
+   <div class="col-sm-2">
+	Author
+   </div>
+    <div class="col-sm-2">
+	Creation date
+   </div>
+</div>
+{% for hierarch in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1"><a target="_blank"   href="{{ path('app_edit_mineralhierarchygs', {'pk':hierarch['pk'] }) }}" >{{ hierarch['pk'] }}</a></div>
+	<div class="col-sm-2"><a target="_blank" >{{ hierarch['name'] }}</a></div>	
+	<div class="col-sm-2"><a target="_blank" >{{ hierarch['author'] }}</a></div>	
+	<div class="col-sm-2"><a target="_blank" >{{ hierarch['creation_date'] }}</a></div>		
+   
+</div>
+{%  endfor %}
+</div>
+<script language="JavaScript">
+
+</script>

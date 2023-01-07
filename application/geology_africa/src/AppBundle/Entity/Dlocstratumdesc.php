@@ -80,7 +80,7 @@ class Dlocstratumdesc extends GeodarwinEntity
      *
      * @param string $idcollection
      *
-     * @return DLoclitho
+     * @return Dlocstratumdesc
      */
     public function setIdcollection($idcollection)
     {

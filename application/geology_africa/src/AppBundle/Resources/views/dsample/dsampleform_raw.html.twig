@@ -1,0 +1,137 @@
+{# src/AppBundle/Resources/views/dsample/dsampleform_raw.html.twig #}
+{% include "@App/forms/standalonejs.html.twig" %}
+{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{{read_mode}}
+	<div class="row">
+		<div class="col-sm-2">ID Collection</div>
+		<div class="col-sm-2">{% if read_mode=="read" %}
+					{{dsample.idcollection}}
+				{% else %}
+					{{ read_test.widget_read_mode(read_mode, form.idcollection,  {'attr':{'class': 'form-control inp_Idcollection'}},dsample.idcollection ) }}
+					
+				{% endif %}</div>
+		<div class="col-sm-2">ID sample</div>
+		<div class="col-sm-2">{{ read_test.widget_read_mode(read_mode, form.idsample, {'attr': {'class': 'form-control inp_Idsample'}}, dsample.idsample ??"" ) }}
+		{% if read_mode=="write" %}
+		<input type='button' id="get_idsample" value="Get next ID"></input>
+		{% endif %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Field num</div>
+		<div class="col-sm-2">					
+					{{ read_test.widget_read_mode(read_mode, form.fieldnum,  {'attr':{'class': 'form-control inp_fieldnum'}},dsample.fieldnum ) }}					
+		</div>
+		<div class="col-sm-2">Museum num</div>
+		<div class="col-sm-2">					
+					{{ read_test.widget_read_mode(read_mode, form.museumnum,  {'attr':{'class': 'form-control inp_museumnum'}},dsample.museumnum ) }}					
+		</div>
+	</div>
+	{% if view_detail %}
+	<div class="row">
+		<div class="col-sm-2">Museum location</div>
+		<div class="col-sm-2">					
+					{{ read_test.widget_read_mode(read_mode, form.museumlocation,  {'attr':{'class': 'form-control inp_museumlocation'}},dsample.museumlocation ) }}					
+		</div>
+		<div class="col-sm-2">Box number</div>
+		<div class="col-sm-2">					
+					{{ read_test.widget_read_mode(read_mode, form.boxnumber,  {'attr':{'class': 'form-control inp_box_number'}},dsample.boxnumber ) }}					
+		</div>
+	</div>
+	{% endif %}
+	
+	<div class="row">
+		<div class="col-sm-2">Description</div>
+		<div class="col-sm-6">
+			{{ read_test.input_read_mode(read_mode, "textarea", "sample_description" , "sample_description" , (dsample.sampledescription ??"")  | trim , "form-control inp_sampledescription")  }}
+
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Various info</div>
+		<div class="col-sm-6">
+			{{ read_test.input_read_mode(read_mode, "textarea", "sample_varioussampleinfo" , "sample_varioussampleinfo" , (dsample.varioussampleinfo ??"")  | trim , "form-control inp_varioussampleinfo")  }}
+
+		</div>
+	</div>
+	{% if view_detail %}
+	<div class="row">
+		<div class="col-sm-2">Loan information</div>
+		<div class="col-sm-6">
+			{{ read_test.input_read_mode(read_mode, "textarea", "sample_loaninformation" , "sample_loaninformation" , (dsample.loaninformation ??"")  | trim , "form-control inp_loaninformation")  }}
+
+		</div>
+	</div>
+	{% endif %}
+	<div class="row">
+		<div class="col-sm-2">Weight</div>		
+		<div class="col-sm-2">
+		{{ read_test.input_read_mode(read_mode, "number", "weight" , "weight" , (dsample.weight ??"")   , "form-control inp_weight")  }}
+		</div>
+		<div class="col-sm-2">Quantity</div>		
+		<div class="col-sm-2">
+		{{ read_test.widget_read_mode(read_mode, form.quantity,  {'attr':{'class': 'form-control inp_quantity'}},dsample.quantity ) }}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Size</div>		
+		<div class="col-sm-2">
+		{{ read_test.widget_read_mode(read_mode, form.size,  {'attr':{'class': 'form-control inp_size'}},dsample.size ) }}
+		</div>
+		<div class="col-sm-2">Dimension code</div>
+		<div class="col-sm-2">
+		{{ read_test.input_read_mode(read_mode, "number", "dimensioncode" , "dimensioncode" , (dsample.dimentioncode ??"")   , "form-control inp_dimensioncode")  }}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Slim plate</div>
+		<div class="col-sm-2">Chemical analysis</div>
+		<div class="col-sm-2">Holotype</div>
+		<div class="col-sm-2">Paratype</div>
+	</div>
+	<div class="row">
+		
+		<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", "slimplate" , "slimplate" , (dsample.slimplate ??"")   , " inp_slimplate")  }}</div>
+		<div class="col-sm-1"></div>
+		<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", "chemicalanalysis" , "chemicalanalysis" , (dsample.chemicalanalysis ??"")   , " inp_chemicalanalysis")  }}</div>
+		<div class="col-sm-1"></div>
+		<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", "holotype" , "holotype" , (dsample.holotype ??"")   , "inp_holotype")  }}</div>
+		<div class="col-sm-1"></div>
+		<div class="col-sm-1">{{ read_test.input_read_mode(read_mode, "checkbox", "paratype" , "paratype" , (dsample.paratype ??"")   , "inp_paratype")  }}</div>
+		<div class="col-sm-1"></div>
+	</div>	
+	{% if view_detail %}
+	<div class="row">
+		<div class="col-sm-2">Radioactivity</div>		
+		<div class="col-sm-2">
+		{{ read_test.input_read_mode(read_mode, "number", "radioactivity" , "radioactivity" , (dsample.radioactivity ??"")   , "form-control inp_radioactivity")  }}
+		</div>
+		<div class="col-sm-2">Security level</div>		
+		<div class="col-sm-2">
+		{{ read_test.input_read_mode(read_mode, "number", "securitylevel" , "securitylevel" , (dsample.securitylevel ??"")   , "form-control inp_securitylevel")  }}
+		</div>
+	</div>
+	{% endif %}
+<script language="javascript">
+	$(document).ready(
+		function()
+		{		
+			$("#get_idsample").click(
+				function()
+				{
+					
+					 jQuery.getJSON("{{ path('app_get_next_id')}}",
+						{
+						'table':'dsample'
+						},
+						function(result)
+						{
+							$('.inp_Idsample').val(result.id);						
+						}
+					 );
+					
+				});
+		}		
+	);
+</script>

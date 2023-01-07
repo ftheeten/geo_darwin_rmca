@@ -1,0 +1,43 @@
+<div class="container">
+		<div class="row">
+			 <div class="col-sm-2">Mineral</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}searchsample_mineral" id="{{prefix_ctrl}}searchsample_mineral" style="width:100%"  multiple="multiple" ></select> </div>
+			 <div class="col-sm-1">Include child elements</div><div class="col-sm-1"><input type="checkbox" name="{{prefix_ctrl}}searchsample_mineral_children" id="{{prefix_ctrl}}searchsample_mineral_children" checked/></div>
+			 {% if hierarchies is defined and hierarchies is not null %}
+			
+				 <div class="col-sm-1">Hierarchy</div>
+				 <div class="col-sm-2"><select name="{{prefix_ctrl}}searchsample_hierarch" id="{{prefix_ctrl}}searchsample_hierarch" style="width:100%"  >
+					<option value="">All</option>
+					{% for item in hierarchies %}
+						<option value="{{item.pk}}">{{item.name}}</option>
+					{% endfor %}		 
+				 </select> </div>
+			
+			{% endif %}
+		</div>
+		<div class="row">
+		
+			<div class="col-sm-2">Field number</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}searchsamplefieldnumber" id="{{prefix_ctrl}}searchsamplefieldnumber" style="width:100%" multiple="multiple" ></select></div>
+			<div class="col-sm-2">Museum number</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}searchsamplemuseumnumber" id="{{prefix_ctrl}}searchsamplemuseumnumber" style="width:100%" multiple="multiple" ></select></div>
+			
+			
+	</div>
+	<div class="row">
+		
+			<div class="col-sm-2">Museum location</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}searchsamplemuseumlocation" id="{{prefix_ctrl}}searchsamplemuseumlocation" style="width:100%" multiple="multiple" ></select></div>
+			<div class="col-sm-2">Box number</div>
+			<div class="col-sm-3"><select name="{{prefix_ctrl}}searchsampleboxnumber" id="{{prefix_ctrl}}searchsampleboxnumber" style="width:100%" multiple="multiple" ></select></div>
+			
+			
+	</div>
+	<div class="row">
+		<div class="col-sm-2">Slim plate : </div><div class="col-sm-1"><input type="checkbox" id="{{prefix_ctrl}}searchsampleslimplate" name="{{prefix_ctrl}}searchsampleslimplate"></input></div>
+		<div class="col-sm-2">Chemical analysis : </div><div class="col-sm-1"><input type="checkbox" id="{{prefix_ctrl}}searchsamplechemicalanalysis" name="{{prefix_ctrl}}searchsamplechemicalanalysis"></input></div>
+		<div class="col-sm-2">Holotype : </div><div class="col-sm-1"><input type="checkbox" id="{{prefix_ctrl}}searchsampleholotype" name="{{prefix_ctrl}}searchsampleholotype"></input></div>
+		<div class="col-sm-2">Paratype : </div><div class="col-sm-1"><input type="checkbox" id="{{prefix_ctrl}}searchsampleparatype" name="{{prefix_ctrl}}searchsampleparatype"></input></div>
+		
+	</div>
+</div>

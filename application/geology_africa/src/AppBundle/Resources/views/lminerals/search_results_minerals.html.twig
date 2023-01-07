@@ -1,0 +1,57 @@
+{# src/AppBundle/Resources/views/lminerals/search_results_minerals.html.twig #}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set is_modal = is_modal|default(false) %}
+
+{{ nb_results }} Record(s)
+{% include '@App/pagination.html.twig' %}
+
+<br/>
+<div class="row" style="border-style:solid; margin: 1px;">
+	<div class="col-sm-1">pk</div>
+	<div class="col-sm-1">
+	 Name
+   </div>
+   <div class="col-sm-2">
+	Hierarchical classification
+   </div>
+    <div class="col-sm-2">
+	Rank
+   </div>
+   <div class="col-sm-2">
+	Formula
+   </div>
+    <div class="col-sm-2">
+	Classification name
+   </div>
+</div>
+{% for min in results %}
+<div class="row" style="border-style:solid; margin: 1px;">
+	{% if is_modal %}
+	<div class="col-sm-1"><a target="_blank"  data-modal-key="{{ min['pk'] }}" data-modal-value="{{ min['mname'] }}"  href="{{ path('app_edit_mineralgs', {'pk':min['pk'] }) }}"   class="modal_link"  >{{ min['pk'] }}</a></div>	
+	{% else %}
+	<div class="col-sm-1"><a target="_blank"  data-modal-key="{{ min['pk'] }}" data-modal-value="{{ min['mname'] }}"  href="{{ path('app_edit_mineralgs', {'pk':min['pk'] }) }}" >{{ min['pk'] }}</a></div>	
+	{% endif %}
+	<div class="col-sm-1">
+	{{ min["mname"]}}
+   </div>
+   <div class="col-sm-2">
+	<div> 
+<img src="{{ asset('pics/info_small.svg') }}" id="trigger_hiera_{{ min['pk'] }}" data-bs-toggle="collapse" data-bs-target="#div_hiera_{{ min['pk'] }}" aria-expanded="false" aria-controls="collapseExample"></img></div>
+	<div class="collapse" id="div_hiera_{{ min['pk'] }}" >{{ read_test.explode_to_tree(min["hierarch_name"])}}</div>
+   </div>
+    <div class="col-sm-2">
+	{{ min["rank"] }}
+   </div>
+   <div class="col-sm-2">
+	{{ min["mformula"] }}
+   </div>
+    <div class="col-sm-2">
+	{{ min["classification_name"] }}
+   </div>
+   
+</div>
+{%  endfor %}
+</div>
+<script language="JavaScript">
+
+</script>

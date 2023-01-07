@@ -1,0 +1,30 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Id link:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk"~ index, ctrl_prefix ~"_pk"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Alpha-ray:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_alpharay"~ index, ctrl_prefix ~"_alpharay"~ index,default_val.alpharay ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Beta-ray:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_betaray"~ index, ctrl_prefix ~"_betaray"~ index,default_val.betaray ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Gamma-ray:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_gammaray"~ index, ctrl_prefix ~"_gammaray"~ index,default_val.gammaray ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+X-ray:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_xray"~ index, ctrl_prefix ~"_xray"~ index,default_val.xray ?? "","readonly_class") }}
+</div>
+</div>

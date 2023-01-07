@@ -1,0 +1,70 @@
+{# src/AppBundle/Resources/views/dsample/dsampleform.html.twig #}
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block javascript %}
+ {{ parent() }}
+{% endblock %}
+
+{% block body %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% include "@App/forms/security_shift.html.twig" %}
+{% set current_tab=current_tab|default("mainsample-tab") %}
+
+{% if read_mode!="create" %}
+<h2>{{ dsample.idcollection??""}} {{ dsample.idsample??""}}</h2>
+{% endif %}
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+{{ read_test.enable_bootstrap_tab("mainsample-tab", current_tab,"#maintabsample", "maintabsample", "Home", "shift_mode") }}
+{{ read_test.enable_bootstrap_tab("samplemineral-tab", current_tab,"#samplemineral", "samplemineral", "Minerals") }}
+{{ read_test.enable_bootstrap_tab("samplegranulo-tab", current_tab,"#samplegranulo", "samplegranulo", "Granulometry") }}
+{{ read_test.enable_bootstrap_tab("samheavymin-tab", current_tab,"#samheavymin", "samheavymin", "Heavy minerals") }}
+{{ read_test.enable_bootstrap_tab("samaray-tab", current_tab,"#samaray", "samaray", "A-ray") }}
+{{ read_test.enable_bootstrap_tab("samslimplate-tab", current_tab,"#samslimplate", "samslimplate", "Slim plates") }}
+{{ read_test.enable_bootstrap_tab("samsloc-tab", current_tab,"#samsloc", "samsloc", "Localities") }}
+{{ read_test.enable_bootstrap_tab("samscontrib-tab", current_tab,"#samscontrib", "samscontrib", "Contributions") }}
+{{ read_test.enable_bootstrap_tab("samsdoc-tab", current_tab,"#samsdoc", "samsdoc", "document") }}
+</ul>
+
+{{ read_test.form_read_mode(read_mode, form, {'attr': {'class': 'form-horizontal','id': 'form_sample'}}) }}
+{% set form =form %}
+{{ form_row(form._token) }}
+<div class="tab-content">
+{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+
+  {{ read_test.activate_boostrap_tab("maintabsample", current_tab, "mainsample-tab") }}
+		{% include "@App/dsample/dsampleform_raw.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samplemineral", current_tab, "samplemineral-tab") }}
+		{% include "@App/dsample/dsampleform_minerals.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samplegranulo", current_tab, "samplegranulo-tab") }}
+		{% include "@App/dsample/dsampleform_granulo.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samheavymin", current_tab, "samheavymin-tab") }}
+		{% include "@App/dsample/dsampleform_heavymin.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samaray", current_tab, "samaray-tab") }}
+		{% include "@App/dsample/dsampleform_aray.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samslimplate", current_tab, "samslimplate-tab") }}
+		{% include "@App/dsample/dsampleform_slimplate.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samsloc", current_tab, "samsloc-tab") }}
+		{% include "@App/dsample/dsampleform_localities.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samscontrib", current_tab, "samscontrib-tab") }}
+		{% include "@App/dsample/dsampleform_contrib.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+  {{ read_test.activate_boostrap_tab("samsdoc", current_tab, "samsdoc-tab") }}
+		{% include "@App/dsample/dsampleform_doc.html.twig"  %} 
+  {{ read_test.end_activate_boostrap_tab() }}
+ 
+
+</div>
+<div><input type="hidden" name="current_tab" id="current_tab"/></div>
+{{ read_test.end_activate_boostrap_tab() }}
+ {{ read_test.submit_button_log(read_mode) }}
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#form_sample' , 'delete_route': 'app_delete_sample' } %}
+{{ read_test.form_end_read_mode(read_mode,form,  {'render_rest': false}) }}
+{% endblock %}

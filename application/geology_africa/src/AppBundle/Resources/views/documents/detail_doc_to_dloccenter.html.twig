@@ -13,9 +13,10 @@
 
 {{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_link_"~ index, ctrl_prefix ~"_id_link_"~ index,default_val.pk ?? "","readonly_class") }}
 
-
+Pk (point):
 {{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_id_dloccenter_"~ index, ctrl_prefix ~"_id_dloccenter_"~ index,default_val.dloccenter.pk ?? "","readonly_class") }}
 
+Description (point)
 {{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_description_dloccenter_"~ index, ctrl_prefix ~"_description_dloccenter_"~ index,(default_val.dloccenter.idpt ?? ""  ~ " " ~ default_val.dloccenter.description ?? "")|trim  ,"readonly_class") }}
 
 

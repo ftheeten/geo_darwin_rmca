@@ -1,0 +1,99 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Id link:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk"~ index, ctrl_prefix ~"_pk"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+
+<div class="col-sm-2">
+Total weight:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_tot"~ index, ctrl_prefix ~"_weight_tot"~ index,default_val.weighttot ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Total weight:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_sand"~ index, ctrl_prefix ~"_weight_sand"~ index,default_val.weightsand ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Weight above 2000:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_ab_2000"~ index, ctrl_prefix ~"_weight_ab_2000"~ index,default_val.wAbove2000 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 1400-2000:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_2000"~ index, ctrl_prefix ~"_weight_2000"~ index,default_val.w2000 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 1000-1400:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_1400"~ index, ctrl_prefix ~"_weight_1400"~ index,default_val.w1400 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 710-1000:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_1000"~ index, ctrl_prefix ~"_weight_1000"~ index,default_val.w1000 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 500-710:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_710"~ index, ctrl_prefix ~"_weight_710"~ index,default_val.w710 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 355-500:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_500"~ index, ctrl_prefix ~"_weight_500"~ index,default_val.w500 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 250-355:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_355"~ index, ctrl_prefix ~"_weight_355"~ index,default_val.w355 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 180-250:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_250"~ index, ctrl_prefix ~"_weight_250"~ index,default_val.w250 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 125-180:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_180"~ index, ctrl_prefix ~"_weight_180"~ index,default_val.w180 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 90-125:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_125"~ index, ctrl_prefix ~"_weight_125"~ index,default_val.w_125 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 63-90:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_90"~ index, ctrl_prefix ~"_weight_90"~ index,default_val.w90 ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+Weight 0-63:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_weight_63"~ index, ctrl_prefix ~"_weight_63"~ index,default_val.w63 ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-8">
+description:
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"_weight_description"~ index, ctrl_prefix ~"_description"~ index,default_val.description ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+percentage:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pc"~ index, ctrl_prefix ~"_pc"~ index,default_val.pc ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+cumulated percentage:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pccum"~ index, ctrl_prefix ~"_pccum"~ index,default_val.pccum ?? "","readonly_class") }}
+</div>
+<div class="col-sm-2">
+{% set  display_date = "now"|date('Y-m-d H:i:s') %}
+{% if default_val is not null %}
+{% if default_val.date is not null and default_val.date is defined %}
+{% set tmp_date= default_val.date %}
+{% set display_date = tmp_date|date('Y-m-d H:i:s') %}
+{% endif %}
+{% endif %}
+Date:
+{{ read_test.input_read_mode(read_mode, "timestamp", ctrl_prefix ~"_date"~ index, ctrl_prefix ~"_date"~ index, display_date,"readonly_class") }}
+
+</div>
+</div>

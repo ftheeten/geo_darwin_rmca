@@ -1,4 +1,4 @@
-{# src/AppBundle/Resources/views/dloccenter/pointform.html.twig #}
+{# src/AppBundle/Resources/views/dloccenter/map.html.twig #}
 {% import "@App/forms/read_test.html.twig" as read_test  %}
 <style>
 	{% if read_mode!="read" %}
@@ -191,6 +191,7 @@ var ol_ext_inherits = function(child,parent) {
 
   function addDarwinLayer_point(feature, type, proj="EPSG:3857")
     {
+			console.log(type);
 			console.log(feature.getGeometry().getCoordinates());
 			if(type=="polygon")
 			{
@@ -199,6 +200,10 @@ var ol_ext_inherits = function(child,parent) {
 			else if(type=="point")
 			{
 				var tmp_geom =new ol.geom.Point(feature.getGeometry().getCoordinates());
+			}
+			else if(type=="linestring")
+			{
+				var tmp_geom =new ol.geom.LineString(feature.getGeometry().getCoordinates());
 			}
 			
             var  generic_feature = new ol.Feature({geometry: tmp_geom});
@@ -225,7 +230,15 @@ var ol_ext_inherits = function(child,parent) {
 			}
 			wktfeaturegeom = format.writeGeometry(tmp_geom4326);
 			$('.wkt').val(wktfeaturegeom);
-            vectorLoaded=true;		
+            vectorLoaded=true;	
+			var layerExtent = vectorlayer_local.getSource().getExtent();
+			map.getView().fit(layerExtent);	
+			if(type=="point")
+		   {
+				console.log("zoom out");
+				console.log(map.getView().getZoom());
+			map.getView().setZoom(14);
+		   }
     }
         
 var test_has_coords=function()
@@ -251,6 +264,11 @@ var test_has_coords=function()
 		else if(wkt.indexOf("POLYGON")==0)
 		{
 			addDarwinLayer_point(feature, "polygon",'EPSG:3857' );
+		}
+		else if(wkt.indexOf("LINESTRING")==0)
+		{
+			console.log("linestring");
+			addDarwinLayer_point(feature, "linestring",'EPSG:3857' );
 		}
 	}
 }

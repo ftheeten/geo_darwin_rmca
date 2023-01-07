@@ -1,0 +1,143 @@
+{# src/AppBundle/Resources/views/dsample/dsample_search_raw_kern.html.twig #}
+{% set is_modal = is_modal|default(false) %}
+{% if is_modal==false %}
+	{% use "@App/forms/standalonejs.html.twig" %}
+{% endif %}
+{% block body %}
+    {% set reload_var ='false' %}
+	
+<div class="container">
+	<div class="row">
+		 <div class="col-sm-1">Collection</div>
+		 <div class="col-sm-2">
+			 <select name="search_collections_raw" id="search_collections_raw" style="width:100%"  >
+				<option value="">All</option>
+				{% for item in collections %}
+					<option value="{{item.idcollection}}">{{item.collection}}</option>
+				{% endfor %}
+			 </select>
+		 </div>
+		 <div class="col-sm-1">ID sample</div>
+		 <div class="col-sm-2"><select name="search_idsample_raw" id="search_idsample_raw" style="width:100%"  multiple="multiple" ></select></div>
+	</div>
+    <div class="row">
+		 <div class="col-sm-1">Mineral</div>
+    <div class="col-sm-2"><select name="search_min_raw" id="search_min_raw" style="width:100%"  multiple="multiple" ></select> </div>
+	 <div class="col-sm-1">Include child elements</div><div class="col-sm-1"><input type="checkbox" name="min_child" id="min_child" checked/></div>
+	 {% if hierarchies is defined and hierarchies is not null %}
+	
+		 <div class="col-sm-1">Hierarchy</div>
+		 <div class="col-sm-2"><select name="search_hierarch_raw" id="search_hierarch_raw" style="width:100%"  >
+			<option value="">All</option>
+			{% for item in hierarchies %}
+				<option value="{{item.pk}}">{{item.name}}</option>
+			{% endfor %}		 
+		 </select> </div>
+	
+	{% endif %}
+	</div>
+	<div class="col-sm-2"><input type="button" id="submit_sample_raw" name="submit_sample_raw" value="search"></input></div>
+	</div>
+	<div id="div_results_sample" class="row"></div>
+</div>
+{% endblock %}
+{% block javascripts %}
+ {{ parent() }}
+<script type="text/javascript">
+
+var search_all_samples=function(current_page, page_size)
+{
+	search_logic_all_samples(current_page, page_size,false);					
+}
+
+var search_logic_all_samples=function(current_page, page_size, csv)
+{
+	var criterias={};
+	criterias["min"]=$("#search_min_raw").val();
+	criterias["child_min"]=false;
+
+	criterias["hierarchy"]=$("#search_hierarch_raw").val();
+	
+	if ($('#min_child').is(":checked"))
+	{
+		criterias["child_min"]=true;
+	}
+	
+	criterias["collection"]=$("#search_collections_raw").val();
+	criterias["idsample"]=$("#search_idsample_raw").val();
+	
+	criterias["current_page"]=current_page;
+    criterias["page_size"]=page_size;
+	$.post("{{ path('app_result_samplegs')}}", criterias,
+				function(data)
+				{
+					
+					$("#div_results_sample").html(data);
+							
+				}
+			);
+}
+
+$(document).ready(
+		
+		function()
+		{	
+			
+			
+				$("#search_min_raw").select2({
+                        minimumInputLength: 2,
+                        ajax:
+                        {
+                            url:"{{ path('search_all_minerals_full_autocomplete')}}",
+                            dataType: 'json',
+                            data: function(param)
+                            {
+                                global_pattern= param.term;
+								
+								var hierarch=$("#search_hierarch_raw").val();
+								
+                                return {
+									
+                                    code: param.term,
+									hierarch: hierarch,
+									getpk: true
+                                };
+                            }
+                            ,
+                            processResults: function(result)
+                            {
+                                returned=Array();
+                          
+								
+                                if(result.length>0)
+                                {
+									
+                                   
+                                    for(var i=0; i<result.length; i++ )
+                                    {
+                                        returned.push({"id": result[i]["id"] , "text":result[i]["word"] });
+                                    }
+                                    
+                                    
+                                }
+                                return {"results":returned};
+                            }
+                        }
+                    
+                    },2);
+					
+				  $("#search_idsample_raw").select2(select2_generic("{{ path('app_idsample_autocomplete')}}","idsample","idsample" ),2);
+
+					
+				$("#submit_sample_raw").click(
+						function()
+						{
+							search=search_all_samples;
+							search_all_samples(1, $("#page_size").val());
+
+						}
+			);
+			
+		});
+</script>
+{% endblock %}

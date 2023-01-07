@@ -32,42 +32,25 @@ class Dsamminerals
 
 	
     /**
-     * @var \AppBundle\Entity\Dsample
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollection", referencedColumnName="idcollection"),
-     * })
+     * @ORM\Column(name="idcollection", type="string", nullable=false)
      */
     private $idcollection;
 	
 	/**
-     * @var \AppBundle\Entity\Dsample
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idsample", referencedColumnName="idsample")
-     * })
+     * @ORM\Column(name="idsample", type="integer", nullable=false)
      */
     private $idsample;
 
     /**
-     * @var \AppBundle\Entity\Lminerals
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Lminerals",  fetch="EAGER")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idmineral", referencedColumnName="idmineral")
-     * })
+     * @ORM\Column(name="idmineral", type="integer", nullable=false)
      */
     private $idmineral;
-	
-
-	 
-	
-	
-
-
-
 
 	/**
      * Get pk
@@ -102,15 +85,15 @@ class Dsamminerals
     {
         return $this->grade;
     }
-
-    /**
+	
+	/**
      * Set idcollection
      *
-     * @param \AppBundle\Entity\Dsample $idcollection
+     * @param string $idcollection
      *
      * @return Dsamminerals
      */
-    public function setIdcollection(\AppBundle\Entity\Dsample $idcollection = null)
+    public function setIdcollection($idcollection)
     {
         $this->idcollection = $idcollection;
 
@@ -118,9 +101,27 @@ class Dsamminerals
     }
 
     /**
+     * Set idcollectionobj
+     *
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dsamminerals
+     */
+    public function setIdcollectionobj(\AppBundle\Entity\Dsample $sample = null)
+    {
+        if($sample !==null)
+		{
+			 $this->idcollection = $sample->getIdCollection();
+			 $this->idsample = $sample->getIdSample();
+		}
+
+        return $this;
+    }
+
+    /**
      * Get idcollection
      *
-     * @return \AppBundle\Entity\Dsample
+     * @return string
      */
     public function getIdcollection()
     {
@@ -130,11 +131,11 @@ class Dsamminerals
 	/**
      * Set idsample
      *
-     * @param \AppBundle\Entity\Dsample $idsample
+     * @param integer
      *
-     * @return Dsamminerals
+     * @return integer
      */
-    public function setIdsample(\AppBundle\Entity\Dsample $idsample = null)
+    public function setIdsample( $idsample)
     {
         $this->idsample = $idsample;
 
@@ -155,24 +156,82 @@ class Dsamminerals
     /**
      * Set idmineral
      *
-     * @param \AppBundle\Entity\Lminerals $idmineral
+     * @param  integer
      *
      * @return Dsamminerals
      */
-    public function setIdmineral(\AppBundle\Entity\Lminerals $idmineral = null)
+    public function setIdmineral($idmineral = null)
     {
         $this->idmineral = $idmineral;
 
         return $this;
     }
+	
+	
+	
+	
 
     /**
      * Get idmineral
      *
-     * @return \AppBundle\Entity\Lminerals
+     * @return integer
      */
     public function getIdmineral()
     {
         return $this->idmineral;
     }
+	
+
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
+	
+	//fks
+	public $lminerals;
+	public function setLminerals_db($em)
+	{
+		$tmp_mineral=$em->getRepository(Lminerals::class)
+							->findOneBy(array(
+								"idmineral"=>$this->idmineral							
+							));
+		$this->lminerals=$tmp_mineral;
+	}
+	
+/*
+	public $dsamples;
+	public $lminerals;
+	
+	public function getDsamples()
+	{
+		return $this->dsamples;
+	}
+	
+	public function getLminerals()
+	{
+		return $this->lminerals
+	}
+	
+	public function setDsamples_db($em)
+	{
+		$tmp_samples=$em->getRepository(Dsample::class)
+							->findOneBy(array(
+								"idcollection"=>$this->idcollection,
+								"idsample"=>$this->idsample
+							));
+		$this->dsamples=$tmp_samples;
+	}
+	
+	public function setLminerals_db($em)
+	{
+		$tmp_minerals=$em->getRepository(Dsample::class)
+							->findOneBy(array(
+								"idmineral"=>$this->idmineral							
+							));
+		$this->lminerals=$tmp_minerals;
+	}
+*/
+	
+	
 }

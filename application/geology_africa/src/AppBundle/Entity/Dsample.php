@@ -4,6 +4,8 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use AppBundle\Entity\GeodarwinEntity;
+
 
 /**
  * Dsample
@@ -11,7 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @ORM\Table(name="dsample", uniqueConstraints={@ORM\UniqueConstraint(name="dsample_unique", columns={"idcollection", "idsample"})})
  */
 
-class Dsample
+class Dsample extends GeodarwinEntity
 {
     /**
      * @var integer
@@ -164,21 +166,7 @@ class Dsample
     private $varioussampleinfo;
 	
 	
-	/** 
-   * @ORM\OneToMany(targetEntity="Dsamminerals", mappedBy="idsample") 
-   */ 
-    private $dsamminerals; 
-
-	/*public function __construct() 
-     { 
-         $this->dsamminerals = new ArrayCollection(); 
-     } 
-
-	public function getDsamminerals()
-     { 
-         return $this->dsamminerals; 
-     } */
-
+	
 
     /**
      * Get pk
@@ -189,6 +177,12 @@ class Dsample
     {
         return $this->pk;
     }
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+		return $this;
+	}
 
     /**
      * Set idcollection
@@ -669,4 +663,396 @@ class Dsample
     {
         return $this->varioussampleinfo;
     }
+	
+	//foreign keys
+	//many to many
+	protected $dsamminerals;
+	protected $dsamslimplate;
+	//many to many
+	protected $dlinklocsam;
+	protected $dsamgranulo;
+	//many to many
+	protected $dlinkcontsam;
+	//many to many
+	protected $dlinkdocsam;
+	protected $dsamarays;
+	protected $dsamheavymin;
+	
+	public function __construct()
+	{
+		$this->dsamminerals=Array();
+		$this->dsamslimplate=Array();
+		$this->dlinklocsam=Array();
+		$this->dsamgranulo=Array();
+		$this->dlinkcontsam=Array();
+		$this->dlinkdocsam=Array();
+		$this->dsamarays=Array();
+		$this->dsamheavymin=Array();
+	}
+	
+	
+	//get
+	public function getDsamminerals()
+	{
+		return $this->dsamminerals;
+	}
+	
+	public function getDsamslimplate()
+	{
+		return $this->dsamslimplate;
+	}
+	
+	public function getDlinklocsam()
+	{
+		return $this->dlinklocsam;
+	}
+	
+	public function getDsamgranulo()
+	{
+		return $this->dsamgranulo;
+	}
+	
+	public function getDlinkcontsam()
+	{
+		return $this->dlinkcontsam;
+	}
+	
+	public function getDlinkdocsam()
+	{
+		return $this->dlinkdocsam;
+	}
+	
+	public function getDsamarays()
+	{
+		return $this->dsamarays;
+	}
+	
+	public function getDsamheavymin()
+	{
+		return $this->dsamheavymin;
+	}
+	
+	//set
+	public function setDsamminerals($obj)
+	{
+		$this->dsamminerals=$obj;
+		return $this;
+	}
+	
+	public function setDsamslimplate($obj)
+	{
+		$this->dsamslimplate=$obj;
+		return $this;
+	}
+	
+	public function setDlinklocsam($obj)
+	{
+		$this->dlinklocsam=$obj;
+		return $this;
+	}
+	
+	public function setDsamgranulo($obj)
+	{
+		$this->dsamgranulo=$obj;
+		return $this;
+	}
+	
+	public function setDlinkcontsam($obj)
+	{
+		$this->dlinkcontsam=$obj;
+	}
+	
+	public function setDlinkdocsam($obj)
+	{
+		$this->dlinkdocsam=$obj;
+		return $this;
+	}
+	
+	public function setDsamarays($obj)
+	{
+		 $this->dsamarays=$obj;
+		 return $this;
+	}
+	
+	public function setDsamheavymin($obj)
+	{
+		$this->dsamheavymin=$obj;
+		return $this;
+	}
+	
+	//init
+	
+	public function initDsamminerals($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamminerals::class, 
+			"dsamminerals",
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		$objs=[];
+		foreach($this->dsamminerals as $obj)
+		{
+			
+			$obj->setLminerals_db($em);
+			$objs[$obj->lminerals->getMname()]=$obj;
+		}
+		$this->dsamminerals=$objs;
+		return $this->dsamminerals;
+	}
+	
+	public function initDsamslimplate($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamslimplate::class, 
+			"dsamslimplate",
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		return $this->dsamslimplate;
+	}
+	
+	public function initDlinklocsam($em)
+	{
+		$objs=[];
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinklocsam::class, 
+			"dlinklocsam",
+			array(
+				"idcollecsample"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		
+		foreach($this->dlinklocsam as $obj)
+		{
+			
+			$obj->setDloclitho_db($em);
+			$objs[$obj->dloclithos->getPk()]=$obj;
+		}
+		$this->dlinklocsam=$objs;
+		return $this->dlinklocsam;
+	}
+	
+	public function initDsamgranulo($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamgranulo::class, 
+			"dsamgranulo",
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		return $this->dsamgranulo;
+	}
+	
+	public function initDlinkcontsam($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkcontsam::class, 
+			"dlinkcontsam",
+			array(
+				"idcollection"=>$this->idcollection,
+				"id"=>$this->idsample
+				),
+				"getPk");
+		foreach($this->dlinkcontsam as $obj)
+		{
+			$obj->setDcontribution_db($em);
+		}
+		return $this->dlinkcontsam;
+	}
+	
+	public function initDlinkdocsam($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkdocsam::class, 
+			"dlinkdocsam",
+			array(
+				"idcollectionsample"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		foreach($this->dlinkdocsam as $obj)
+		{
+			$obj->setDocument_db($em);
+		}
+		return $this->dlinkdocsam;
+	}
+	
+	public function initDsamarays($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamarays::class, 
+			"dsamarays",
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		return $this->dsamarays;
+	}
+	
+	public function initDsamheavymin($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dsamheavymin::class, 
+			"dsamheavymin",
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				),
+				"getPk");
+		return $this->dsamheavymin;
+	}
+	
+	//reattach
+	
+	public function initNewDsamminerals($em, $new_dsamminerals)
+	{
+		$this->initDsamminerals($em);
+		$this->reattachForeignkeysAsObject(
+			$em, 
+			Dsamminerals::class, 
+			"dsamminerals",
+			"getPk",
+			 $new_dsamminerals,
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dsamminerals;
+	}
+	
+	public function initNewDsamslimplate($em, $new_dsamslimplate)
+	{
+		$this->initDsamslimplate($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dsamslimplate::class, 
+			"dsamslimplate",
+			"getPk",
+			 $new_dsamslimplate,
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dsamslimplate;
+	}
+	
+	public function initNewDlinklocsam($em, $new_dlinklocsam)
+	{
+		$this->initDlinklocsam($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dlinklocsam::class, 
+			"dlinklocsam",
+			"getPk",
+			 $new_dlinklocsam,
+			array(
+				"idcollecsample"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dlinklocsam;
+	}
+	
+	public function initNewDsamgranulo($em, $new_dsamgranulo)
+	{
+		$this->initDsamgranulo($em);
+		if(count($new_dsamgranulo)>0)
+		{
+			$this->reattachForeignKeysAsObject(
+				$em, 
+				Dsamgranulo::class, 
+				"dsamgranulo",
+				"getPk",
+				 $new_dsamgranulo,
+				array(
+					"idcollection"=>$this->idcollection,
+					"idsample"=>$this->idsample
+					));
+		}
+		return $this->dsamgranulo;
+	}
+	
+	public function initNewDlinkcontsam($em, $new_dlinkcontsam)
+	{
+		$this->initDlinkcontsam($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dlinkcontsam::class, 
+			"dlinkcontsam",
+			"getPk",
+			 $new_dlinkcontsam,
+			array(
+				"idcollection"=>$this->idcollection,
+				"id"=>$this->idsample
+				));
+		return $this->dlinkcontsam;
+	}
+	
+	public function initNewDlinkdocsam($em, $new_dlinkdocsam)
+	{
+		$this->initDlinkdocsam($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dlinkdocsam::class, 
+			"dlinkdocsam",
+			"getPk",
+			 $new_dlinkdocsam,
+			array(
+				"idcollectionsample"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dlinkdocsam;
+	}
+	
+	public function initNewDsamarays($em, $new_dsamarays)
+	{
+		$this->initDsamarays($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dsamarays::class, 
+			"dsamarays",
+			"getPk",
+			 $new_dsamarays,
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dsamarays;
+	}
+	
+	public function initNewDsamheavymin($em, $new_dsamheavymin)
+	{
+		$this->initDsamheavymin($em);
+		$this->reattachForeignKeysAsObject(
+			$em, 
+			Dsamheavymin::class, 
+			"dsamheavymin",
+			"getPk",
+			 $new_dsamheavymin,
+			array(
+				"idcollection"=>$this->idcollection,
+				"idsample"=>$this->idsample
+				));
+		return $this->dsamheavymin;
+	}
+	
+	
+	
+	
 }

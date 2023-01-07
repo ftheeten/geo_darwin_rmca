@@ -1,0 +1,67 @@
+{# src/AppBundle/Resources/views/lminerals/mineralhierarchyform.html.twig #}
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block javascript %}
+ {{ parent() }}
+{% endblock %}
+
+{% block body %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+{% set originaction=originaction|default("edit") %}
+{% include "@App/forms/security_shift.html.twig" %}
+
+{{ read_test.form_read_mode(read_mode, form, {'attr': {'class': 'form-horizontal','id': 'mineralhierarchy_form'}}) }}
+{% include "@App/validation_errors.html.twig" with {'local_form' : form}  %}
+
+
+<style>
+
+</style>
+
+<div class="container">
+	<div class="row">
+		<div class="col-sm-1">ID mineral</div>
+		<div class="col-sm-3">
+		<input type="hidden" name="mode" id="mode" value="read"/>
+		{% if lmineralhierarchy.pk != "" %}
+					{{lmineralhierarchy.pk}}
+				
+		{% endif %}
+		</div>
+		
+		<div class="col-sm-1">Name</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.name, {'attr': {'class': 'form-control inp_name'}}, lmineralhierarchy.name ??"" ) }}</div>
+		
+		<div class="col-sm-1">Comment</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.comment, {'attr': {'class': 'form-control inp_comment'}}, lmineralhierarchy.comment ??"" ) }}</div>
+	</div>
+	<div class="row">
+	
+		<div class="col-sm-1">Author</div>
+		<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.author, {'attr': {'class': 'form-control inp_author'}}, lmineralhierarchy.author ??"" ) }}</div>
+		<div class="col-sm-1">Creation date</div>
+		
+			
+				<div class="col-sm-3">{{ read_test.widget_read_mode(read_mode, form.creationDate, {'attr': {'class': 'form-control inp_creation_date'}}, (lmineralhierarchy.creationDate|date('Y-m-d') )|default( "now"|date("Y-m-d") )  ) }}</div>
+			
+		
+	</div>
+	
+</div>	
+
+<script language="JavaScript">
+
+</script>
+
+ {{ read_test.submit_button_log(read_mode) }}
+{% include "@App/forms/form_buttons.html.twig" with {'id_form': '#mineralhierarchy_form' , 'delete_route': 'app_delete_mineralhierarchy' } %}
+{{ read_test.form_end_read_mode(read_mode, form) }}
+	
+{% endblock %}
+
+
+	
+
+
+

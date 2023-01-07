@@ -2,7 +2,7 @@
 {% set read_mode = read_mode|default("write") %}
 <!--pb to fx, this libraries should already be loaded-->
 <script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
-<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{{ asset('js/jquery-ui.js') }}"></script>
 <script src="{{ asset('js/core.js') }}"></script>
 <script src="{{ asset('js/select2/js/select2.full.min.js') }}"></script>
 
@@ -17,7 +17,7 @@
 <div class="{{ ctrl_prefix }}_placeholder" >
 	
 </div>
-{{ ctrl_prefix }}
+
 <div class="container">
 
 <ul id="{{ ctrl_prefix }}_list">
@@ -45,13 +45,14 @@
 {% endif %}
 
 </ul>
-</div>
+
 
 
 {% if read_mode=="write" %}
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_add">Add</button>
 <button type="button" class="btn btn-secondary" id="b_{{ ctrl_prefix }}_remove">Remove</button>
 {% endif %}
+</div>
 
 <script type="text/javascript">
 {% if i_doc is defined %}

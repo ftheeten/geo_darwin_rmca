@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
  * Dlinklocsam
  *
@@ -22,28 +23,40 @@ class Dlinklocsam
      */
     private $pk;
 
-    /**
-     * @var \AppBundle\Entity\Dsample
+   /**
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dsample")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollecsample", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="idsample", referencedColumnName="idsample")
-     * })
+     * @ORM\Column(name="idcollecsample", type="string", nullable=false)
      */
     private $idcollecsample;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idsample", type="integer", nullable=false)
+     */
+    private $idsample;
 
     /**
-     * @var \AppBundle\Entity\Dloclitho
+     * @var string
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Dloclitho")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idcollectionloc", referencedColumnName="idcollection"),
-     *   @ORM\JoinColumn(name="idpt", referencedColumnName="idpt"),
-     *   @ORM\JoinColumn(name="idstratum", referencedColumnName="idstratum")
-     * })
+     * @ORM\Column(name="idcollectionloc", type="string", nullable=false)
      */
     private $idcollectionloc;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idpt", type="string", nullable=false)
+     */
+    private $idpt;
+	
+	/**
+     * @var integer
+     *
+     * @ORM\Column(name="idstratum", type="string", nullable=false)
+     */
+    private $idstratum;
 
 
 
@@ -58,28 +71,38 @@ class Dlinklocsam
     }
 
     /**
-     * Set idcollecsample
+     * Set idcollection
      *
-     * @param \AppBundle\Entity\Dsample $idcollecsample
+     * @param string $idcollection
      *
      * @return Dlinklocsam
      */
-    public function setIdcollecsample(\AppBundle\Entity\Dsample $idcollecsample = null)
+    public function setIdcollecsample($idcollection)
     {
-        $this->idcollecsample = $idcollecsample;
+        $this->idcollecsample = $idcollection;
 
         return $this;
     }
 
     /**
-     * Get idcollecsample
+     * Set idcollectionobj
      *
-     * @return \AppBundle\Entity\Dsample
+     * @param \AppBundle\Entity\Dsample $idcollection
+     *
+     * @return Dlinklocsam
      */
-    public function getIdcollecsample()
+    public function setIdcollecsampleobj(\AppBundle\Entity\Dsample $sample = null)
     {
-        return $this->idcollecsample;
+        if($sample !==null)
+		{
+			 $this->idcollecsample = $sample->getIdCollection();
+			 $this->idsample = $sample->getIdSample();
+		}
+
+        return $this;
     }
+
+   
 
     /**
      * Set idcollectionloc
@@ -108,7 +131,7 @@ class Dlinklocsam
 	//dloclitho
 	
 	public $dloclitho;
-	public $dsample;
+	
 	
 	public function getLocLitho()
 	{
@@ -119,4 +142,87 @@ class Dlinklocsam
 	{
 		return $this->dsample;
 	}
+	
+
+	
+	public function setPk($pk)
+	{
+		$this->pk=$pk;
+	}
+	
+	public function getIdpt()
+	{
+		return $this->idpt;
+	}
+	
+	public function setIdpt($val)
+	{
+		$this->idpt=$val;
+		return $this;
+	}
+	
+	public function getIdstratum()
+	{
+		return $this->idstratum;
+		
+	}
+	
+	public function setIdstratum($val)
+	{
+		$this->idstratum=$val;
+		return $this;
+	}
+	
+	//fks
+	public $dloclithos;
+	public $dsample;
+	
+	public function setDloclitho_db($em)
+	{
+		$tmp_loc=$em->getRepository(DLoclitho::class)
+							->findOneBy(array(
+								"idcollection"=>$this->idcollectionloc,	
+								"idpt"=>$this->idpt,
+								"idstratum"=>$this->idstratum,								
+							));
+		if($tmp_loc!==null)
+		{
+			$tmp_loc->attachLoccenter($em);
+		}
+		$this->dloclithos=$tmp_loc;
+	}
+	
+	public function setDsample_db($em)
+	{
+		$tmp_loc=$em->getRepository(Dsample::class)
+							->findOneBy(array(
+								"idcollection"=>$this->idcollecsample,	
+								"idsample"=>$this->idsample,
+								));
+		$this->dsample=$tmp_loc;
+	}
+	
+	/*public $dsamples;
+	public $dloclithos;
+	
+	public function getDsamples()
+	{
+		return $this->dsamples;
+	}
+	
+	public function getDloclithos()
+	{
+		return $this->dloclithos;
+	}
+	
+	public function setDsamples_db($em)
+	{
+		$tmp_samples=$em->getRepository(Dsample::class)
+							->findOneBy(array(
+								"idcollection"=>$this->idcollection,
+								"idsample"=>$this->idsample
+							));
+		$this->dsamples=$tmp_samples;
+	}*/
+	
 }

@@ -14,15 +14,20 @@ app_add_contributor:
     defaults: 
      _controller: AppBundle:Geo:addcontributor     
      
-app_add_sample:
-    path:     /add/sample
+app_add_samplegs:
+    path:     /add/samplegs
     defaults: 
-     _controller: AppBundle:Geo:addsample
+     _controller: AppBundle:Sample:addsamplegs
      
 app_add_mineral:
     path:     /add/mineral
     defaults: 
      _controller: AppBundle:Geo:addmineral
+     
+app_add_mineralgs:
+    path:     /add/mineralgs
+    defaults: 
+     _controller: AppBundle:Mineral:addmineralgs
      
 app_add_document:
     path:     /add/document
@@ -99,6 +104,21 @@ app_edit_mineral:
     defaults: 
      _controller: AppBundle:Geo:editmineral
      
+app_edit_mineralgs:
+    path:     /edit/mineralgs/{pk}
+    defaults: 
+     _controller: AppBundle:Mineral:editmineralgs
+
+app_add_mineralhierarchygs:
+    path:     /add/mineralhierarchygs
+    defaults: 
+     _controller: AppBundle:Mineral:addmineralhierarchygs
+     
+app_edit_mineralhierarchygs:
+    path:     /edit/mineralhierarchygs/{pk}
+    defaults: 
+     _controller: AppBundle:Mineral:editmineralhierarchygs
+     
 app_edit_doc:
     path:     /edit/doc/{pk}/{current_tab}
     defaults: 
@@ -108,16 +128,51 @@ app_edit_point:
     path:     /edit/point/{pk}
     defaults: 
      _controller: AppBundle:Geo:editpoint
+
+app_edit_samplegs:
+    path:     /edit/samplegs/{pk}
+    defaults: 
+     _controller: AppBundle:Sample:editsamplegs
      
 app_search_mineral:
     path:     /search/mineral
     defaults: 
      _controller: AppBundle:Search:searchmineral
      
+app_search_mineralgs:
+    path:     /search/mineralgs
+    defaults: 
+     _controller: AppBundle:Mineral:searchmineral
+     
+app_result_mineralgs:
+    path:     /search/rsmineralgs
+    defaults: 
+     _controller: AppBundle:Mineral:main_search
+     
+app_search_mineralhierarchiesgs:
+    path:     /search/mineralgshierarchies
+    defaults: 
+     _controller: AppBundle:Mineral:searchmineralhierarchies
+     
+app_result_mineralhierarchiesgs:
+    path:     /search/rsmineralgshierarchies
+    defaults: 
+     _controller: AppBundle:Mineral:hierarchy_search
+          
 app_search_sample:
     path:     /search/sample
     defaults: 
      _controller: AppBundle:Search:searchsample
+     
+app_search_samplegs:
+    path:     /search/samplegs
+    defaults: 
+     _controller: AppBundle:Sample:searchsample
+
+app_result_samplegs:
+    path:     /search/rssamplegs
+    defaults: 
+     _controller: AppBundle:Sample:main_search
      
 app_search_contribution:
     path:     /search/contribution
@@ -128,6 +183,11 @@ app_search_contributor:
     path:     /search/contributor
     defaults: 
      _controller: AppBundle:Search:searchcontributor
+ 
+app_search_stratumgs:
+    path:     /search/stratumgs
+    defaults: 
+     _controller: AppBundle:Search:searchstratumgs
 
 app_search_document:
     path:     /search/document
@@ -384,11 +444,21 @@ search_all_collections:
     defaults: 
      _controller: AppBundle:Geo:all_collections
      
-
+search_all_collections_samples:
+    path:     /all_collections_samples
+    defaults: 
+     _controller: AppBundle:Geo:all_collections_samples
+     
+     
 search_main:
     path:    /main_search
     defaults: 
      _controller: AppBundle:Search:main_search
+
+search_main_spec_stratum:
+    path:    /main_search_stratum
+    defaults: 
+     _controller: AppBundle:Search:main_search_stratum
 
 search_contributor:
     path:    /contributor_search
@@ -419,7 +489,12 @@ app_search_keywords:
 app_search_raw_keywords:
     path: /keywords_logic
     defaults: 
-     _controller: AppBundle:Keyword:raw_search  
+     _controller: AppBundle:Keyword:raw_search
+
+app_search_raw_minerals:
+    path: /minerals_logic
+    defaults: 
+     _controller: AppBundle:Mineral:raw_search       
      
 app_refresh_mv:
     path:    /init_portal
@@ -431,10 +506,20 @@ app_search_keywords_fancytreejs:
     defaults: 
      _controller: AppBundle:Keyword:get_fancytree
      
+app_search_minerals_fancytreejs:
+    path: /get_mineralsjs
+    defaults: 
+     _controller: AppBundle:Mineral:get_fancytree
+     
 app_search_keywords_pathjs:
     path: /get_keywordpath
     defaults: 
      _controller: AppBundle:Keyword:get_keywordpath
+     
+app_search_minerals_pathjs:
+    path: /get_mineralspath
+    defaults: 
+     _controller: AppBundle:Mineral:get_mineralpath
      
 search_all_keywords_full_autocomplete:
     path:     /get_keywords_all
@@ -442,6 +527,19 @@ search_all_keywords_full_autocomplete:
      _controller: AppBundle:Keyword:allkeywords_autocomplete
     methods:  GET
     
+search_all_minerals_full_autocomplete:
+    path:     /get_minerals_all
+    defaults: 
+     _controller: AppBundle:Mineral:allminerals_autocomplete
+    methods:  GET
+    
+get_all_minerals_hierarchy:
+    path:     /get_minerals_hierarchies
+    defaults: 
+     _controller: AppBundle:Mineral:allminerals_hierarchies
+    methods:  GET 
+    
+ 
 app_get_next_id:
     path:    /get_next_id
     defaults: 

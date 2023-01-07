@@ -40,6 +40,11 @@ app_delete_dlinkdocloc:
     defaults: 
      {_controller: AppBundle:Delete:deletedlinkdocloc}
 
+app_delete_dlinkdoclocfrompoint:
+    path:     /delete/dlinkdoclocpt/{pk}/{container_pk}
+    defaults: 
+     {_controller: AppBundle:Delete:deletedlinkdoclocfrompoint}
+
 
 app_delete_dlinkcontdoc_from_contrib:
     path:     /delete/dlinkcontdoc_contrib/{pk}/{container_pk}
@@ -80,3 +85,64 @@ app_delete_stratum_description:
     path:     /delete/stratum_description/{pk}/{container_pk}
     defaults: 
      _controller: AppBundle:Delete:deletestratum_description
+     
+app_delete_mineral:
+    path:    /delete/mineral/{pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_mineral
+     
+app_delete_mineralhierarchy:
+    path:    /delete/mineralhierarchy/{pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_mineralhierarchy
+
+app_delete_mineral_from_sample:
+    path:    /delete/mineral_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_mineral_from_sample
+
+app_delete_granulo_from_sample:
+    path:    /delete/granulo_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_granulo_from_sample
+
+app_delete_heavymin_from_sample:
+    path:    /delete/heavymin_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_heavymin_from_sample
+
+app_delete_aray_from_sample:
+    path:    /delete/aray_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_aray_from_sample 
+
+app_delete_slimplate_from_sample:
+    path:    /delete/slimplate_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_slimplate_from_sample      
+
+app_delete_locality_from_sample:
+    path:    /delete/loc_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_loc_from_sample
+
+app_delete_contrib_from_sample:
+    path:    /delete/contrib_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_contrib_from_sample
+
+app_delete_doc_from_sample:
+    path:    /delete/doc_from_sample/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_doc_from_sample        
+     
+app_delete_sample:
+    path:    /delete/dsamplegs/{pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_sample
+     
+app_delete_contrib_from_point:
+    path:    /delete/contrib_from_point/{pk}/{container_pk}
+    defaults:
+     _controller: AppBundle:Delete:delete_contrib_from_point
+     

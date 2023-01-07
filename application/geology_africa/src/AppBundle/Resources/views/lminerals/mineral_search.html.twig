@@ -1,0 +1,11 @@
+{# src/AppBundle/Resources/views/lminerals/mineral_search.html.twig #}
+
+{% extends "@App/searchlayout.html.twig" %}
+
+{% block title %}
+	{{ parent() }} - All
+{% endblock %}
+{% block body %}
+<br/>
+{% include "@App/lminerals/mineral_search_raw_kern.html.twig" with {'ranks':ranks}  %}
+{% endblock %}

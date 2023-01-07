@@ -1,0 +1,36 @@
+AppBundle\Entity\LmineralsHierarchy:
+    type: entity
+    table: lminerals_hierarchy
+    id:
+        pk:
+            type: integer
+            nullable: false
+            options:
+                unsigned: false
+            id: true
+            generator:
+                strategy: SEQUENCE
+    fields:
+        name:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        creationDate:
+            type: datetime
+            nullable: true
+            column: creation_date
+        author:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+        comment:
+            type: string
+            nullable: true
+            length: null
+            options:
+                fixed: false
+    lifecycleCallbacks: {  }

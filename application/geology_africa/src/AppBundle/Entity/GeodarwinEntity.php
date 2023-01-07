@@ -86,7 +86,6 @@ class GeodarwinEntity
 		}
 		$signatures_new=Array();
 		$signatures_new_pk=Array();
-		//print_r($new_array);
 		//passing object and not pk !		
 		foreach($new_array as $obj)
 		{	
@@ -96,14 +95,9 @@ class GeodarwinEntity
 			$signatures_new_pk[$signature]=call_user_func(array($obj, $pk_fct));			
 		}
 		
-		//print("<br/>_");
-		//print_r(array_keys($signatures_existing));
-		//print("<br/>_");
-		//print_r(array_keys($signatures_new));
-		//print("<br/>_");
+		
 		$to_remove=array_diff_key($signatures_existing,$signatures_new);
-		//print_r(array_keys($to_remove));
-		//print("_");
+		
 		$to_add=$signatures_new;//array_diff_key($signatures_new,$signatures_existing );
 		$to_edit_pk=array_intersect($signatures_existing_pk,$signatures_new_pk );
 		
@@ -132,15 +126,11 @@ class GeodarwinEntity
 			{
 				if(!in_array($tmp_pk,$signatures_new_pk))
 				{
-				
-					//print("persist ".$class);
+	
 					$em->persist($obj);
 				}
 				else
 				{
-					//print("PK=");
-					//print($obj->getPk());
-					//print("merge".$class);
 					$em->merge($obj);
 				}
 				//else just edit
@@ -148,9 +138,8 @@ class GeodarwinEntity
 			}
 			else
 			{
-				//assume no pk=new
-			
-				//print("persist ".$class);
+				//assume no pk=new			
+
 				$em->persist($obj);
 			}
 		}
@@ -180,8 +169,6 @@ class GeodarwinEntity
 				
 		if($this->$attribute!==NULL)
 		{
-			
-			//print_r($this->$attribute);
 			foreach($this->$attribute as $pk_link)
 			{
 				

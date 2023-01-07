@@ -228,10 +228,14 @@ class Dcontribution extends GeodarwinEntity
 	protected $dlinkcontribute;
 	protected $dlinkcontdoc;
 	protected $description;
+	protected $dlinkcontsam;
+	
 	public function __construct()
 	{
 		$this->dlinkcontribute=Array();
 		$this->dlinkcontdoc=Array();
+		$this->description=Array();
+		$this->dlinkcontsam=Array();
 	}
 	
 	public function getDlinkcontdoc()
@@ -298,25 +302,24 @@ class Dcontribution extends GeodarwinEntity
 	}
 	
 		public function initDlinkcontribute($em)
-	{
-		//print("BEGIN_1");		
-		$this->attachForeignkeysAsObject($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontribution"=>$this->getIdcontribution()), "getContributororder");
-		
-		$this->description=$this->datetype;
-		
-		foreach($this->dlinkcontribute as $contrib)
 		{
-			$contrib->setContributor_db($em);
+			
+			$this->attachForeignkeysAsObject($em,Dlinkcontribute::class,"dlinkcontribute", array("idcontribution"=>$this->getIdcontribution()), "getContributororder");
+			
+			$this->description=$this->datetype;
+			
+			foreach($this->dlinkcontribute as $contrib)
+			{
+				$contrib->setContributor_db($em);
+			}
+			
+			return $this->dlinkcontribute;
+			
 		}
-		//print_r($this->dlinkcontribute);
-		//print("END_1");
-		return $this->dlinkcontribute;
-		
-	}
 	
 	public function initNewDlinkcontribute($em, $new_dlinkcontribute)
 	{
-		//print("BEGIN_2");
+		
 		print(count($new_dlinkcontribute));
 		$this->initDlinkcontribute($em);
 		if(count($new_dlinkcontribute)>0)
@@ -348,6 +351,34 @@ class Dcontribution extends GeodarwinEntity
 			$new_dlinkdocument,		
 			array("idcontribution"=>$this->idcontribution));
 		}
+	}
+	
+	public function initDlinkcontsam($em)
+	{
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkcontsam::class, 
+			"dlinkcontsam",
+			array(				
+				"idcontribution"=>$this->idcontribution
+				),
+				"getPk");
+		return $this->dlinkcontsam;
+	}
+	
+	public function initNewDlinkcontsam($em, $new_dlinkcontsam)
+	{
+		$this->initDlinkcontsam($em);
+		$this->attachForeignkeysAsObject(
+			$em, 
+			Dlinkcontsam::class, 
+			"dlinkcontsam",
+			"getPk",
+			 $new_dlinkcontsam,
+			array(
+				"idcontribution"=>$this->idcontribution
+				));
+		return $this->dlinkcontsam;
 	}
 	
 }

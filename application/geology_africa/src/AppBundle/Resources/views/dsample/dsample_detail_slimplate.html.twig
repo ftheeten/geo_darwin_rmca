@@ -1,0 +1,30 @@
+{% set default_val=default_val|default(null) %}
+{% import "@App/forms/read_test.html.twig" as read_test  %}
+{% set read_mode=read_mode|default("read") %}
+<div class="row">
+<div class="col-sm-1">{{ index }}</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Id link:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_pk"~ index, ctrl_prefix ~"_pk"~ index,default_val.pk ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-2">
+Num plate:
+{{ read_test.input_read_mode(read_mode, "text", ctrl_prefix ~"_num_plate"~ index, ctrl_prefix ~"_num_plate"~ index,default_val.numplate ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+Plate description:
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"plate_description"~ index, ctrl_prefix ~"plate_description"~ index,default_val.platedescription ?? "","readonly_class") }}
+</div>
+</div>
+<div class="row">
+<div class="col-sm-6">
+Various info:
+{{ read_test.input_read_mode(read_mode, "textarea", ctrl_prefix ~"plate_variousinfo"~ index, ctrl_prefix ~"plate_variousinfo"~ index,default_val.platevariousinfo ?? "","readonly_class") }}
+</div>
+</div>

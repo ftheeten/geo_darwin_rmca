@@ -1,2 +1,3 @@
 {# src/AppBundle/Resources/views/search_all/searchallbs_documents_raw.html.twig #}
-{% include "@App/search_all/searchallbs_raw.html.twig" with {'type_filter' : 'document', 'is_modal': true} %}
+{% set prefix_ctrl = prefix_ctrl|default("") %}
+{% include "@App/search_all/searchallbs_raw.html.twig" with {'type_filter' : 'document', 'is_modal': true, "current_tab":"mainsearch-tab", "ctrl_prefix":ctrl_prefix} %}
